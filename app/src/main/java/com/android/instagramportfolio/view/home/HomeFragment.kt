@@ -9,9 +9,9 @@ import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.widget.FrameLayout
 import android.widget.Toast
-import androidx.core.view.marginTop
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.databinding.DataBindingUtil
-import androidx.databinding.adapters.ViewBindingAdapter.setPadding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.android.instagramportfolio.R
@@ -19,10 +19,11 @@ import com.android.instagramportfolio.databinding.FragmentHomeBinding
 import com.android.instagramportfolio.extension.getNaviBarHeight
 import com.android.instagramportfolio.extension.getStatusBarHeight
 import com.android.instagramportfolio.model.InstarFile
+import com.android.instagramportfolio.view.MainActivity
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 
 
-class HomeFragment : Fragment() {
+class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
@@ -48,12 +49,17 @@ class HomeFragment : Fragment() {
 
         // ui가 아랫부분 navitaion bar를 침범하지 않도록 패딩
         binding.layoutRoot.setPadding(0, 0, 0, requireContext().getNaviBarHeight())
-        // files coordinator가 최대로 확장됐을 때 status bar 부분 침범하지 않도록 패딩
-        binding.coordinatorFiles.setPadding(0, requireContext().getStatusBarHeight(), 0, 0)
-        // 앱 실행 화면이 ui xml과 똑같이 보이도록 마진
+
+        // files coordinator가 최대로 확장됐을 때 status bar 부분 침범하지 않도록 마진
+        val params = binding.layoutFilesBottomSheet.layoutParams as CoordinatorLayout.LayoutParams
+        params.setMargins(0, requireContext().getStatusBarHeight(), 0, 0)
+        binding.layoutFilesBottomSheet.layoutParams = params
+
+        // 앱 실행 화면이 ui xml과 똑같이 보이도록 패딩
         binding.layoutUser.setPadding(0, requireContext().getStatusBarHeight(), 0, 0)
 
 
+        // 리사이클러 뷰 설정
         adapter = InstarFileAdapter(arrayListOf(), ::onItemClick)
         binding.recyclerView.adapter = this.adapter
 
@@ -68,21 +74,10 @@ class HomeFragment : Fragment() {
         behavior.isDraggable = false
         setListOpacity(0)
 
-        // 파일 종류 선택 bottom sheet 보여주기
+        // 파일 종류 선택 bottom sheet 확장시키기
         binding.buttonShowSheet.setOnClickListener {
-            // bottom sheet 확장
             behavior.state = BottomSheetBehavior.STATE_EXPANDED
-
-            // + 버튼 비활성화(애니메이션 없이)
-            binding.buttonShowSheet.visibility = View.GONE
-            binding.buttonShowSheet.isClickable = false
-
-            // 블랙 스크린 활성화
-            binding.layoutBlockScreen.visibility = View.VISIBLE
-
-            // 맨 위 선택지 클릭 활성화
-            binding.buttonDirectory.isClickable = true
-            binding.buttonDirectory.isFocusable = true
+            setViewsExpanded()
         }
 
         // 검은 화면 클릭하면 bottom sheet 다시 줄어들음
@@ -94,34 +89,10 @@ class HomeFragment : Fragment() {
         behavior.addBottomSheetCallback(object: BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 when (newState) {
-                    BottomSheetBehavior.STATE_EXPANDED -> {
-                        behavior.isDraggable = true
-                    }
+                    BottomSheetBehavior.STATE_EXPANDED ->  behavior.isDraggable = true
                     BottomSheetBehavior.STATE_COLLAPSED -> {
                         behavior.isDraggable = false
-
-                        // 맨 위 선택지 클릭 비활성화
-                        binding.buttonDirectory.isClickable = false
-                        binding.buttonDirectory.isFocusable = false
-
-                        // + 버튼 활성화(애니메이션과 같이)
-                        binding.buttonShowSheet.startAnimation(
-                            AlphaAnimation(0.0f, 1.0f).apply {
-                                duration = 150
-                                fillBefore = true
-                                setAnimationListener(object: Animation.AnimationListener {
-                                    override fun onAnimationEnd(p0: Animation?) {
-                                        binding.buttonShowSheet.visibility = View.VISIBLE
-                                        binding.buttonShowSheet.isClickable = true
-                                    }
-                                    override fun onAnimationStart(p0: Animation?) {}
-                                    override fun onAnimationRepeat(p0: Animation?) {}
-                                })
-                        })
-
-
-                        // 블랙 스크린 비활성화
-                        binding.layoutBlockScreen.visibility = View.GONE
+                        setViewsCollapsed()
                     }
                 }
             }
@@ -139,10 +110,59 @@ class HomeFragment : Fragment() {
         return binding.root
     }
 
+
     private fun onItemClick(instarFile: InstarFile) {
         Toast.makeText(requireContext(), instarFile.fileName, Toast.LENGTH_SHORT).show()
     }
 
+    // 뒤로가기 할 때 sourceOfFiles bottom sheet이 확장되어 있으면 축소시킴
+    override fun onBackPressed() {
+        if (behavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+            behavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        }
+        else {
+            requireActivity().finish()
+        }
+    }
+
+    // navigation bottom sheet이 확장됐을 때 관련 뷰들도 활성화
+    private fun setViewsExpanded() {
+        // + 버튼 비활성화(애니메이션 없이)
+        binding.buttonShowSheet.visibility = View.GONE
+        binding.buttonShowSheet.isClickable = false
+
+        // 블랙 스크린 활성화
+        binding.layoutBlockScreen.visibility = View.VISIBLE
+
+        // 맨 위 선택지 클릭 활성화
+        binding.buttonDirectory.isClickable = true
+        binding.buttonDirectory.isFocusable = true
+    }
+
+    // navigation bottom sheet이 줄어들었을 때 관련 뷰들도 비활성화
+    private fun setViewsCollapsed() {
+        // 맨 위 선택지 클릭 비활성화
+        binding.buttonDirectory.isClickable = false
+        binding.buttonDirectory.isFocusable = false
+
+        // + 버튼 활성화(애니메이션과 같이)
+        binding.buttonShowSheet.startAnimation(
+            AlphaAnimation(0.0f, 1.0f).apply {
+                duration = 150
+                fillBefore = true
+                setAnimationListener(object: Animation.AnimationListener {
+                    override fun onAnimationEnd(p0: Animation?) {
+                        binding.buttonShowSheet.visibility = View.VISIBLE
+                        binding.buttonShowSheet.isClickable = true
+                    }
+                    override fun onAnimationStart(p0: Animation?) {}
+                    override fun onAnimationRepeat(p0: Animation?) {}
+                })
+            })
+
+        // 블랙 스크린 비활성화
+        binding.layoutBlockScreen.visibility = View.GONE
+    }
 
     // 파일 선택지들의 투명도 조절
     private fun setListOpacity(opacity: Int) {

@@ -1,14 +1,10 @@
-package com.android.instagramportfolio.view
+package com.android.instagramportfolio.view.common
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.WindowManager
 import androidx.databinding.DataBindingUtil
-import androidx.databinding.adapters.ViewBindingAdapter.setPadding
 import com.android.instagramportfolio.R
 import com.android.instagramportfolio.databinding.ActivityMainBinding
-import com.android.instagramportfolio.extension.getNaviBarHeight
-import com.android.instagramportfolio.extension.getStatusBarHeight
 
 class MainActivity : AppCompatActivity() {
 

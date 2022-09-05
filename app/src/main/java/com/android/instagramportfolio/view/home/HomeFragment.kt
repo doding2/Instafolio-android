@@ -1,6 +1,14 @@
 package com.android.instagramportfolio.view.home
 
+import android.app.Activity.RESULT_OK
+import android.content.Context
+import android.content.Intent
+import android.database.Cursor
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,21 +17,30 @@ import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.widget.FrameLayout
 import android.widget.Toast
-import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.android.instagramportfolio.R
 import com.android.instagramportfolio.databinding.FragmentHomeBinding
-import com.android.instagramportfolio.extension.getNaviBarHeight
-import com.android.instagramportfolio.extension.getStatusBarHeight
+import com.android.instagramportfolio.extension.*
 import com.android.instagramportfolio.model.InstarFile
-import com.android.instagramportfolio.view.MainActivity
+import com.android.instagramportfolio.view.common.MainActivity
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 
 
 class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
+
+
+    companion object {
+        const val TAG = "HomeFragment"
+    }
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
@@ -48,15 +65,9 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
 
         // ui가 아랫부분 navitaion bar를 침범하지 않도록 패딩
-        binding.layoutRoot.setPadding(0, 0, 0, requireContext().getNaviBarHeight())
-
-        // files coordinator가 최대로 확장됐을 때 status bar 부분 침범하지 않도록 마진
-        val params = binding.layoutFilesBottomSheet.layoutParams as CoordinatorLayout.LayoutParams
-        params.setMargins(0, requireContext().getStatusBarHeight(), 0, 0)
-        binding.layoutFilesBottomSheet.layoutParams = params
-
+        binding.layoutRoot.setPadding(0, 0, 0, getNaviBarHeight())
         // 앱 실행 화면이 ui xml과 똑같이 보이도록 패딩
-        binding.layoutUser.setPadding(0, requireContext().getStatusBarHeight(), 0, 0)
+        binding.layoutUser.setPadding(0, getStatusBarHeight(), 0, 0)
 
 
         // 리사이클러 뷰 설정
@@ -68,7 +79,15 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
             adapter.replaceItems(it)
         }
 
-        // bottom sheet 설정하기
+
+        // source of files bottom sheet 설정하기
+        // bottom sheet가 최대로 확장됐을 때 status bar 부분 침범하지 않도록 마진
+        val metrics = resources.displayMetrics
+        val screenHeight = metrics.heightPixels
+        val sourceOfFilesBehavior = BottomSheetBehavior.from(binding.layoutFilesBottomSheet)
+        sourceOfFilesBehavior.maxHeight = screenHeight - getStatusBarHeight()
+
+        //  Navigation bottom sheet 설정하기
         // 기본적으로 드래그 비활성화
         behavior = BottomSheetBehavior.from(binding.navigationAndBottomSheet)
         behavior.isDraggable = false
@@ -107,6 +126,18 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
             }
         })
 
+
+        // 내 디렉토리에서 파일 가져오기
+        binding.buttonDirectory.setOnClickListener {
+            requestToDirectory()
+            behavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        }
+        // 내 갤러리에서 파일 가져오기
+        binding.buttonGallery.setOnClickListener {
+            requestToGallery()
+            behavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        }
+
         return binding.root
     }
 
@@ -124,6 +155,112 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
             requireActivity().finish()
         }
     }
+    
+    
+    // 내 디렉토리에서 파일들 가져오기
+    private fun requestToDirectory() {
+        val mimeTypes = arrayOf("application/pdf", "image/*")
+
+        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+            type = "*/*"
+            putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+            putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+        }
+
+        resultLauncher.launch(intent)
+    }
+
+
+    // 내 갤러리에서 파일들 가져오기
+    private fun requestToGallery() {
+        val mimeTypes = arrayOf("image/*")
+
+        val intent = Intent(Intent.ACTION_PICK).apply {
+            type = "image/*"
+            putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+            putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+        }
+
+        resultLauncher.launch(intent)
+    }
+    
+    // activity result listener
+    private val resultLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) launcher@{
+            if (it.resultCode != RESULT_OK) return@launcher
+            val intent = it.data ?: return@launcher
+
+            // 리턴된 결과를 처리함
+            handleResult(intent)
+        }
+
+    // 리턴된 결과를 다루는 함수
+    private fun handleResult(intent: Intent) {
+        // 리턴된 인텐트를 가지고 파일 uri 리스트로 변환
+        val uriList = getUriListFrom(intent)
+
+        // 이미지와 pdf만 분별하여 넣을 리스트
+        val filteredUriList = arrayListOf<Uri>()
+
+        // 만약을 대비해 이미지와 pdf만 존재하도록 필터링
+        Log.i(TAG, "uri list: $uriList")
+        for (uri in uriList) {
+            val fileName: String? = getFileName(uri)
+            Log.i(TAG, "file name: $fileName")
+            Log.i(TAG, "extension: ${fileName?.extension}")
+
+            // 이미지나 pdf인 경우에만 새 리스트에 추가
+            if (checkIsImage(uri) || (fileName != null && fileName.extension == "pdf")) {
+                filteredUriList.add(uri)
+            }
+        }
+
+        Log.i(TAG, "filtered uri list: $filteredUriList")
+
+        // pdf를 bitmap으로 변환
+        lifecycleScope.launch(Dispatchers.IO) {
+            val realPath = getRealPathFromUri(filteredUriList[0])
+            Log.d(TAG, "real path: $realPath")
+            val pdfFile = File(realPath)
+            val bitmaps = pdfToBitmap(pdfFile)
+            Log.d(TAG, "bitmap list size: ${bitmaps.size}")
+
+            if (bitmaps.size > 0) {
+                withContext(Dispatchers.Main) {
+                    binding.image.visibility = View.VISIBLE
+                    binding.image.setImageBitmap(bitmaps[0])
+                }
+            }
+        }
+    }
+
+
+    // 인텐트를 가지고 파일 uri 리스트로 변환
+    private fun getUriListFrom(intent: Intent): MutableList<Uri> {
+        val fileUriList = arrayListOf<Uri>()
+
+        // 선택된 파일이 여러개인 경우
+        if (intent.clipData != null) {
+            for (i in 0 until intent.clipData!!.itemCount) {
+                val uri = intent.clipData!!.getItemAt(i).uri
+                fileUriList.add(uri)
+            }
+        }
+        // 선택된 파일이 하나인 경우
+        else if (intent.data != null) {
+            val uri = intent.data!!
+            fileUriList.add(uri)
+        }
+        // 파일을 아무것도 선택 안 했을 경우
+        else {
+            // Nothing to do
+        }
+
+        return fileUriList
+    }
+
 
     // navigation bottom sheet이 확장됐을 때 관련 뷰들도 활성화
     private fun setViewsExpanded() {

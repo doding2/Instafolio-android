@@ -1,13 +1,10 @@
 package com.android.instagramportfolio.view.home
 
 import android.app.Activity.RESULT_OK
-import android.content.Context
 import android.content.Intent
-import android.database.Cursor
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
-import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -28,10 +25,7 @@ import com.android.instagramportfolio.extension.*
 import com.android.instagramportfolio.model.InstarFile
 import com.android.instagramportfolio.view.common.MainActivity
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.io.File
 
 
@@ -201,41 +195,44 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         // 리턴된 인텐트를 가지고 파일 uri 리스트로 변환
         val uriList = getUriListFrom(intent)
 
-        // 이미지와 pdf만 분별하여 넣을 리스트
-        val filteredUriList = arrayListOf<Uri>()
+        // 이미지와 pdf만 분별하여 넣을 리스트 (확장자별로 분류도 시킬 예정)
+        val filteredUriList = ArrayList<Pair<Uri, String>>()
 
         // 만약을 대비해 이미지와 pdf만 존재하도록 필터링
-        Log.i(TAG, "uri list: $uriList")
         for (uri in uriList) {
             val fileName: String? = getFileName(uri)
-            Log.i(TAG, "file name: $fileName")
-            Log.i(TAG, "extension: ${fileName?.extension}")
 
-            // 이미지나 pdf인 경우에만 새 리스트에 추가
-            if (checkIsImage(uri) || (fileName != null && fileName.extension == "pdf")) {
-                filteredUriList.add(uri)
+            // 이 uri가 이미지
+            if (checkIsImage(uri)) {
+                filteredUriList.add(uri to "image")
+            }
+            // 이 uri가 pdf
+            else if (fileName != null && fileName.extension == "pdf") {
+                filteredUriList.add(uri to "pdf")
             }
         }
 
-        Log.i(TAG, "filtered uri list: $filteredUriList")
+        // pdf를 여러장의 bitmap들로 변환
+        // 이미지이면 그냥 비트맵으로 변환
+        val bitmaps = ArrayList<Bitmap>()
 
-        // pdf를 bitmap으로 변환
         lifecycleScope.launch(Dispatchers.IO) {
-            val realPath = getRealPathFromUri(filteredUriList[0])
-            Log.d(TAG, "real path: $realPath")
-            val pdfFile = File(realPath)
-            val bitmaps = pdfToBitmap(pdfFile)
-            Log.d(TAG, "bitmap list size: ${bitmaps.size}")
-
-            if (bitmaps.size > 0) {
-                withContext(Dispatchers.Main) {
-                    binding.image.visibility = View.VISIBLE
-                    binding.image.setImageBitmap(bitmaps[0])
+            for ((uri, extension) in filteredUriList) {
+                if (extension == "image") {
+                    bitmaps.add(convertImageUriToBitmap(uri))
                 }
+                else if (extension == "pdf") {
+                    bitmaps.addAll(convertPdfUriToBitmaps(uri))
+                }
+            }
+
+            // 메인 스레드
+            withContext(Dispatchers.Main) {
+                binding.image.visibility = View.VISIBLE
+                binding.image.setImageBitmap(bitmaps[0])
             }
         }
     }
-
 
     // 인텐트를 가지고 파일 uri 리스트로 변환
     private fun getUriListFrom(intent: Intent): MutableList<Uri> {
@@ -261,6 +258,35 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         return fileUriList
     }
 
+    // image의 uri를 가지고 bitmap으로 변환
+    private suspend fun convertImageUriToBitmap(imageUri: Uri): Bitmap {
+        var bitmap: Bitmap? = null
+
+        coroutineScope {
+            launch(Dispatchers.IO) {
+                bitmap = imageToBitmap(imageUri)
+            }
+        }
+
+        return bitmap
+            ?: throw Exception("Converting Image File to Image Failed")
+    }
+
+    // pdf의 uri를 가지고 bitmap으로 변환
+    private suspend fun convertPdfUriToBitmaps(pdfUri: Uri): MutableList<Bitmap> {
+        var bitmaps: MutableList<Bitmap>? = null
+
+        coroutineScope {
+            launch(Dispatchers.IO) {
+                val realPath = getRealPathFromUri(pdfUri)
+                val pdfFile = File(realPath)
+                bitmaps = pdfToBitmaps(pdfFile)
+            }
+        }
+
+        return bitmaps
+            ?: throw Exception("Converting PDF to Image Failed")
+    }
 
     // navigation bottom sheet이 확장됐을 때 관련 뷰들도 활성화
     private fun setViewsExpanded() {

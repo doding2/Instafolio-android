@@ -1,10 +1,13 @@
 package com.android.instagramportfolio.extension
 
+import android.content.Context
 import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.ImageDecoder
 import android.graphics.pdf.PdfRenderer
 import android.net.Uri
+import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.provider.MediaStore
 import android.provider.OpenableColumns
@@ -117,7 +120,7 @@ fun Fragment.getRealPathFromUri(contentUri: Uri): String? {
 }
 
 // pdf to image 변환
-fun Fragment.pdfToBitmap(pdfFile: File): ArrayList<Bitmap> {
+fun Fragment.pdfToBitmaps(pdfFile: File): ArrayList<Bitmap> {
     val bitmaps: ArrayList<Bitmap> = ArrayList()
     try {
         val renderer =
@@ -143,4 +146,17 @@ fun Fragment.pdfToBitmap(pdfFile: File): ArrayList<Bitmap> {
     }
 
     return bitmaps
+}
+
+// 인자로 전달된 uri로부터 비트맵을 생성하는 함수
+fun Fragment.imageToBitmap(uri: Uri): Bitmap {
+    val bitmap: Bitmap = if (Build.VERSION.SDK_INT < 28) {
+        MediaStore.Images.Media.getBitmap(requireContext().contentResolver, uri)
+    }
+    else {
+        val source = ImageDecoder.createSource(requireContext().contentResolver, uri)
+        ImageDecoder.decodeBitmap(source)
+    }
+
+    return bitmap
 }

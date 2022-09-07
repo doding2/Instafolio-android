@@ -63,13 +63,14 @@ class SlideAdapter(
                         break
                     }
                     if (second == item) {
-                        binding.layoutSlideWrapper.setBackgroundResource(Color.TRANSPARENT)
+                        binding.layoutSlideWrapper.foreground =  ColorDrawable(Color.TRANSPARENT)
                         break
                     }
                 }
             }
             else {
-                binding.layoutSlideWrapper.setBackgroundResource(Color.TRANSPARENT)
+//                binding.layoutSlideWrapper.setBackgroundResource(Color.TRANSPARENT)
+                binding.layoutSlideWrapper.foreground =  ColorDrawable(Color.TRANSPARENT)
             }
 
 
@@ -113,6 +114,8 @@ class SlideAdapter(
                         bindedSlideIndex = nextSlideIndex
 
                         binding.imageSlideAfter.foreground = ColorDrawable(Color.TRANSPARENT)
+                        // 위엣 놈 추가됨
+
                         binding.imageSlideAfter.visibility = View.VISIBLE
                         binding.imageSlideAfter.setImageBitmap(nextSlide.bitmap)
                         break
@@ -131,6 +134,8 @@ class SlideAdapter(
                         bindedSlideIndex = prevSlideIndex
 
                         binding.imageSlideBefore.foreground = ContextCompat.getDrawable(context, R.drawable.icon_check)
+                        // 위엣 놈 추가됨
+
                         binding.imageSlideBefore.visibility = View.VISIBLE
                         binding.imageSlideBefore.setImageBitmap(prevSlide.bitmap)
                         break
@@ -167,6 +172,7 @@ class SlideAdapter(
                     val prevSlide = bindedSlide!!
 
                     binding.imageSlideBefore.foreground = ColorDrawable(Color.TRANSPARENT)
+                    // 위엣 놈 추가됨
 
                     if (myIndex <= 0) {
                         items.add(0, prevSlide)

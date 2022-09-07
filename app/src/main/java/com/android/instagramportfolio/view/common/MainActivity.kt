@@ -21,7 +21,6 @@ class MainActivity : AppCompatActivity() {
         _binding = null
     }
 
-
     // 프래그먼트들에서 onBackPressed()를 지원하기 위한 인터페이스
     interface OnBackPressedListener {
         fun onBackPressed()
@@ -39,5 +38,15 @@ class MainActivity : AppCompatActivity() {
         }
 
         super.onBackPressed()
+    }
+
+    // 요청한 권한 처리
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        // This method call must be launched here to delegate permission granted results To [PermissionRequester].
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 }

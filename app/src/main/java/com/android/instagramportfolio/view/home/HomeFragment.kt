@@ -1,10 +1,12 @@
 package com.android.instagramportfolio.view.home
 
+import android.Manifest
 import android.app.Activity.RESULT_OK
 import android.content.Intent
-import android.graphics.Bitmap
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -15,18 +17,18 @@ import android.view.animation.Animation
 import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.android.instagramportfolio.R
 import com.android.instagramportfolio.databinding.FragmentHomeBinding
 import com.android.instagramportfolio.extension.*
 import com.android.instagramportfolio.model.InstarFile
 import com.android.instagramportfolio.view.common.MainActivity
+import com.android.instagramportfolio.view.slide.SlideViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import kotlinx.coroutines.*
-import java.io.File
 
 
 class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
@@ -39,19 +41,23 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var viewModel: HomeViewModel
+    private lateinit var homeViewModel: HomeViewModel
     private lateinit var adapter: InstarFileAdapter
 
     // bottom sheet 동작 설정
     private lateinit var behavior: BottomSheetBehavior<FrameLayout>
+
+    // 선택된 bitmap들을 SlideFragment로 전달하기 위한 뷰 모델
+    private lateinit var slideViewModel: SlideViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = DataBindingUtil.inflate(inflater, R.layout.fragment_home, container, false)
-        val factory = HomeViewModelFactory(requireContext())
-        viewModel = ViewModelProvider(this, factory)[HomeViewModel::class.java]
+        val factory = HomeViewModelFactory(requireActivity())
+        homeViewModel = ViewModelProvider(requireActivity(), factory)[HomeViewModel::class.java]
+        slideViewModel= ViewModelProvider(requireActivity())[SlideViewModel::class.java]
 
         //status bar와 navigation bar 모두 투명하게 만드는 코드
         requireActivity().window.setFlags(
@@ -69,22 +75,27 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         binding.recyclerView.adapter = this.adapter
 
         // 인스타 파일들 재등록
-        viewModel.instarFiles.observe(viewLifecycleOwner) {
+        homeViewModel.instarFiles.observe(viewLifecycleOwner) {
             adapter.replaceItems(it)
         }
-
 
         // source of files bottom sheet 설정하기
         // bottom sheet가 최대로 확장됐을 때 status bar 부분 침범하지 않도록 마진
         val metrics = resources.displayMetrics
         val screenHeight = metrics.heightPixels
         val sourceOfFilesBehavior = BottomSheetBehavior.from(binding.layoutFilesBottomSheet)
-        sourceOfFilesBehavior.maxHeight = screenHeight - getStatusBarHeight()
+        sourceOfFilesBehavior.maxHeight = screenHeight - requireContext().pxToDp(getStatusBarHeight())
+        binding.layoutUser.post {
+            sourceOfFilesBehavior.peekHeight = screenHeight - binding.layoutUser.height
+        }
+
 
         //  Navigation bottom sheet 설정하기
         // 기본적으로 드래그 비활성화
         behavior = BottomSheetBehavior.from(binding.navigationAndBottomSheet)
         behavior.isDraggable = false
+        // 맨 위 선택지 처음엔 비활성화
+        binding.buttonDirectory.isEnabled = false
         setListOpacity(0)
 
         // 파일 종류 선택 bottom sheet 확장시키기
@@ -120,7 +131,6 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
             }
         })
 
-
         // 내 디렉토리에서 파일 가져오기
         binding.buttonDirectory.setOnClickListener {
             requestToDirectory()
@@ -135,7 +145,6 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         return binding.root
     }
 
-
     private fun onItemClick(instarFile: InstarFile) {
         Toast.makeText(requireContext(), instarFile.fileName, Toast.LENGTH_SHORT).show()
     }
@@ -149,11 +158,10 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
             requireActivity().finish()
         }
     }
-    
-    
+
     // 내 디렉토리에서 파일들 가져오기
     private fun requestToDirectory() {
-        val mimeTypes = arrayOf("application/pdf", "image/*")
+        val mimeTypes = arrayOf("application/pdf")
 
         val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
             type = "*/*"
@@ -186,8 +194,17 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
             if (it.resultCode != RESULT_OK) return@launcher
             val intent = it.data ?: return@launcher
 
-            // 리턴된 결과를 처리함
-            handleResult(intent)
+            val requestCode = intent.getStringExtra("requestCode")
+
+            // pdf 파일/이미지 가져옴
+            if (requestCode == null) {
+                // 리턴된 결과를 처리함
+                handleResult(intent)
+            }
+            // 모든 파일 관리 허용 퍼미션 수락하고 옴
+            else {
+                Log.d(TAG, "퍼미션")
+            }
         }
 
     // 리턴된 결과를 다루는 함수
@@ -196,7 +213,7 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         val uriList = getUriListFrom(intent)
 
         // 이미지와 pdf만 분별하여 넣을 리스트 (확장자별로 분류도 시킬 예정)
-        val filteredUriList = ArrayList<Pair<Uri, String>>()
+        val uriWithExtension = ArrayList<Pair<Uri, String>>()
 
         // 만약을 대비해 이미지와 pdf만 존재하도록 필터링
         for (uri in uriList) {
@@ -204,34 +221,27 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
 
             // 이 uri가 이미지
             if (checkIsImage(uri)) {
-                filteredUriList.add(uri to "image")
+                uriWithExtension.add(uri to "image")
             }
             // 이 uri가 pdf
             else if (fileName != null && fileName.extension == "pdf") {
-                filteredUriList.add(uri to "pdf")
+                uriWithExtension.add(uri to "pdf")
             }
         }
 
-        // pdf를 여러장의 bitmap들로 변환
-        // 이미지이면 그냥 비트맵으로 변환
-        val bitmaps = ArrayList<Bitmap>()
-
-        lifecycleScope.launch(Dispatchers.IO) {
-            for ((uri, extension) in filteredUriList) {
-                if (extension == "image") {
-                    bitmaps.add(convertImageUriToBitmap(uri))
-                }
-                else if (extension == "pdf") {
-                    bitmaps.addAll(convertPdfUriToBitmaps(uri))
-                }
-            }
-
-            // 메인 스레드
-            withContext(Dispatchers.Main) {
-                binding.image.visibility = View.VISIBLE
-                binding.image.setImageBitmap(bitmaps[0])
-            }
+        if (uriWithExtension.isEmpty()) {
+            Toast.makeText(requireContext(), "이미지와 PDF 파일만을 선택해주세요", Toast.LENGTH_SHORT).show()
+            return
         }
+
+
+        // uri 리스트를 Slide Fragment로 전달
+        slideViewModel.clear()
+        slideViewModel.uriWithExtension.value = uriWithExtension
+
+        // Slide Fragment로 이동
+        findNavController()
+            .navigate(R.id.action_homeFragment_to_slideFragment)
     }
 
     // 인텐트를 가지고 파일 uri 리스트로 변환
@@ -258,38 +268,9 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         return fileUriList
     }
 
-    // image의 uri를 가지고 bitmap으로 변환
-    private suspend fun convertImageUriToBitmap(imageUri: Uri): Bitmap {
-        var bitmap: Bitmap? = null
-
-        coroutineScope {
-            launch(Dispatchers.IO) {
-                bitmap = imageToBitmap(imageUri)
-            }
-        }
-
-        return bitmap
-            ?: throw Exception("Converting Image File to Image Failed")
-    }
-
-    // pdf의 uri를 가지고 bitmap으로 변환
-    private suspend fun convertPdfUriToBitmaps(pdfUri: Uri): MutableList<Bitmap> {
-        var bitmaps: MutableList<Bitmap>? = null
-
-        coroutineScope {
-            launch(Dispatchers.IO) {
-                val realPath = getRealPathFromUri(pdfUri)
-                val pdfFile = File(realPath)
-                bitmaps = pdfToBitmaps(pdfFile)
-            }
-        }
-
-        return bitmaps
-            ?: throw Exception("Converting PDF to Image Failed")
-    }
-
     // navigation bottom sheet이 확장됐을 때 관련 뷰들도 활성화
     private fun setViewsExpanded() {
+
         // + 버튼 비활성화(애니메이션 없이)
         binding.buttonShowSheet.visibility = View.GONE
         binding.buttonShowSheet.isClickable = false
@@ -298,6 +279,7 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         binding.layoutBlockScreen.visibility = View.VISIBLE
 
         // 맨 위 선택지 클릭 활성화
+        binding.buttonDirectory.isEnabled = true
         binding.buttonDirectory.isClickable = true
         binding.buttonDirectory.isFocusable = true
     }
@@ -305,6 +287,7 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
     // navigation bottom sheet이 줄어들었을 때 관련 뷰들도 비활성화
     private fun setViewsCollapsed() {
         // 맨 위 선택지 클릭 비활성화
+        binding.buttonDirectory.isEnabled = false
         binding.buttonDirectory.isClickable = false
         binding.buttonDirectory.isFocusable = false
 

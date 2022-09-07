@@ -43,6 +43,13 @@ android {
 }
 
 dependencies {
+
+    // uri를 real path로 변환할때 버그 해결용
+    implementation 'commons-io:commons-io:2.5'
+
+    // horizontal staggered recycler view
+    implementation 'com.google.android.flexbox:flexbox:3.0.0'
+
     // life cycle
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.1'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1'

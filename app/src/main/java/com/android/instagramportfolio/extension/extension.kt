@@ -1,6 +1,8 @@
 package com.android.instagramportfolio.extension
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -11,10 +13,17 @@ import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.provider.MediaStore
 import android.provider.OpenableColumns
+import android.text.TextUtils
+import android.util.Log
+import android.widget.Toast
+import androidx.core.app.ActivityCompat.requestPermissions
+import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
+import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
-import java.io.File
-import java.io.IOException
-import java.io.InputStream
+import org.apache.commons.io.IOUtils
+import java.io.*
 
 
 /** status bar와
@@ -43,11 +52,11 @@ fun Fragment.getNaviBarHeight(): Int {
 }
 
 // dp와 px간의 변환
-fun Fragment.dpToPx(dp: Int): Int {
+fun Context.dpToPx(dp: Int): Int {
     return (dp * resources.displayMetrics.density).toInt()
 }
 
-fun Fragment.pxToDp(px: Int): Int {
+fun Context.pxToDp(px: Int): Int {
     return (px / resources.displayMetrics.density).toInt()
 }
 
@@ -106,18 +115,49 @@ fun Fragment.checkIsImage(uri: Uri): Boolean {
 }
 
 // content uri로부터 파일 진짜 경로 가져오기
-fun Fragment.getRealPathFromUri(contentUri: Uri): String? {
-    var cursor: Cursor? = null
-    return try {
-        val proj = arrayOf(MediaStore.Images.Media.DATA)
-        cursor = requireContext().contentResolver.query(contentUri, proj, null, null, null)!!
-        val columnIndex: Int = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-        cursor.moveToFirst()
-        cursor.getString(columnIndex)
-    } finally {
-        cursor?.close()
+fun getFilePathFromURI(fragment: Fragment, contentUri: Uri?): String? {
+    val fileName = getFileName(contentUri)
+    if (!TextUtils.isEmpty(fileName)) {
+        val copyFile = File(fragment.requireContext().filesDir.toString() + File.separator + fileName)
+        copy(fragment, contentUri, copyFile)
+        return copyFile.absolutePath
+    }
+    return null
+}
+fun getFileName(uri: Uri?): String? {
+    if (uri == null) return null
+    var fileName: String? = null
+    val path = uri.path
+    val cut = path!!.lastIndexOf('/')
+    if (cut != -1) {
+        fileName = path.substring(cut + 1)
+    }
+    return fileName
+}
+fun copy(fragment: Fragment, srcUri: Uri?, dstFile: File?, permissionGranted: Boolean = false) {
+    try {
+        val inputStream = fragment.requireContext().contentResolver.openInputStream(srcUri!!) ?: return
+        val outputStream: OutputStream = FileOutputStream(dstFile)
+        IOUtils.copy(inputStream, outputStream)
+        inputStream.close()
+        outputStream.close()
+    } catch (e: IOException) {
+        // manage storage 퍼미션이 허용됨
+        try {
+            val inputStream = File(srcUri?.path).inputStream()
+            val outputStream: OutputStream = FileOutputStream(dstFile)
+            IOUtils.copy(inputStream, outputStream)
+            inputStream.close()
+            outputStream.close()
+        }
+        // manage storage 퍼미션이 허용 안됨
+        catch (e: Exception) {
+            throw NoManageStoragePermissionException("퍼미션이 승인 안 됨")
+        }
     }
 }
+
+
 
 // pdf to image 변환
 fun Fragment.pdfToBitmaps(pdfFile: File): ArrayList<Bitmap> {
@@ -129,8 +169,17 @@ fun Fragment.pdfToBitmaps(pdfFile: File): ArrayList<Bitmap> {
         val pageCount = renderer.pageCount
         for (i in 0 until pageCount) {
             val page = renderer.openPage(i)
-            val width: Int = resources.displayMetrics.densityDpi / 72 * page.width
-            val height: Int = resources.displayMetrics.densityDpi / 72 * page.height
+
+            var width: Int
+            var height: Int
+            var divider = 432
+            do {
+                width = resources.displayMetrics.densityDpi / divider * page.width
+                height = resources.displayMetrics.densityDpi / divider * page.height
+                divider /= 2
+            } while (width <= 0 || height <= 0)
+            Log.d("extension", "pdf image $i  width: $width, height: $height")
+
             bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
             page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
             bitmaps.add(bitmap)
@@ -154,9 +203,26 @@ fun Fragment.imageToBitmap(uri: Uri): Bitmap {
         MediaStore.Images.Media.getBitmap(requireContext().contentResolver, uri)
     }
     else {
-        val source = ImageDecoder.createSource(requireContext().contentResolver, uri)
-        ImageDecoder.decodeBitmap(source)
+        return try {
+            val source = ImageDecoder.createSource(requireContext().contentResolver, uri)
+            ImageDecoder.decodeBitmap(source)
+        }
+        catch (e: Exception) {
+            try {
+                // 퍼미션이 승인됨
+                val file = File(uri.path)
+                val bmOptions = BitmapFactory.Options()
+                bmOptions.inPreferredConfig = Bitmap.Config.ARGB_8888
+                val bitmap = BitmapFactory.decodeStream(FileInputStream(file), null, bmOptions)
+                return bitmap!!
+            }
+            catch (e: Exception) {
+                // 퍼미션이 승인 안됨
+                throw NoReadStoragePermissionException("퍼미션이 승인 안 됨")
+            }
+        }
     }
 
     return bitmap
 }
+

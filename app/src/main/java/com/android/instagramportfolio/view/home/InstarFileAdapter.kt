@@ -34,7 +34,7 @@ class InstarFileAdapter(
         notifyDataSetChanged()
     }
 
-    inner class ViewHolder(val binding: ItemInstarFileBinding): RecyclerView.ViewHolder(binding.root) {
+    inner class ViewHolder(private val binding: ItemInstarFileBinding): RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: InstarFile) {
             // TODO 나중에 아이템 꾸며야됨

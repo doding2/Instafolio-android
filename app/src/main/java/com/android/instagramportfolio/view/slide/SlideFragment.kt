@@ -1,0 +1,429 @@
+package com.android.instagramportfolio.view.slide
+
+import android.Manifest
+import android.content.Intent
+import android.content.res.Configuration
+import android.graphics.Bitmap
+import android.net.Uri
+import android.os.Bundle
+import android.os.Environment
+import android.provider.Settings
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
+import android.widget.ImageView
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ItemTouchHelper
+import com.android.instagramportfolio.R
+import com.android.instagramportfolio.databinding.FragmentSlideBinding
+import com.android.instagramportfolio.extension.*
+import com.android.instagramportfolio.model.Slide
+import com.google.android.flexbox.FlexDirection
+import com.google.android.flexbox.FlexWrap
+import com.google.android.flexbox.FlexboxLayoutManager
+import com.google.android.flexbox.JustifyContent
+import kotlinx.coroutines.*
+import java.io.File
+
+class SlideFragment : Fragment() {
+
+    companion object {
+        const val TAG = "SlideFragment"
+    }
+
+    private var _binding: FragmentSlideBinding? = null
+    private val binding get() = _binding!!
+
+    private lateinit var viewModel: SlideViewModel
+    private lateinit var adapter: SlideAdapter
+
+    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        when (throwable) {
+            // image exception
+            is NoReadStoragePermissionException -> {
+                // read storage 퍼미션 요청
+                permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+            // pdf exception
+            is NoManageStoragePermissionException -> {
+                // manage storage 퍼미션 허용하라고 유저를 보내버림
+                viewModel.isAppPausedBecauseOfPermission.value = true
+                Toast.makeText(requireContext(), "모든 파일에 대한 접근 권한을 허용해 주세요", Toast.LENGTH_SHORT).show()
+                
+                val intent = Intent()
+                intent.action = Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION
+                val uri = Uri.fromParts("package", requireActivity().packageName, null)
+                intent.data = uri
+                startActivity(intent)
+            }
+            else -> {
+                Toast.makeText(requireContext(), "에러 발생: ${throwable.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = DataBindingUtil.inflate(inflater, R.layout.fragment_slide, container, false)
+        viewModel= ViewModelProvider(requireActivity())[SlideViewModel::class.java]
+
+        requireActivity().window.setFlags(
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+
+        // 뷰를 status bar와 navigation bar의 위치에서 떨어진 원래 위치로 복구(회전 방향에 따라 달라짐)
+        val displayMode = resources.configuration.orientation
+        if (displayMode == Configuration.ORIENTATION_PORTRAIT) {
+            binding.root.setPadding(0, getStatusBarHeight(), 0, getNaviBarHeight())
+        } else {
+            binding.root.setPadding(getNaviBarHeight(), getStatusBarHeight(), 0, 0)
+        }
+
+
+        // 리사이클러 뷰 설정
+        adapter = SlideAdapter(requireContext(), arrayListOf(), ::onItemClick, viewModel.isInstarSize)
+        binding.recyclerViewSlide.adapter = adapter
+        val layoutManager = FlexboxLayoutManager(requireContext()).apply {
+            flexDirection = FlexDirection.ROW
+            flexWrap = FlexWrap.WRAP
+            justifyContent = JustifyContent.CENTER
+        }
+        binding.recyclerViewSlide.layoutManager = layoutManager
+
+        // Drag and Drop 구현
+        val callback = ItemTouchHelperCallback(adapter)
+        val touchHelper = ItemTouchHelper(callback)
+        touchHelper.attachToRecyclerView(binding.recyclerViewSlide)
+        adapter.startDrag(object: SlideAdapter.OnStartDragListener {
+            override fun onStartDrag(viewHolder: SlideAdapter.ViewHolder) {
+                touchHelper.startDrag(viewHolder)
+            }
+        })
+
+        // uri 리스트가 변할때마다 이미지로 가공
+        viewModel.uriWithExtension.observe(viewLifecycleOwner) { it ->
+            if (it.isNullOrEmpty()) {
+                findNavController().popBackStack()
+            }
+            handleUri(it)
+        }
+
+        // 이미지 사이즈 조절
+        initImagesScale()
+        binding.buttonScale.setOnClickListener {
+            scaleImages()
+        }
+
+        // 이미지 두 개를 하나로 묶기 활성화 버튼
+        initBinding()
+        binding.buttonBinding.setOnClickListener {
+            if (adapter.itemCount > 1) {
+                initBinding()
+                viewModel.enableBinding.value = viewModel.enableBinding.value != true
+
+                // 바인딩 상태가 풀렸을 때, 바인딩된 슬라이드가 존재하지 않는다면
+                // 그냥 싱글 프리뷰 화면 보이기
+                if (viewModel.enableBinding.value == false && adapter.bindingFlattenSlides.isEmpty()) {
+                    binding.layoutBinding.visibility = View.GONE
+                    binding.imagePreview.visibility = View.VISIBLE
+                }
+            }
+            else {
+                Toast.makeText(requireContext(), "적어도 두 개의 이미지가 필요합니다", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // 바인딩 되어있으면 버튼 배경이 생김
+        viewModel.enableBinding.observe(viewLifecycleOwner) {
+            if (it == true) {
+                binding.buttonBindingBackground.visibility = View.VISIBLE
+                showFirstBindingToPreview()
+            } else {
+                binding.buttonBindingBackground.visibility = View.GONE
+            }
+        }
+        // 확장 되어있으면 버튼 배경이 생김
+        viewModel.isInstarSize.observe(viewLifecycleOwner) {
+            if (it == true) {
+                binding.buttonScaleBackground.visibility = View.GONE
+            } else {
+                binding.buttonScaleBackground.visibility = View.VISIBLE
+            }
+        }
+
+        return binding.root
+    }
+
+    private fun handleUri(uris: MutableList<Pair<Uri, String>>) {
+        if (uris.isNullOrEmpty()) return
+
+        lifecycleScope.launch(exceptionHandler) {
+
+            if (!viewModel.slides.value.isNullOrEmpty()) {
+                binding.imagePreview.setImageBitmap(viewModel.slides.value!![0].bitmap)
+                adapter.replaceItems(viewModel.slides.value!!, viewModel.bindingPairs.value!!)
+                adapter.bindingPairs = viewModel.bindingPairs.value!!
+                binding.text.text = "done"
+                return@launch
+            }
+
+            binding.text.text = "processing"
+            val slides: MutableList<Slide> = processIntoSlides(uris)
+
+            // 가공 완료된 slide들을 view model에 전달
+            if (viewModel.slides.value == null) {
+                viewModel.slides.value = slides
+            } else {
+                viewModel.slides.value!!.clear()
+                viewModel.slides.value!!.addAll(slides)
+            }
+
+            // slide 리스트가 변할때마다 리사이클러뷰에 반영
+            binding.text.text = "done"
+            if (viewModel.slides.value!!.size > 0) {
+                binding.imagePreview.setImageBitmap(viewModel.slides.value!![0].bitmap)
+                adapter.replaceItems(viewModel.slides.value!!, viewModel.bindingPairs.value!!)
+            } else {
+                // TODO 변환된 비트맵 이미지가 0개
+            }
+
+            viewModel.bindingPairs.value = adapter.bindingPairs
+        }
+    }
+
+    // 슬라이드 클릭하면 프리뷰에 띄워줌
+    private fun onItemClick(slide: Slide) {
+        if (viewModel.enableBinding.value == true) {
+            if (viewModel.slides.value?.size!! <= 1) {
+                Toast.makeText(requireContext(), "슬라이드 수가 부족합니다", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            var firstIdx = adapter.getIndexOf(slide)
+            if (firstIdx >= adapter.itemCount - 1) {
+                firstIdx--
+            }
+            val secondIdx = firstIdx + 1
+
+            val firstSlide = adapter.getSlideAt(firstIdx)
+            val secondSlide = adapter.getSlideAt(secondIdx)
+
+            // 두 슬라이드가 바인딩 안 되어있다면, 등록
+            if (!adapter.isBindingContains(firstSlide) && !adapter.isBindingContains(secondSlide)) {
+                adapter.registerBinding(firstSlide, secondSlide)
+
+                binding.imagePreview.visibility = View.GONE
+                binding.layoutBinding.visibility = View.VISIBLE
+                binding.imageBindingPreviewFirst.setImageBitmap(firstSlide.bitmap)
+                binding.imageBindingPreviewSecond.setImageBitmap(secondSlide.bitmap)
+            }
+            // 그 외는 모두 취소
+            // 처음 꺼를 클릭한 거니까 그냥 취소
+            else if (adapter.isBindingContains(firstSlide)) {
+                adapter.cancelBinding(firstSlide)
+                showFirstBindingToPreview()
+            }
+            // 두번째 꺼를 클릭한 것도 그냥 취소
+            else if (adapter.isBindingContains(secondSlide)) {
+                adapter.cancelBinding(secondSlide)
+                showFirstBindingToPreview()
+            }
+            else {
+                Log.i(TAG, "일어날 수가 없는 에러: 슬라이드 두개가 전부 등록되어있는데 if문에서 안 걸러짐")
+            }
+
+        } else {
+            // 만약 클릭한 이 슬라이드가 바인딩 됐을 때
+            if (adapter.isBindingContains(slide)) {
+                binding.imagePreview.visibility = View.GONE
+                binding.layoutBinding.visibility = View.VISIBLE
+
+                for ((first, second) in adapter.bindingPairs) {
+                    if (first == slide || second == slide) {
+                        binding.imageBindingPreviewFirst.setImageBitmap(first.bitmap)
+                        binding.imageBindingPreviewSecond.setImageBitmap(second.bitmap)
+                        break
+                    }
+                }
+            }
+            // 아닐 때
+            else {
+                binding.imagePreview.visibility = View.VISIBLE
+                binding.layoutBinding.visibility = View.GONE
+                binding.imagePreview.setImageBitmap(slide.bitmap)
+            }
+        }
+    }
+
+    // 바인딩 초기화
+    private fun initBinding() {
+        if (viewModel.enableBinding.value == true) {
+            binding.layoutBinding.visibility = View.VISIBLE
+            binding.imagePreview.visibility = View.GONE
+        }
+        else {
+            binding.layoutBinding.visibility = View.GONE
+            binding.imagePreview.visibility = View.VISIBLE
+        }
+    }
+
+    // 가장 위에 존재하는 바인딩을 프리뷰에 띄우기
+    private fun showFirstBindingToPreview() {
+
+        binding.imagePreview.visibility = View.GONE
+        binding.layoutBinding.visibility = View.VISIBLE
+
+        // 등록된 바인딩 페어가 없으면 그냥 빈 화면 띄움
+        if (adapter.bindingPairs.isEmpty()) {
+            binding.imageBindingPreviewFirst.setImageResource(android.R.color.transparent)
+            binding.imageBindingPreviewSecond.setImageResource(android.R.color.transparent)
+        }
+        else {
+            val pair = adapter.bindingPairs.minBy { adapter.getIndexOf(it.first) + adapter.getIndexOf(it.second) }
+            binding.imageBindingPreviewFirst.setImageBitmap(pair.first.bitmap)
+            binding.imageBindingPreviewSecond.setImageBitmap(pair.second.bitmap)
+        }
+
+    }
+
+
+    // 이미지 크기 초기화
+    private fun initImagesScale() {
+        if (viewModel.isInstarSize.value == true) {
+            setInstarSize()
+        } else {
+            setOriginalImage()
+        }
+    }
+
+    // 이미지 크기 조절
+    private fun scaleImages() {
+        if (viewModel.isInstarSize.value == true) {
+            setOriginalImage()
+            viewModel.isInstarSize.value = false
+        } else {
+            setInstarSize()
+            viewModel.isInstarSize.value = true
+        }
+    }
+
+    // 이미지들을 화면 꽉차게 키우기
+    private fun setOriginalImage() {
+        adapter.setOriginalImage()
+        binding.layoutPreviewBackground.setBackgroundResource(R.color.gray)
+        binding.layoutBinding.setBackgroundResource(R.color.gray)
+    }
+
+    // 이미지들을 인스타 사이즈로 줄이기
+    private fun setInstarSize() {
+        adapter.setImagesInstarSize()
+        binding.layoutPreviewBackground.setBackgroundResource(R.color.white)
+        binding.layoutBinding.setBackgroundResource(R.color.white)
+    }
+
+    // uri들을 slide(bitmap 이미지)로 가공
+    private suspend fun processIntoSlides(uriList: List<Pair<Uri, String>>): MutableList<Slide> {
+        val slides = ArrayList<Slide>()
+
+        // pdf를 여러장의 Slide(bitmap)들로 변환
+        // 이미지이면 그냥 비트맵으로 변환
+        coroutineScope {
+            launch(Dispatchers.IO) {
+                for ((uri, extension) in uriList) {
+                    if (extension == "image") {
+                        val slide = Slide(convertImageUriToBitmap(uri))
+                        slides.add(slide)
+                    } else if (extension == "pdf") {
+                        val returnedSlides = convertPdfUriToBitmaps(uri).map { Slide(it) }
+                        slides.addAll(returnedSlides)
+                    }
+                }
+            }
+        }
+
+        return slides
+    }
+
+    // 퍼미션 런처
+    private val permissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            handleUri(viewModel.uriWithExtension.value!!)
+        }
+        else {
+            Toast.makeText(requireContext(), "사진 및 미디어 액세스 권한을 허용해 주세요", Toast.LENGTH_SHORT).show()
+            findNavController().popBackStack()
+        }
+    }
+
+    // manage storage 권한 요청이 받아졌는지 확인
+    override fun onResume() {
+        super.onResume()
+        // 유저가 manage storage 권한을 수정하러 보내졌는가?
+        if (viewModel.isAppPausedBecauseOfPermission.value == true) {
+            // 권한이 성공적으로 수정됨
+            if (Environment.isExternalStorageManager()) {
+                viewModel.isAppPausedBecauseOfPermission.value = false
+                handleUri(viewModel.uriWithExtension.value!!)
+            }
+            // 권한이 아직 수정 안 됨
+            else {
+                Toast.makeText(requireContext(), "모든 파일에 대한 접근 권한을 허용해 주세요", Toast.LENGTH_SHORT).show()
+                findNavController().popBackStack()
+                viewModel.isAppPausedBecauseOfPermission.value = false
+            }
+        }
+    }
+
+
+    // image의 uri를 가지고 bitmap으로 변환
+    private suspend fun convertImageUriToBitmap(imageUri: Uri): Bitmap {
+        var bitmap: Bitmap? = null
+
+        coroutineScope {
+                launch(exceptionHandler) {
+                    withContext(Dispatchers.IO) {
+                        bitmap = imageToBitmap(imageUri)
+                    }
+                }
+        }
+
+        return bitmap
+            ?: throw Exception("Converting Image File to Image Failed")
+    }
+
+    // pdf의 uri를 가지고 bitmap으로 변환
+    private suspend fun convertPdfUriToBitmaps(pdfUri: Uri): MutableList<Bitmap> {
+        var bitmaps: MutableList<Bitmap>? = null
+
+        coroutineScope {
+                launch(exceptionHandler) {
+                    withContext(Dispatchers.IO) {
+                        val realPath = getFilePathFromURI(this@SlideFragment, pdfUri)
+                        // pdf 파일의 path가 null인 경우 빈 리스트를 반환
+                        val pdfFile = File(realPath!!)
+                        bitmaps = pdfToBitmaps(pdfFile)
+                    }
+                }
+        }
+        return bitmaps
+            ?: throw Exception("Converting PDF to Image Failed")
+    }
+
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+}

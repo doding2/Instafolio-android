@@ -3,12 +3,9 @@ package com.android.instagramportfolio.view.slide
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.util.Log
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.MutableLiveData
@@ -29,6 +26,10 @@ class SlideAdapter(
 
     private lateinit var dragListener: OnStartDragListener
 
+    private val transparentDrawable = ColorDrawable(Color.TRANSPARENT)
+    private val borderWithoutLeft = ContextCompat.getDrawable(context, R.drawable.border_without_left)
+    private val borderWithoutRight = ContextCompat.getDrawable(context, R.drawable.border_without_right)
+
     inner class ViewHolder(
         val binding: ItemSlideBinding,
     ): RecyclerView.ViewHolder(binding.root), ItemTouchHelperViewHolder {
@@ -43,34 +44,54 @@ class SlideAdapter(
             this.mySlide = item
 
             binding.imageSlide.setImageBitmap(item.bitmap)
+            // 인스타 사이즈
             if (isInstarSize.value == true) {
                 binding.imageSlideBefore.setBackgroundResource(R.color.white)
                 binding.imageSlide.setBackgroundResource(R.color.white)
                 binding.imageSlideAfter.setBackgroundResource(R.color.white)
-            } else {
-                binding.imageSlideBefore.setBackgroundResource(R.color.gray)
-                binding.imageSlide.setBackgroundResource(R.color.gray)
-                binding.imageSlideAfter.setBackgroundResource(R.color.gray)
+//                binding.viewBeforeConnectBackground.setBackgroundResource(R.color.white)
+//                binding.viewAfterConnectBackground.setBackgroundResource(R.color.white)
+            }
+            // 원본 사이즈
+            else {
+                binding.imageSlideBefore.setBackgroundResource(android.R.color.transparent)
+                binding.imageSlide.setBackgroundResource(android.R.color.transparent)
+                binding.imageSlideAfter.setBackgroundResource(android.R.color.transparent)
+//                binding.viewBeforeConnectBackground.setBackgroundResource(android.R.color.transparent)
+//                binding.viewAfterConnectBackground.setBackgroundResource(android.R.color.transparent)
             }
 
             //  바인딩 되어있는 놈들이면 배경에 보더 추가
             if (isBindingContains(item)) {
-//                binding.layoutSlideWrapper.setBackgroundResource(R.drawable.border_without_none)
 
                 for ((first, second) in bindingPairs) {
+                    // 이 아이템이 처음 놈일 때
                     if (first == item) {
-                        binding.layoutSlideWrapper.foreground = ContextCompat.getDrawable(context, R.drawable.icon_check)
+                        binding.borderConnectStartTop.visibility = View.GONE
+                        binding.borderConnectStartBottom.visibility = View.GONE
+                        binding.wrapperBorderImageSlide.foreground = borderWithoutRight
+                        binding.borderConnectEndTop.visibility = View.VISIBLE
+                        binding.borderConnectEndBottom.visibility = View.VISIBLE
                         break
                     }
+                    // 이 아이템이 두 번쨰 놈일 때
                     if (second == item) {
-                        binding.layoutSlideWrapper.foreground =  ColorDrawable(Color.TRANSPARENT)
+                        binding.borderConnectStartTop.visibility = View.VISIBLE
+                        binding.borderConnectStartBottom.visibility = View.VISIBLE
+                        binding.wrapperBorderImageSlide.foreground = borderWithoutLeft
+                        binding.borderConnectEndTop.visibility = View.GONE
+                        binding.borderConnectEndBottom.visibility = View.GONE
                         break
                     }
                 }
             }
+            // 이 놈이 바인딩 되어있지 않았을 때
             else {
-//                binding.layoutSlideWrapper.setBackgroundResource(Color.TRANSPARENT)
-                binding.layoutSlideWrapper.foreground =  ColorDrawable(Color.TRANSPARENT)
+                binding.borderConnectStartTop.visibility = View.GONE
+                binding.borderConnectStartBottom.visibility = View.GONE
+                binding.wrapperBorderImageSlide.foreground = transparentDrawable
+                binding.borderConnectEndTop.visibility = View.GONE
+                binding.borderConnectEndBottom.visibility = View.GONE
             }
 
 
@@ -113,10 +134,7 @@ class SlideAdapter(
                         bindedSlide = nextSlide
                         bindedSlideIndex = nextSlideIndex
 
-                        binding.imageSlideAfter.foreground = ColorDrawable(Color.TRANSPARENT)
-                        // 위엣 놈 추가됨
-
-                        binding.imageSlideAfter.visibility = View.VISIBLE
+                        binding.layoutAfter.visibility = View.VISIBLE
                         binding.imageSlideAfter.setImageBitmap(nextSlide.bitmap)
                         break
                     }
@@ -133,10 +151,7 @@ class SlideAdapter(
                         bindedSlide = prevSlide
                         bindedSlideIndex = prevSlideIndex
 
-                        binding.imageSlideBefore.foreground = ContextCompat.getDrawable(context, R.drawable.icon_check)
-                        // 위엣 놈 추가됨
-
-                        binding.imageSlideBefore.visibility = View.VISIBLE
+                        binding.layoutBefore.visibility = View.VISIBLE
                         binding.imageSlideBefore.setImageBitmap(prevSlide.bitmap)
                         break
                     }
@@ -148,8 +163,8 @@ class SlideAdapter(
         override fun onItemClear() {
             if (isBindingContains(mySlide!!)) {
                 // 옆의 따까리 안 보이게 비활성화
-                binding.imageSlideBefore.visibility = View.GONE
-                binding.imageSlideAfter.visibility = View.GONE
+                binding.layoutBefore.visibility = View.GONE
+                binding.layoutAfter.visibility = View.GONE
 
                 val myIndex = items.indexOf(mySlide)
 
@@ -167,12 +182,8 @@ class SlideAdapter(
                     }
                 }
                 else {
-                    Log.d("SlideAdapter", "myIndex: $myIndex")
                     // 내 슬라이드가 뒤에 있을 때
                     val prevSlide = bindedSlide!!
-
-                    binding.imageSlideBefore.foreground = ColorDrawable(Color.TRANSPARENT)
-                    // 위엣 놈 추가됨
 
                     if (myIndex <= 0) {
                         items.add(0, prevSlide)
@@ -184,7 +195,6 @@ class SlideAdapter(
                 }
             }
 
-//            setBindingPairsBackground()
             notifyDataSetChanged()
         }
     }
@@ -226,12 +236,14 @@ class SlideAdapter(
         notifyDataSetChanged()
     }
 
-    // 이미지가 화면에 꽉차게 확장시키기
+    // 이미지 원본으로 변환
     fun setOriginalImage() {
         for ((_, holder) in viewHolders) {
-            holder.binding.imageSlideBefore.setBackgroundResource(R.color.gray)
-            holder.binding.imageSlide.setBackgroundResource(R.color.gray)
-            holder.binding.imageSlideAfter.setBackgroundResource(R.color.gray)
+            holder.binding.imageSlideBefore.setBackgroundResource(android.R.color.transparent)
+            holder.binding.imageSlide.setBackgroundResource(android.R.color.transparent)
+            holder.binding.imageSlideAfter.setBackgroundResource(android.R.color.transparent)
+//            holder.binding.viewBeforeConnectBackground.setBackgroundResource(android.R.color.transparent)
+//            holder.binding.viewAfterConnectBackground.setBackgroundResource(android.R.color.transparent)
         }
     }
 
@@ -241,6 +253,8 @@ class SlideAdapter(
             holder.binding.imageSlideBefore.setBackgroundResource(R.color.white)
             holder.binding.imageSlide.setBackgroundResource(R.color.white)
             holder.binding.imageSlideAfter.setBackgroundResource(R.color.white)
+//            holder.binding.viewBeforeConnectBackground.setBackgroundResource(R.color.white)
+//            holder.binding.viewAfterConnectBackground.setBackgroundResource(R.color.white)
         }
     }
 
@@ -250,11 +264,23 @@ class SlideAdapter(
         val pair = first to second
         if (pair !in bindingPairs) {
             bindingPairs.add(pair)
-            viewHolders[first]?.binding?.layoutSlideWrapper?.foreground = ContextCompat.getDrawable(context, R.drawable.icon_check)
-            viewHolders[second]?.binding?.layoutSlideWrapper?.foreground = ColorDrawable(Color.TRANSPARENT)
-//
-//            viewHolders[first]?.binding?.layoutSlideWrapper?.setBackgroundResource(R.drawable.border_without_none)
-//            viewHolders[second]?.binding?.layoutSlideWrapper?.setBackgroundResource(R.drawable.border_without_none)
+            // 앞에 있는 슬라이드
+            viewHolders[first]?.binding?.run {
+                borderConnectStartTop.visibility = View.GONE
+                borderConnectStartBottom.visibility = View.GONE
+                wrapperBorderImageSlide.foreground = borderWithoutRight
+                borderConnectEndTop.visibility = View.VISIBLE
+                borderConnectEndBottom.visibility = View.VISIBLE
+            }
+
+            // 뒤에 있는 슬라이드
+            viewHolders[second]?.binding?.run {
+                borderConnectStartTop.visibility = View.VISIBLE
+                borderConnectStartBottom.visibility = View.VISIBLE
+                wrapperBorderImageSlide.foreground = borderWithoutLeft
+                borderConnectEndTop.visibility = View.GONE
+                borderConnectEndBottom.visibility = View.GONE
+            }
         }
     }
 
@@ -265,10 +291,22 @@ class SlideAdapter(
             if (first == slide || second == slide) {
                 bindingPairs.remove(first to second)
 
-                viewHolders[first]?.binding?.layoutSlideWrapper?.foreground = ColorDrawable(Color.TRANSPARENT)
-                viewHolders[second]?.binding?.layoutSlideWrapper?.foreground = ColorDrawable(Color.TRANSPARENT)
-//                viewHolders[first]?.binding?.layoutSlideWrapper?.setBackgroundResource(Color.TRANSPARENT)
-//                viewHolders[second]?.binding?.layoutSlideWrapper?.setBackgroundResource(Color.TRANSPARENT)
+                // 앞에 있는 슬라이드
+                viewHolders[first]?.binding?.run {
+                    borderConnectStartTop.visibility = View.GONE
+                    borderConnectStartBottom.visibility = View.GONE
+                    wrapperBorderImageSlide.foreground = transparentDrawable
+                    borderConnectEndTop.visibility = View.GONE
+                    borderConnectEndBottom.visibility = View.GONE
+                }
+                // 뒤에 있는 슬라이드
+                viewHolders[second]?.binding?.run {
+                    borderConnectStartTop.visibility = View.GONE
+                    borderConnectStartBottom.visibility = View.GONE
+                    wrapperBorderImageSlide.foreground = transparentDrawable
+                    borderConnectEndTop.visibility = View.GONE
+                    borderConnectEndBottom.visibility = View.GONE
+                }
                 break
             }
         }

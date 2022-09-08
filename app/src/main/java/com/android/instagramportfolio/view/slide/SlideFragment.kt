@@ -12,10 +12,12 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
 import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -88,6 +90,9 @@ class SlideFragment : Fragment() {
         } else {
             binding.root.setPadding(getNaviBarHeight(), getStatusBarHeight(), 0, 0)
         }
+
+        // status bar가 밝은 색이 아니라는 것을 알림
+        WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightStatusBars = false
 
 
         // 리사이클러 뷰 설정
@@ -320,8 +325,8 @@ class SlideFragment : Fragment() {
     // 이미지들을 화면 꽉차게 키우기
     private fun setOriginalImage() {
         adapter.setOriginalImage()
-        binding.layoutPreviewBackground.setBackgroundResource(R.color.gray)
-        binding.layoutBinding.setBackgroundResource(R.color.gray)
+        binding.layoutPreviewBackground.setBackgroundResource(android.R.color.transparent)
+        binding.layoutBinding.setBackgroundResource(android.R.color.transparent)
     }
 
     // 이미지들을 인스타 사이즈로 줄이기

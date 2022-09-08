@@ -18,6 +18,7 @@ import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -69,6 +70,8 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         // 앱 실행 화면이 ui xml과 똑같이 보이도록 패딩
         binding.layoutUser.setPadding(0, getStatusBarHeight(), 0, 0)
 
+        // status bar가 밝은 색이라는 것을 알림
+        WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightStatusBars = true
 
         // 리사이클러 뷰 설정
         adapter = InstarFileAdapter(arrayListOf(), ::onItemClick)

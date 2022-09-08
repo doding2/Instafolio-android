@@ -84,16 +84,30 @@ class SlideFragment : Fragment() {
 
                 // 뷰가 화면에 너무 크게 차지하지 않게 조절
                 binding.root.post {
-
+                    val params = binding.layoutPreviewBackground.layoutParams
+                    params.width = (binding.root.height / 3.0).toInt()
+                    binding.layoutPreviewBackground.layoutParams = params
                 }
             }
             // 폰이 오른쪽으로 누움
             Surface.ROTATION_270 -> {
                 binding.root.setPadding(getNaviBarHeight(), getStatusBarHeight(), 0, 0)
+
+                // 뷰가 화면에 너무 크게 차지하지 않게 조절
+                binding.root.post {
+                    val params = binding.layoutPreviewBackground.layoutParams
+                    params.width = (binding.root.height / 3.0).toInt()
+                    binding.layoutPreviewBackground.layoutParams = params
+                }
             }
             // 그 외는 그냥 정방향으으로 처리함
             else -> {
                 binding.root.setPadding(0, getStatusBarHeight(), 0, getNaviBarHeight())
+
+                // 정상 상태
+                val params = binding.layoutPreviewBackground.layoutParams
+                params.width = ViewGroup.LayoutParams.MATCH_PARENT
+                binding.layoutPreviewBackground.layoutParams = params
             }
         }
 

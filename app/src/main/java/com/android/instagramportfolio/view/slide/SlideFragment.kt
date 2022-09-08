@@ -81,6 +81,11 @@ class SlideFragment : Fragment() {
             // 폰이 왼쪽으로 누움
             Surface.ROTATION_90 -> {
                 binding.root.setPadding(0, getStatusBarHeight(), getNaviBarHeight(), 0)
+
+                // 뷰가 화면에 너무 크게 차지하지 않게 조절
+                binding.root.post {
+
+                }
             }
             // 폰이 오른쪽으로 누움
             Surface.ROTATION_270 -> {

@@ -11,6 +11,8 @@
         tools:context=".view.slide.SlideFragment">
 
         <ImageView
+            android:id="@+id/button_navigate_preview"
+            android:theme="@android:style/ThemeOverlay.Material.Dark"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
@@ -58,22 +60,20 @@
                         android:id="@+id/image_binding_preview_first"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:paddingBottom="3dp"/>
+                        android:layout_weight="1"/>
 
                     <ImageView
                         android:id="@+id/image_binding_preview_second"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:paddingTop="3dp"/>
+                        android:layout_weight="1"/>
                 </LinearLayout>
 
-                <TextView
-                    android:id="@+id/text"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:text="processing indicator" />
+<!--                <TextView-->
+<!--                    android:id="@+id/text"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="match_parent"-->
+<!--                    android:text="processing indicator" />-->
             </FrameLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
 

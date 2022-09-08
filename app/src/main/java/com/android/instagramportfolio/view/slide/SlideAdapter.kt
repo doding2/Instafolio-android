@@ -19,7 +19,7 @@ import java.util.*
 
 class SlideAdapter(
     private val context: Context,
-    private val items: MutableList<Slide>,
+    val items: MutableList<Slide>,
     private val clickListener: (Slide) -> Unit,
     private val isInstarSize: MutableLiveData<Boolean>,
 ): RecyclerView.Adapter<SlideAdapter.ViewHolder>(), ItemTouchHelperCallback.OnItemMoveListener {
@@ -49,16 +49,12 @@ class SlideAdapter(
                 binding.imageSlideBefore.setBackgroundResource(R.color.white)
                 binding.imageSlide.setBackgroundResource(R.color.white)
                 binding.imageSlideAfter.setBackgroundResource(R.color.white)
-//                binding.viewBeforeConnectBackground.setBackgroundResource(R.color.white)
-//                binding.viewAfterConnectBackground.setBackgroundResource(R.color.white)
             }
             // 원본 사이즈
             else {
                 binding.imageSlideBefore.setBackgroundResource(android.R.color.transparent)
                 binding.imageSlide.setBackgroundResource(android.R.color.transparent)
                 binding.imageSlideAfter.setBackgroundResource(android.R.color.transparent)
-//                binding.viewBeforeConnectBackground.setBackgroundResource(android.R.color.transparent)
-//                binding.viewAfterConnectBackground.setBackgroundResource(android.R.color.transparent)
             }
 
             //  바인딩 되어있는 놈들이면 배경에 보더 추가
@@ -112,11 +108,6 @@ class SlideAdapter(
             if (isBindingContains(mySlide!!)) {
 
                 val myIndex = items.indexOf(mySlide)
-
-                val params = binding.root.layoutParams as FlexboxLayoutManager.LayoutParams
-                params.apply {
-                    flexGrow = 1.0f
-                }
 
                 // 이 슬라이드가 첫번째인지 두번째인지 체크
                 for ((first, second) in bindingPairs) {

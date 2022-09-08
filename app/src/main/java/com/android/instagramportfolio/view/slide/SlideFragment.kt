@@ -9,11 +9,8 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -79,20 +76,25 @@ class SlideFragment : Fragment() {
         _binding = DataBindingUtil.inflate(inflater, R.layout.fragment_slide, container, false)
         viewModel= ViewModelProvider(requireActivity())[SlideViewModel::class.java]
 
-        requireActivity().window.setFlags(
-            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
-
         // 뷰를 status bar와 navigation bar의 위치에서 떨어진 원래 위치로 복구(회전 방향에 따라 달라짐)
-        val displayMode = resources.configuration.orientation
-        if (displayMode == Configuration.ORIENTATION_PORTRAIT) {
-            binding.root.setPadding(0, getStatusBarHeight(), 0, getNaviBarHeight())
-        } else {
-            binding.root.setPadding(getNaviBarHeight(), getStatusBarHeight(), 0, 0)
+        when (requireActivity().display?.rotation) {
+            // 폰이 왼쪽으로 누움
+            Surface.ROTATION_90 -> {
+                binding.root.setPadding(0, getStatusBarHeight(), getNaviBarHeight(), 0)
+            }
+            // 폰이 오른쪽으로 누움
+            Surface.ROTATION_270 -> {
+                binding.root.setPadding(getNaviBarHeight(), getStatusBarHeight(), 0, 0)
+            }
+            // 그 외는 그냥 정방향으으로 처리함
+            else -> {
+                binding.root.setPadding(0, getStatusBarHeight(), 0, getNaviBarHeight())
+            }
         }
 
-        // status bar가 밝은 색이 아니라는 것을 알림
+        // status bar, navigation bar가 밝은 색이 아니라는 것을 알림
         WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightStatusBars = false
+        WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightNavigationBars = false
 
 
         // 리사이클러 뷰 설정
@@ -166,6 +168,18 @@ class SlideFragment : Fragment() {
             }
         }
 
+        // 프리뷰 화면으로 이동 버튼
+        binding.buttonNavigatePreview.setOnClickListener {
+            // 슬라이드 로딩이 끝났을 때만 이동가능
+            if (viewModel.slides.value != null && viewModel.slides.value!!.size > 0) {
+                // Preview Fragment에 정보 전달 하기 위해 백업
+                viewModel.slides.value = adapter.items
+                viewModel.bindingPairs.value = adapter.bindingPairs
+                viewModel.bindingFlattenSlides.value = adapter.bindingFlattenSlides
+                findNavController().navigate(R.id.action_slideFragment_to_previewFragment)
+            }
+        }
+
         return binding.root
     }
 
@@ -178,11 +192,11 @@ class SlideFragment : Fragment() {
                 binding.imagePreview.setImageBitmap(viewModel.slides.value!![0].bitmap)
                 adapter.replaceItems(viewModel.slides.value!!, viewModel.bindingPairs.value!!)
                 adapter.bindingPairs = viewModel.bindingPairs.value!!
-                binding.text.text = "done"
+//                binding.text.text = "done"
                 return@launch
             }
 
-            binding.text.text = "processing"
+//            binding.text.text = "processing"
             val slides: MutableList<Slide> = processIntoSlides(uris)
 
             // 가공 완료된 slide들을 view model에 전달
@@ -194,7 +208,7 @@ class SlideFragment : Fragment() {
             }
 
             // slide 리스트가 변할때마다 리사이클러뷰에 반영
-            binding.text.text = "done"
+//            binding.text.text = "done"
             if (viewModel.slides.value!!.size > 0) {
                 binding.imagePreview.setImageBitmap(viewModel.slides.value!![0].bitmap)
                 adapter.replaceItems(viewModel.slides.value!!, viewModel.bindingPairs.value!!)
@@ -400,6 +414,7 @@ class SlideFragment : Fragment() {
                 launch(exceptionHandler) {
                     withContext(Dispatchers.IO) {
                         bitmap = imageToBitmap(imageUri)
+                        bitmap = getResized(bitmap!!, 1080, 1080)
                     }
                 }
         }

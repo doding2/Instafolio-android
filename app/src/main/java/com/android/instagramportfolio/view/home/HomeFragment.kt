@@ -4,14 +4,14 @@ import android.Manifest
 import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Configuration
+import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.view.WindowManager
+import android.view.*
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.widget.FrameLayout
@@ -60,18 +60,29 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         homeViewModel = ViewModelProvider(requireActivity(), factory)[HomeViewModel::class.java]
         slideViewModel= ViewModelProvider(requireActivity())[SlideViewModel::class.java]
 
-        //status bar와 navigation bar 모두 투명하게 만드는 코드
-        requireActivity().window.setFlags(
-            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+        when (requireActivity().display?.rotation) {
+            // 폰이 왼쪽으로 누움
+            Surface.ROTATION_90 -> {
+                binding.layoutRoot.setPadding(0, 0, getNaviBarHeight(), 0)
+                binding.layoutUser.setPadding(0, getStatusBarHeight(), 0, 0)
+            }
+            // 폰이 오른쪽으로 누움
+            Surface.ROTATION_270 -> {
+                binding.layoutRoot.setPadding(getNaviBarHeight(), 0, 0, 0)
+                binding.layoutUser.setPadding(0, getStatusBarHeight(), 0, 0)
+            }
+            // 그 외는 그냥 정방향으으로 처리함
+            else -> {
+                // ui가 아랫부분 navitaion bar를 침범하지 않도록 패딩
+                binding.layoutRoot.setPadding(0, 0, 0, getNaviBarHeight())
+                // 앱 실행 화면이 ui xml과 똑같이 보이도록 패딩
+                binding.layoutUser.setPadding(0, getStatusBarHeight(), 0, 0)
+            }
+        }
 
-        // ui가 아랫부분 navitaion bar를 침범하지 않도록 패딩
-        binding.layoutRoot.setPadding(0, 0, 0, getNaviBarHeight())
-        // 앱 실행 화면이 ui xml과 똑같이 보이도록 패딩
-        binding.layoutUser.setPadding(0, getStatusBarHeight(), 0, 0)
-
-        // status bar가 밝은 색이라는 것을 알림
+        // status bar, navigation bar가 밝은 색이라는 것을 알림
         WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightStatusBars = true
+        WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightNavigationBars = false
 
         // 리사이클러 뷰 설정
         adapter = InstarFileAdapter(arrayListOf(), ::onItemClick)
@@ -87,7 +98,7 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         val metrics = resources.displayMetrics
         val screenHeight = metrics.heightPixels
         val sourceOfFilesBehavior = BottomSheetBehavior.from(binding.layoutFilesBottomSheet)
-        sourceOfFilesBehavior.maxHeight = screenHeight - requireContext().pxToDp(getStatusBarHeight())
+        sourceOfFilesBehavior.maxHeight = screenHeight - getStatusBarHeight()
         binding.layoutUser.post {
             sourceOfFilesBehavior.peekHeight = screenHeight - binding.layoutUser.height
         }

@@ -1,8 +1,6 @@
 package com.android.instagramportfolio.extension
 
-import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
 import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -15,12 +13,6 @@ import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.text.TextUtils
 import android.util.Log
-import android.widget.Toast
-import androidx.core.app.ActivityCompat.requestPermissions
-import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
-import androidx.core.content.ContentProviderCompat.requireContext
-import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import org.apache.commons.io.IOUtils
 import java.io.*
@@ -172,12 +164,26 @@ fun Fragment.pdfToBitmaps(pdfFile: File): ArrayList<Bitmap> {
 
             var width: Int
             var height: Int
+
+            // 너비 또는 높이 둘 중 큰 것을 1080으로 고정
+            val criteria = 1080.0
+            if (page.width > page.height) {
+                val scale = page.width / criteria
+                height = (page.height / scale).toInt()
+                width = criteria.toInt()
+            } else {
+                val scale = page.height / criteria
+                width = (page.width / scale).toInt()
+                height = criteria.toInt()
+            }
+
+            // 위에서 고정에 실패하면 크기 조절
             var divider = 432
-            do {
+            while (width <= 0 || height <= 0) {
                 width = resources.displayMetrics.densityDpi / divider * page.width
                 height = resources.displayMetrics.densityDpi / divider * page.height
                 divider /= 2
-            } while (width <= 0 || height <= 0)
+            }
             Log.d("extension", "pdf image $i  width: $width, height: $height")
 
             bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
@@ -224,5 +230,31 @@ fun Fragment.imageToBitmap(uri: Uri): Bitmap {
     }
 
     return bitmap
+}
+
+// 인자로 전달된 비트맵을 리사이징해서 반환하는 함수
+fun getResized(
+    bitmap: Bitmap,
+    maxWidth: Int = 1080,
+    maxHeight: Int = 1080
+): Bitmap {
+    var image = bitmap
+    if (maxHeight > 0 && maxWidth > 0) {
+        val width = image.width
+        val height = image.height
+        val ratioBitmap = width.toFloat() / height.toFloat()
+        val ratioMax = maxWidth.toFloat() / maxHeight.toFloat()
+
+        var finalWidth = maxWidth
+        var finalHeight = maxHeight
+        if (ratioMax > ratioBitmap) {
+            finalWidth = (maxHeight.toFloat() * ratioBitmap).toInt()
+        } else {
+            finalHeight = (maxWidth.toFloat() / ratioBitmap).toInt()
+        }
+        image = Bitmap.createScaledBitmap(image, finalWidth, finalHeight, true)
+    }
+
+    return image
 }
 

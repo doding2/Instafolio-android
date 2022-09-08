@@ -15,10 +15,13 @@ class SlideViewModel: ViewModel() {
         value = mutableListOf()
     }
 
-    // 이거랑 아래거 두개는 백업 용도로만 사용해야 됨
+    // 이거랑 아래거는 백업 용도로만 사용해야 됨
     // 실제로 사용해야 하는 것은 adapter에서 관리
     val bindingPairs = MutableLiveData<MutableList<Pair<Slide, Slide>>>().apply {
         value = mutableListOf()
+    }
+    val bindingFlattenSlides = MutableLiveData<List<Slide>>().apply {
+        value = listOf()
     }
 
     val isInstarSize = MutableLiveData<Boolean>().apply {
@@ -39,6 +42,7 @@ class SlideViewModel: ViewModel() {
         uriWithExtension.value = mutableListOf()
         slides.value = mutableListOf()
         bindingPairs.value = mutableListOf()
+        bindingFlattenSlides.value = listOf()
         isInstarSize.value = true
         enableBinding.value = false
         isAppPausedBecauseOfPermission.value = false

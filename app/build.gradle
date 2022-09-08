@@ -43,7 +43,6 @@ android {
 }
 
 dependencies {
-
     // uri를 real path로 변환할때 버그 해결용
     implementation 'commons-io:commons-io:2.5'
 

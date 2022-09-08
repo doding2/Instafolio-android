@@ -1,10 +1,15 @@
 package com.android.instagramportfolio.view.common
 
-import androidx.appcompat.app.AppCompatActivity
+import android.os.Build
 import android.os.Bundle
+import android.view.Window
+import android.view.WindowManager
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.android.instagramportfolio.R
 import com.android.instagramportfolio.databinding.ActivityMainBinding
+import com.android.instagramportfolio.extension.getNaviBarHeight
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -14,6 +19,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         _binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
     }
 
     override fun onDestroy() {
@@ -38,15 +47,5 @@ class MainActivity : AppCompatActivity() {
         }
 
         super.onBackPressed()
-    }
-
-    // 요청한 권한 처리
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        // This method call must be launched here to delegate permission granted results To [PermissionRequester].
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 }

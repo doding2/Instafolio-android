@@ -64,7 +64,10 @@ class PreviewFragment : Fragment() {
         snapHelper.attachToRecyclerView(binding.recyclerView)
 
 
+        // 다운로드 버튼
+        binding.buttonDownload.setOnClickListener {
 
+        }
 
 
 

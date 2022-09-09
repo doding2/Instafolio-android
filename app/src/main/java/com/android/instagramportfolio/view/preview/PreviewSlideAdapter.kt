@@ -149,7 +149,7 @@ class PreviewSlideAdapter(
                 // 비트맵의 가로가 더 길면
                 // 얘가 오른쪽으로 쏠리게 보임
                 // 그거 보정
-                if (item.bitmap.height >= item.bitmap.width) {
+                if (item.bitmap.height > item.bitmap.width) {
                     binding.imagePreviewFirst.scaleType = ImageView.ScaleType.FIT_CENTER
                 } else {
                     binding.imagePreviewFirst.scaleType = ImageView.ScaleType.FIT_END
@@ -157,7 +157,7 @@ class PreviewSlideAdapter(
 
                 // 얜 왼쪽으로 쏠려셔
                 // 그거 또 보정
-                if (item.bitmapSecond!!.height >= item.bitmapSecond.width) {
+                if (item.bitmapSecond!!.height > item.bitmapSecond.width) {
                     binding.imagePreviewSecond.scaleType = ImageView.ScaleType.FIT_CENTER
                 } else {
                     binding.imagePreviewSecond.scaleType = ImageView.ScaleType.FIT_START

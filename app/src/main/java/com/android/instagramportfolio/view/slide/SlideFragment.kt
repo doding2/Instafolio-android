@@ -433,7 +433,8 @@ class SlideFragment : Fragment() {
                 launch(exceptionHandler) {
                     withContext(Dispatchers.IO) {
                         bitmap = imageToBitmap(imageUri)
-                        bitmap = getResized(bitmap!!, 1080, 1080)
+                        // TODO 이거 지금 없어도 될듯?
+//                        bitmap = getResized(bitmap!!, 1080, 1080)
                     }
                 }
         }

@@ -23,6 +23,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.GridLayoutManager
 import com.android.instagramportfolio.R
 import com.android.instagramportfolio.databinding.FragmentHomeBinding
 import com.android.instagramportfolio.extension.*
@@ -65,11 +66,13 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
             Surface.ROTATION_90 -> {
                 binding.layoutRoot.setPadding(0, 0, getNaviBarHeight(), 0)
                 binding.layoutUser.setPadding(0, getStatusBarHeight(), 0, 0)
+                binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 6)
             }
             // 폰이 오른쪽으로 누움
             Surface.ROTATION_270 -> {
                 binding.layoutRoot.setPadding(getNaviBarHeight(), 0, 0, 0)
                 binding.layoutUser.setPadding(0, getStatusBarHeight(), 0, 0)
+                binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 6)
             }
             // 그 외는 그냥 정방향으으로 처리함
             else -> {
@@ -77,12 +80,15 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
                 binding.layoutRoot.setPadding(0, 0, 0, getNaviBarHeight())
                 // 앱 실행 화면이 ui xml과 똑같이 보이도록 패딩
                 binding.layoutUser.setPadding(0, getStatusBarHeight(), 0, 0)
+                // 리사이클러뷰 한 줄에 아이템 3개씩 오도록 조정
+                binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
             }
         }
 
         // status bar, navigation bar가 밝은 색이라는 것을 알림
         WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightStatusBars = true
         WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightNavigationBars = false
+
 
         // 리사이클러 뷰 설정
         adapter = InstarFileAdapter(arrayListOf(), ::onItemClick)

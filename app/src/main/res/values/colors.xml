@@ -13,4 +13,5 @@
     <color name="light_gray">#F5F5F5</color>
     <color name="transparent_gray">#80D9D9D9</color>
     <color name="transparent_black">#b3000000</color>
+    <color name="less_transparent_black">#bf000000</color>
 </resources>

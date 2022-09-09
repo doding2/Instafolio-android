@@ -244,7 +244,7 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         }
 
         if (uriWithExtension.isEmpty()) {
-            Toast.makeText(requireContext(), "이미지와 PDF 파일만을 선택해주세요", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "앱에서 지원하지 않는 파일입니다", Toast.LENGTH_SHORT).show()
             return
         }
 

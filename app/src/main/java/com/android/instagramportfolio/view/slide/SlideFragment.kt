@@ -116,6 +116,9 @@ class SlideFragment : Fragment() {
         WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightNavigationBars = false
 
 
+        // 로딩 화면 표시
+        binding.layoutLoading.root.visibility = View.VISIBLE
+
         // 리사이클러 뷰 설정
         adapter = SlideAdapter(requireContext(), arrayListOf(), ::onItemClick, viewModel.isInstarSize)
         binding.recyclerViewSlide.adapter = adapter
@@ -212,6 +215,8 @@ class SlideFragment : Fragment() {
                 adapter.replaceItems(viewModel.slides.value!!, viewModel.bindingPairs.value!!)
                 adapter.bindingPairs = viewModel.bindingPairs.value!!
 //                binding.text.text = "done"
+                // 로딩 화면 끄기
+                binding.layoutLoading.root.visibility = View.GONE
                 return@launch
             }
 
@@ -233,9 +238,14 @@ class SlideFragment : Fragment() {
                 adapter.replaceItems(viewModel.slides.value!!, viewModel.bindingPairs.value!!)
             } else {
                 // TODO 변환된 비트맵 이미지가 0개
+                Toast.makeText(requireContext(), "선택한 파일을 열 수 없습니다", Toast.LENGTH_SHORT).show()
+                findNavController().popBackStack()
             }
 
             viewModel.bindingPairs.value = adapter.bindingPairs
+
+            // 로딩 화면 끄기
+            binding.layoutLoading.root.visibility = View.GONE
         }
     }
 

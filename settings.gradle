@@ -10,6 +10,8 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // 깃허브에 있는 라이브러리를 그래이들을 이용해서 가져오기 위해 필요
+        maven { url "https://jitpack.io" }
     }
 }
 rootProject.name = "InstagramPortfolio"

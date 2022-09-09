@@ -162,6 +162,9 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
             behavior.state = BottomSheetBehavior.STATE_COLLAPSED
         }
 
+        requireContext().showSelectFormatDialog()
+
+
         return binding.root
     }
 

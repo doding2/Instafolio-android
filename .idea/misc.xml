@@ -3,9 +3,14 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/drago/AndroidStudioProjects/InstagramPortfolio/app/src/main/res/drawable-v24/dialog_button_bottom_gray.xml" value="0.162" />
+        <entry key="..\:/Users/drago/AndroidStudioProjects/InstagramPortfolio/app/src/main/res/drawable-v24/dialog_button_round_gray.xml" value="0.162" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/InstagramPortfolio/app/src/main/res/drawable/border_without_left.xml" value="0.162" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/InstagramPortfolio/app/src/main/res/drawable/border_without_none.xml" value="0.162" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/InstagramPortfolio/app/src/main/res/drawable/border_without_right.xml" value="0.162" />
+        <entry key="..\:/Users/drago/AndroidStudioProjects/InstagramPortfolio/app/src/main/res/drawable/dialog_button_round.xml" value="0.162" />
+        <entry key="..\:/Users/drago/AndroidStudioProjects/InstagramPortfolio/app/src/main/res/drawable/dialog_button_round_gray.xml" value="0.162" />
+        <entry key="..\:/Users/drago/AndroidStudioProjects/InstagramPortfolio/app/src/main/res/drawable/dialog_round.xml" value="0.162" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/InstagramPortfolio/app/src/main/res/drawable/divider.xml" value="0.1395" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/InstagramPortfolio/app/src/main/res/drawable/drawable_round_bottom_sheet.xml" value="0.179" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/InstagramPortfolio/app/src/main/res/drawable/icon_arrow_forward.xml" value="0.162" />
@@ -19,8 +24,11 @@
         <entry key="..\:/Users/drago/AndroidStudioProjects/InstagramPortfolio/app/src/main/res/drawable/icon_round_plus.xml" value="0.179" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/InstagramPortfolio/app/src/main/res/drawable/icon_square.xml" value="0.162" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/InstagramPortfolio/app/src/main/res/drawable/round_bottom_sheet.xml" value="0.162" />
+        <entry key="..\:/Users/drago/AndroidStudioProjects/InstagramPortfolio/app/src/main/res/drawable/selector_dialog_button.xml" value="0.162" />
+        <entry key="..\:/Users/drago/AndroidStudioProjects/InstagramPortfolio/app/src/main/res/drawable/selector_dialog_button_round.xml" value="0.162" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/InstagramPortfolio/app/src/main/res/layout-v23/item_slide.xml" value="0.2526041666666667" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/InstagramPortfolio/app/src/main/res/layout/activity_main.xml" value="0.264" />
+        <entry key="..\:/Users/drago/AndroidStudioProjects/InstagramPortfolio/app/src/main/res/layout/dialog_select_format.xml" value="0.20820863616930313" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/InstagramPortfolio/app/src/main/res/layout/fragment_home.xml" value="0.264" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/InstagramPortfolio/app/src/main/res/layout/fragment_preview.xml" value="0.2" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/InstagramPortfolio/app/src/main/res/layout/fragment_slide.xml" value="0.20557197129590546" />

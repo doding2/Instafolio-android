@@ -27,5 +27,11 @@
         android:id="@+id/previewFragment"
         android:name="com.android.instagramportfolio.view.preview.PreviewFragment"
         android:label="PreviewFragment"
-        tools:layout="@layout/fragment_preview" />
+        tools:layout="@layout/fragment_preview" >
+        <action
+            android:id="@+id/action_previewFragment_to_homeFragment"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/homeFragment"
+            app:popUpToInclusive="true"/>
+    </fragment>
 </navigation>

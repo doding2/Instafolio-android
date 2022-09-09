@@ -73,6 +73,11 @@ class PreviewSlideAdapter(
 
     override fun getItemCount(): Int = items.size
 
+    fun replaceItems(items: List<PreviewSlide>) {
+        this.items.clear()
+        this.items.addAll(items)
+        notifyDataSetChanged()
+    }
 
     // 원본 뷰홀더
     inner class OriginalViewHolder(
@@ -137,38 +142,43 @@ class PreviewSlideAdapter(
     ): RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: PreviewSlide) {
-            // 이미지 넣기기
-            binding.imagePreviewFirst.setImageBitmap(item.bitmap)
-            binding.imagePreviewSecond.setImageBitmap(item.bitmapSecond)
+            // 오리지널 바인딩은
+            // 프리뷰에 보여지는 예시와 실제 결과가 같게 하기 위해
+            // 그냥 미리 합쳐버림
+            binding.imagePreview.setImageBitmap(item.bitmap)
 
-            // 폰 누어있는 방향
-            val displayMode: Int = binding.root.context.resources.configuration.orientation
-
-            // 정방향
-            if (displayMode == Configuration.ORIENTATION_PORTRAIT) {
-                // 비트맵의 가로가 더 길면
-                // 얘가 오른쪽으로 쏠리게 보임
-                // 그거 보정
-                if (item.bitmap.height > item.bitmap.width) {
-                    binding.imagePreviewFirst.scaleType = ImageView.ScaleType.FIT_CENTER
-                } else {
-                    binding.imagePreviewFirst.scaleType = ImageView.ScaleType.FIT_END
-                }
-
-                // 얜 왼쪽으로 쏠려셔
-                // 그거 또 보정
-                if (item.bitmapSecond!!.height > item.bitmapSecond.width) {
-                    binding.imagePreviewSecond.scaleType = ImageView.ScaleType.FIT_CENTER
-                } else {
-                    binding.imagePreviewSecond.scaleType = ImageView.ScaleType.FIT_START
-                }
-            }
-            // 회전되어 있을 경우에는 보정을 그냥 전부 FIT_CENTER로 해줘야 됨
-            else {
-                binding.imagePreviewFirst.scaleType = ImageView.ScaleType.FIT_CENTER
-                binding.imagePreviewSecond.scaleType = ImageView.ScaleType.FIT_CENTER
-            }
-
+            // 밑의 코드는 item_preview_slide_original_binding2.xml에 대응함
+//            // 이미지 넣기
+//            binding.imagePreviewFirst.setImageBitmap(item.bitmap)
+//            binding.imagePreviewSecond.setImageBitmap(item.bitmapSecond)
+//
+//            // 폰 누어있는 방향
+//            val displayMode: Int = binding.root.context.resources.configuration.orientation
+//
+//            // 정방향
+//            if (displayMode == Configuration.ORIENTATION_PORTRAIT) {
+//                // 비트맵의 가로가 더 길면
+//                // 얘가 오른쪽으로 쏠리게 보임
+//                // 그거 보정
+//                if (item.bitmap.height > item.bitmap.width) {
+//                    binding.imagePreviewFirst.scaleType = ImageView.ScaleType.FIT_CENTER
+//                } else {
+//                    binding.imagePreviewFirst.scaleType = ImageView.ScaleType.FIT_END
+//                }
+//
+//                // 얜 왼쪽으로 쏠려셔
+//                // 그거 또 보정
+//                if (item.bitmapSecond!!.height > item.bitmapSecond.width) {
+//                    binding.imagePreviewSecond.scaleType = ImageView.ScaleType.FIT_CENTER
+//                } else {
+//                    binding.imagePreviewSecond.scaleType = ImageView.ScaleType.FIT_START
+//                }
+//            }
+//            // 회전되어 있을 경우에는 보정을 그냥 전부 FIT_CENTER로 해줘야 됨
+//            else {
+//                binding.imagePreviewFirst.scaleType = ImageView.ScaleType.FIT_CENTER
+//                binding.imagePreviewSecond.scaleType = ImageView.ScaleType.FIT_CENTER
+//            }
         }
     }
 

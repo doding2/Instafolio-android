@@ -1,18 +1,16 @@
 package com.android.instagramportfolio.view.home
 
-import android.graphics.Rect
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.android.instagramportfolio.R
 import com.android.instagramportfolio.databinding.ItemInstarFileBinding
-import com.android.instagramportfolio.model.InstarFile
+import com.android.instagramportfolio.model.SlideResult
 
 class InstarFileAdapter(
-    private val items: MutableList<InstarFile>,
-    private val clickListener: (InstarFile) -> Unit
+    private val items: MutableList<SlideResult>,
+    private val clickListener: (SlideResult) -> Unit
 ): RecyclerView.Adapter<InstarFileAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -28,7 +26,7 @@ class InstarFileAdapter(
 
     override fun getItemCount(): Int = items.size
 
-    fun replaceItems(items: List<InstarFile>) {
+    fun replaceItems(items: List<SlideResult>) {
         this.items.clear()
         this.items.addAll(items)
         notifyDataSetChanged()
@@ -36,7 +34,7 @@ class InstarFileAdapter(
 
     inner class ViewHolder(private val binding: ItemInstarFileBinding): RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: InstarFile) {
+        fun bind(item: SlideResult) {
             // TODO 나중에 아이템 꾸며야됨
 
             binding.root.setOnClickListener {

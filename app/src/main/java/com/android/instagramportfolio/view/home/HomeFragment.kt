@@ -1,15 +1,9 @@
 package com.android.instagramportfolio.view.home
 
-import android.Manifest
 import android.app.Activity.RESULT_OK
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.content.res.Configuration
-import android.graphics.Color
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import android.util.Log
 import android.view.*
 import android.view.animation.AlphaAnimation
@@ -17,7 +11,6 @@ import android.view.animation.Animation
 import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -27,7 +20,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.android.instagramportfolio.R
 import com.android.instagramportfolio.databinding.FragmentHomeBinding
 import com.android.instagramportfolio.extension.*
-import com.android.instagramportfolio.model.InstarFile
+import com.android.instagramportfolio.model.SlideResult
 import com.android.instagramportfolio.view.common.MainActivity
 import com.android.instagramportfolio.view.slide.SlideViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -162,14 +155,11 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
             behavior.state = BottomSheetBehavior.STATE_COLLAPSED
         }
 
-        requireContext().showSelectFormatDialog()
-
-
         return binding.root
     }
 
-    private fun onItemClick(instarFile: InstarFile) {
-        Toast.makeText(requireContext(), instarFile.fileName, Toast.LENGTH_SHORT).show()
+    private fun onItemClick(slideResult: SlideResult) {
+        Toast.makeText(requireContext(), slideResult.fileName, Toast.LENGTH_SHORT).show()
     }
 
     // 뒤로가기 할 때 sourceOfFiles bottom sheet이 확장되어 있으면 축소시킴

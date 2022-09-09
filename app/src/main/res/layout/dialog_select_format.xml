@@ -36,6 +36,7 @@
         android:layout_height="0.3dp"/>
 
     <TextView
+        android:id="@+id/button_jpg"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:gravity="center"
@@ -51,6 +52,7 @@
         android:layout_height="0.3dp"/>
 
     <TextView
+        android:id="@+id/button_pdf"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:gravity="center"

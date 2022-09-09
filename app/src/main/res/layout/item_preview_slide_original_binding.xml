@@ -3,32 +3,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <FrameLayout
+    <ImageView
+        android:id="@+id/image_preview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/black">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:gravity="center">
-
-            <ImageView
-                android:id="@+id/image_preview_first"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:src="@drawable/test_image"
-                android:scaleType="fitEnd"
-                android:layout_weight="1"/>
-
-            <ImageView
-                android:id="@+id/image_preview_second"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:src="@drawable/test_image"
-                android:scaleType="fitStart"
-                android:layout_weight="1"/>
-        </LinearLayout>
-    </FrameLayout>
+        android:background="@color/black"/>
 </layout>

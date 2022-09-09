@@ -1,5 +1,5 @@
 package com.android.instagramportfolio.model
 
-data class InstarFile(
+data class SlideResult(
     val fileName: String
 )

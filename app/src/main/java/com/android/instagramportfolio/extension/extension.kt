@@ -232,29 +232,4 @@ fun Fragment.imageToBitmap(uri: Uri): Bitmap {
     return bitmap
 }
 
-// 인자로 전달된 비트맵을 리사이징해서 반환하는 함수
-fun getResized(
-    bitmap: Bitmap,
-    maxWidth: Int = 1080,
-    maxHeight: Int = 1080
-): Bitmap {
-    var image = bitmap
-    if (maxHeight > 0 && maxWidth > 0) {
-        val width = image.width
-        val height = image.height
-        val ratioBitmap = width.toFloat() / height.toFloat()
-        val ratioMax = maxWidth.toFloat() / maxHeight.toFloat()
-
-        var finalWidth = maxWidth
-        var finalHeight = maxHeight
-        if (ratioMax > ratioBitmap) {
-            finalWidth = (maxHeight.toFloat() * ratioBitmap).toInt()
-        } else {
-            finalHeight = (maxWidth.toFloat() / ratioBitmap).toInt()
-        }
-        image = Bitmap.createScaledBitmap(image, finalWidth, finalHeight, true)
-    }
-
-    return image
-}
 

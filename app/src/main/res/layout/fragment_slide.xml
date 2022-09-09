@@ -72,12 +72,6 @@
                             android:layout_height="match_parent"
                             android:layout_weight="1"/>
                     </LinearLayout>
-
-                    <!--                <TextView-->
-                    <!--                    android:id="@+id/text"-->
-                    <!--                    android:layout_width="match_parent"-->
-                    <!--                    android:layout_height="match_parent"-->
-                    <!--                    android:text="processing indicator" />-->
                 </FrameLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>
 

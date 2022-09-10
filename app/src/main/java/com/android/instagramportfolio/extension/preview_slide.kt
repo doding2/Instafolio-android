@@ -120,6 +120,15 @@ fun saveBitmapsAsPdf(
     document.close()
 }
 
+// 외부 저장소 파일들 삭제
+fun deleteExternalStorageDirectory(
+    innerDirectory: String
+) {
+    val externalDirectory = getExternalStorageDir("인스타그램 포트폴리오", innerDirectory)
+    if (externalDirectory.exists()) {
+        externalDirectory.deleteRecursively()
+    }
+}
 
 // 비트맵들을 pdf로 외부저장소에 저장
 fun saveBitmapsAsPdfInExternalStorage(

@@ -10,6 +10,7 @@ import com.android.instagramportfolio.database.resultslide.ResultSlideRepository
 import com.android.instagramportfolio.model.ResultSlide
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 class HomeViewModel(context: Context): ViewModel() {
@@ -18,13 +19,30 @@ class HomeViewModel(context: Context): ViewModel() {
 
     val resultSlides: LiveData<MutableList<ResultSlide>> = repository.resultSlides
 
-    val nextDirectory get() = "id_" + (resultSlides.value!!.size + 1)
+    // 저장 중에 도중에 나갈때 대비해서
+    // DB에 등록된놈 삭제시킴
+    val savingId = MutableLiveData<Long>().apply {
+        value = null
+    }
 
-    fun addResultSlide(resultSlide: ResultSlide) {
+    suspend fun addResultSlide(resultSlide: ResultSlide): Long {
+        var id = 0L
+
+        coroutineScope {
+            launch(Dispatchers.Main) {
+                id = repository.add(resultSlide)
+                resultSlide.id = id
+                resultSlides.value?.add(resultSlide)
+            }
+        }
+
+        return id
+    }
+
+    fun deleteResultSlide(id: Long) {
         CoroutineScope(Dispatchers.Main).launch {
-            val id = repository.add(resultSlide)
-            resultSlide.id = id
-            resultSlides.value?.add(resultSlide)
+            val resultSlide = repository.get(id)
+            repository.delete(resultSlide)
         }
     }
 

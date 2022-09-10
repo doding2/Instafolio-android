@@ -22,9 +22,15 @@ fun ResultSlide.getFileOfPdf(context: Context): File {
 fun ResultSlide.getFileAsImages(context: Context): MutableList<Bitmap> {
     val bitmaps = arrayListOf<Bitmap>()
 
-    for (index in 0 until size) {
-        val bitmap = getBitmap(context, "slides", "id_$id", "$index", format)
+    val cw = ContextWrapper(context)
+    var cacheDir = cw.getDir("slides", Context.MODE_PRIVATE)
+    cacheDir = File(cacheDir, "id_$id")
+
+    for (file in cacheDir.listFiles()) {
+        val inputStream = FileInputStream(file)
+        val bitmap = BitmapFactory.decodeStream(inputStream)
         bitmaps.add(bitmap)
+        inputStream.close()
     }
 
     return bitmaps

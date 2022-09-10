@@ -22,6 +22,8 @@ import com.android.instagramportfolio.R
 import com.android.instagramportfolio.databinding.FragmentSlideBinding
 import com.android.instagramportfolio.extension.*
 import com.android.instagramportfolio.model.Slide
+import com.android.instagramportfolio.view.home.HomeViewModel
+import com.android.instagramportfolio.view.home.HomeViewModelFactory
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
@@ -40,6 +42,8 @@ class SlideFragment : Fragment() {
 
     private lateinit var viewModel: SlideViewModel
     private lateinit var adapter: SlideAdapter
+
+    private lateinit var homeViewModel: HomeViewModel
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         when (throwable) {
@@ -82,6 +86,8 @@ class SlideFragment : Fragment() {
     ): View {
         _binding = DataBindingUtil.inflate(inflater, R.layout.fragment_slide, container, false)
         viewModel= ViewModelProvider(requireActivity())[SlideViewModel::class.java]
+        val factory = HomeViewModelFactory(requireActivity())
+        homeViewModel = ViewModelProvider(requireActivity(), factory)[HomeViewModel::class.java]
 
         // 뷰를 status bar와 navigation bar의 위치에서 떨어진 원래 위치로 복구(회전 방향에 따라 달라짐)
         when (requireActivity().display?.rotation) {
@@ -252,6 +258,20 @@ class SlideFragment : Fragment() {
             // 이미지 불러오는걸 기다림
             val slides = waitingSlides.await().toMutableList()
 
+
+            // 손상된 파일이라
+            // 삭제시키기
+            if (resultSlide.size != slides.size) {
+                showAlertDialog(
+                    "손상된 파일입니다.",
+                    onDismiss = {
+                        homeViewModel.deleteResultSlide(resultSlide.id)
+                        findNavController().popBackStack()
+                    }
+                )
+            }
+
+
             // 가공 완료된 slide들을 view model에 전달
             if (viewModel.slides.value == null) {
                 viewModel.slides.value = slides
@@ -266,8 +286,9 @@ class SlideFragment : Fragment() {
                 adapter.replaceItems(viewModel.slides.value!!, viewModel.bindingPairs.value!!)
             } else {
                 showAlertDialog(
-                    "파일을 열 수 없습니다.",
+                    "손상된 파일입니다.",
                     onDismiss =  {
+                        homeViewModel.deleteResultSlide(resultSlide.id)
                         findNavController().popBackStack()
                     }
                 )

@@ -13,4 +13,8 @@ class ResultSlideRepository(private val dao: ResultSlideDAO) {
     suspend fun delete(resultSlide: ResultSlide): Int {
         return dao.deleteResultSlide(resultSlide)
     }
+
+    suspend fun get(id: Long): ResultSlide {
+        return dao.getResultSlide(id)
+    }
 }

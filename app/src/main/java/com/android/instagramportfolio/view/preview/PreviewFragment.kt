@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -213,30 +214,35 @@ class PreviewFragment : Fragment() {
                 }
             }
 
+
+            // result slide를 뷰 모델에 추가시켜 저장
+            val thumbnail = getResized(bitmaps.first(), 200, 200)
+            val resultSlide = ResultSlide(0, format, bitmaps.size, thumbnail)
+            val id = homeViewModel.addResultSlide(resultSlide)
+            withContext(Dispatchers.Main) {
+                homeViewModel.savingId.value = id
+            }
+
             // 슬라이드를 내부저장소에 이미지로 저장
             val inInnerStorage = async {
-                saveBitmapsAsImage(requireContext(), bitmaps, "slides", homeViewModel.nextDirectory, format)
+                saveBitmapsAsImage(requireContext(), bitmaps, "slides", "id_${id}", format)
             }
             // 슬라이드를 외부저장소에 이미지로 저장
             val inExternalStorage = async {
                 saveBitmapsAsImageInExternalStorage(
                     bitmaps,
-                    "포트폴리오 ${homeViewModel.resultSlides.value!!.size + 1}",
+                    "포트폴리오 $id",
                     format
                 )
             }
-            
+
             // 저장 기다리기
             inInnerStorage.await()
             inExternalStorage.await()
 
-            // result slide를 뷰 모델에 추가시켜 저장
-            val thumbnail = getResized(bitmaps.first(), 200, 200)
-            val resultSlide = ResultSlide(0, format, bitmaps.size, thumbnail)
-            homeViewModel.addResultSlide(resultSlide)
-
             // 홈 화면으로 돌아가기
             withContext(Dispatchers.Main) {
+                homeViewModel.savingId.value = null
                 findNavController().navigate(R.id.action_previewFragment_to_homeFragment)
             }
         }
@@ -262,16 +268,25 @@ class PreviewFragment : Fragment() {
             }
 
 
+            // result slide를 뷰 모델에 추가시켜 저장
+            val thumbnail = getResized(bitmaps.first(), 200, 200)
+            val resultSlide = ResultSlide(0, "pdf", bitmaps.size, thumbnail)
+            val id = homeViewModel.addResultSlide(resultSlide)
+            withContext(Dispatchers.Main) {
+                homeViewModel.savingId.value = id
+            }
+
+
             // 슬라이드를 내부저장소에 pdf로 저장
             val inInnerStorage = async {
-                saveBitmapsAsPdf(requireContext(), bitmaps, "slides", homeViewModel.nextDirectory, "0")
+                saveBitmapsAsPdf(requireContext(), bitmaps, "slides", "id_$id", "0")
             }
             // 슬라이드를 외부저장소에 pdf로 저장
             val inExternalStorage = async {
                 saveBitmapsAsPdfInExternalStorage(
                     bitmaps,
-                    "포트폴리오 ${homeViewModel.resultSlides.value!!.size + 1}",
-                "pdf"
+                    "포트폴리오 $id",
+                "portfolio"
                 )
             }
 
@@ -279,13 +294,9 @@ class PreviewFragment : Fragment() {
             inInnerStorage.await()
             inExternalStorage.await()
 
-            // result slide를 뷰 모델에 추가시켜 저장
-            val thumbnail = getResized(bitmaps.first(), 200, 200)
-            val resultSlide = ResultSlide(0, "pdf", bitmaps.size, thumbnail)
-            homeViewModel.addResultSlide(resultSlide)
-
             // 홈 화면으로 돌아가기
             withContext(Dispatchers.Main) {
+                homeViewModel.savingId.value = null
                 findNavController().navigate(R.id.action_previewFragment_to_homeFragment)
             }
         }
@@ -294,5 +305,10 @@ class PreviewFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        if (homeViewModel.savingId.value != null) {
+            homeViewModel.deleteResultSlide(homeViewModel.savingId.value!!)
+            homeViewModel.savingId.value = null
+        }
     }
+
 }

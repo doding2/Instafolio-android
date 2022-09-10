@@ -13,6 +13,9 @@ interface ResultSlideDAO {
     @Delete
     suspend fun deleteResultSlide(resultSlide: ResultSlide): Int
 
+    @Query("SELECT * FROM ResultSlideTable WHERE id == :id")
+    suspend fun getResultSlide(id: Long): ResultSlide
+
     @Query("SELECT * FROM ResultSlideTable")
     fun getAllResultSlides(): LiveData<MutableList<ResultSlide>>
 }

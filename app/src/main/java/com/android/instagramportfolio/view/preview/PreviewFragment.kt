@@ -130,7 +130,7 @@ class PreviewFragment : Fragment() {
         }
         // 아니면 빠꾸
         else {
-            showAlertDialog("권한이 허용되지 않으면\n다운로드 할 수 없습니다.")
+            showMessageDialog("권한요청", "다운로드하기 위해서는\n사진 및 미디어 액세스 권한이 필요합니다.")
         }
     }
 

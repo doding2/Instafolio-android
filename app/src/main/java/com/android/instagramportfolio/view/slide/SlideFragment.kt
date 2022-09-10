@@ -51,8 +51,8 @@ class SlideFragment : Fragment() {
             // pdf exception
             is NoManageStoragePermissionException -> {
                 showMessageDialog(
-                    "파일을 열 수 없습니다.",
-                    "모든 파일에 대한 접근 권한을 허용해 주세요.",
+                    "권한요청",
+                    "파일을 열기 위해서는\n모든 파일에 대한 접근 권한이 필요합니다.",
                     onDismiss = {
                         val intent = Intent()
                         intent.action = Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION
@@ -365,7 +365,7 @@ class SlideFragment : Fragment() {
                 showFirstBindingToPreview()
             }
             else {
-                showAlertDialog("예상치 못한 에러가 발생했습니다")
+                showAlertDialog("예상치 못한 에러가 발생했습니다.")
             }
 
         } else {
@@ -489,8 +489,8 @@ class SlideFragment : Fragment() {
         }
         else {
             showMessageDialog(
-                "파일을 열 수 없습니다.",
-                "사진 및 미디어 액세스 권한을 허용해 주세요.",
+                "권한요청",
+                "파일을 열기 위해서는\n사진 및 미디어 액세스 권한이 필요합니다.",
                 onDismiss = {
                     findNavController().popBackStack()
                 }
@@ -510,13 +510,8 @@ class SlideFragment : Fragment() {
             }
             // 권한이 아직 수정 안 됨
             else {
-                // TODO
                 viewModel.isAppPausedBecauseOfPermission.value = false
                 findNavController().popBackStack()
-                showMessageDialog(
-                    "파일을 열 수 없습니다.",
-                    "모든 파일에 대한 접근 권한을 허용해 주세요."
-                )
             }
         }
     }

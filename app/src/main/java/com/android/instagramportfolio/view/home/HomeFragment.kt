@@ -255,7 +255,7 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         }
 
         if (uriWithExtension.isEmpty()) {
-            showAlertDialog("지원하지 않는 파일입니다")
+            showAlertDialog("지원하지 않는 파일입니다.")
             return
         }
 

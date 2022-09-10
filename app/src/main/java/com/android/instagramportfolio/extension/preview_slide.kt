@@ -16,7 +16,8 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.lang.Integer.max
-
+import java.text.SimpleDateFormat
+import java.util.*
 
 // 슬라이드 이미지를 오리지널로 리턴
 fun PreviewSlide.getAsOriginal(): Bitmap {
@@ -169,7 +170,7 @@ fun saveBitmapsAsImageInExternalStorage(
     extension: String,
 ) {
     bitmaps.forEachIndexed { index, bitmap ->
-        saveBitmapInExternalStorage(bitmap, innerDirectory, "$index", extension)
+        saveBitmapInExternalStorage(bitmap, innerDirectory, "image $index", extension)
     }
 }
 
@@ -181,9 +182,22 @@ fun saveBitmapInExternalStorage(
     extension: String
 ) {
     val externalStorage = getExternalStorageDir("인스타그램 포트폴리오", innerDirectory)
-    val imagePath = File(externalStorage, "${name}.${extension}")
 
-    val out = FileOutputStream(imagePath)
+    var out: FileOutputStream
+    var fileName = name
+    var count = 1
+
+    do {
+        try {
+            val imagePath = File(externalStorage, "${fileName}.${extension}")
+            out = FileOutputStream(imagePath)
+            break
+        } catch (e: FileNotFoundException) {
+            fileName = "$name ($count)"
+            count++
+        }
+    } while(true)
+
     if (extension == "jpg") {
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
     } else {
@@ -204,9 +218,7 @@ fun getExternalStorageDir(directory: String, innerDirectory: String): File {
         File("${Environment.getExternalStorageDirectory()}/$directory/$innerDirectory")
     }
 
-    if (dir.exists()) {
-        dir.deleteRecursively()
-    } else {
+    if (!dir.exists()) {
         dir.mkdirs()
     }
 

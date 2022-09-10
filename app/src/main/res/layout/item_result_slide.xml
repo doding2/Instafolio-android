@@ -16,18 +16,17 @@
             app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            android:background="@color/black">
 
             <ImageView
-                android:id="@+id/image_instar_file"
+                android:id="@+id/image_thumbnail"
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_gravity="center"
-                android:scaleType="fitCenter"
-                android:src="@color/gray" />
+                android:layout_height="match_parent"
+                android:layout_gravity="center" />
 
             <FrameLayout
-                android:id="@+id/checkbox_instar_file"
+                android:id="@+id/checkbox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="top|end"

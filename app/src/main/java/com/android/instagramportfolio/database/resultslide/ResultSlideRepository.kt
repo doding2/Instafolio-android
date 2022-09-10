@@ -1,0 +1,16 @@
+package com.android.instagramportfolio.database.resultslide
+
+import com.android.instagramportfolio.model.ResultSlide
+
+class ResultSlideRepository(private val dao: ResultSlideDAO) {
+
+    val resultSlides = dao.getAllResultSlides()
+
+    suspend fun add(resultSlide: ResultSlide): Long {
+        return dao.insertResultSlide(resultSlide)
+    }
+
+    suspend fun delete(resultSlide: ResultSlide): Int {
+        return dao.deleteResultSlide(resultSlide)
+    }
+}

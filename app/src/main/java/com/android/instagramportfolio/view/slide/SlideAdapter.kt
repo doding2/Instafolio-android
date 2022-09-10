@@ -233,8 +233,6 @@ class SlideAdapter(
             holder.binding.imageSlideBefore.setBackgroundResource(android.R.color.transparent)
             holder.binding.imageSlide.setBackgroundResource(android.R.color.transparent)
             holder.binding.imageSlideAfter.setBackgroundResource(android.R.color.transparent)
-//            holder.binding.viewBeforeConnectBackground.setBackgroundResource(android.R.color.transparent)
-//            holder.binding.viewAfterConnectBackground.setBackgroundResource(android.R.color.transparent)
         }
     }
 
@@ -244,8 +242,6 @@ class SlideAdapter(
             holder.binding.imageSlideBefore.setBackgroundResource(R.color.white)
             holder.binding.imageSlide.setBackgroundResource(R.color.white)
             holder.binding.imageSlideAfter.setBackgroundResource(R.color.white)
-//            holder.binding.viewBeforeConnectBackground.setBackgroundResource(R.color.white)
-//            holder.binding.viewAfterConnectBackground.setBackgroundResource(R.color.white)
         }
     }
 

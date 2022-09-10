@@ -20,7 +20,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.android.instagramportfolio.R
 import com.android.instagramportfolio.databinding.FragmentHomeBinding
 import com.android.instagramportfolio.extension.*
-import com.android.instagramportfolio.model.SlideResult
+import com.android.instagramportfolio.model.ResultSlide
 import com.android.instagramportfolio.view.common.MainActivity
 import com.android.instagramportfolio.view.slide.SlideViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -37,7 +37,7 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
     private val binding get() = _binding!!
 
     private lateinit var homeViewModel: HomeViewModel
-    private lateinit var adapter: InstarFileAdapter
+    private lateinit var adapter: ResultSlideAdapter
 
     // bottom sheet 동작 설정
     private lateinit var behavior: BottomSheetBehavior<FrameLayout>
@@ -84,11 +84,11 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
 
 
         // 리사이클러 뷰 설정
-        adapter = InstarFileAdapter(arrayListOf(), ::onItemClick)
+        adapter = ResultSlideAdapter(arrayListOf(), ::onItemClick)
         binding.recyclerView.adapter = this.adapter
 
         // 인스타 파일들 재등록
-        homeViewModel.instarFiles.observe(viewLifecycleOwner) {
+        homeViewModel.resultSlides.observe(viewLifecycleOwner) {
             adapter.replaceItems(it)
         }
 
@@ -158,8 +158,8 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         return binding.root
     }
 
-    private fun onItemClick(slideResult: SlideResult) {
-        Toast.makeText(requireContext(), slideResult.fileName, Toast.LENGTH_SHORT).show()
+    private fun onItemClick(slideResult: ResultSlide) {
+        Toast.makeText(requireContext(), slideResult.id.toString(), Toast.LENGTH_SHORT).show()
     }
 
     // 뒤로가기 할 때 sourceOfFiles bottom sheet이 확장되어 있으면 축소시킴

@@ -1,5 +1,6 @@
 package com.android.instagramportfolio.view.preview
 
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
@@ -17,6 +18,9 @@ import com.android.instagramportfolio.model.PreviewSlide.Companion.INSTAR_SIZE
 import com.android.instagramportfolio.model.PreviewSlide.Companion.INSTAR_SIZE_BINDING
 import com.android.instagramportfolio.model.PreviewSlide.Companion.ORIGINAL
 import com.android.instagramportfolio.model.PreviewSlide.Companion.ORIGINAL_BINDING
+import com.android.instagramportfolio.model.ResultSlide
+import com.android.instagramportfolio.view.home.HomeViewModel
+import com.android.instagramportfolio.view.home.HomeViewModelFactory
 import com.android.instagramportfolio.view.slide.SlideViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,6 +33,7 @@ class PreviewFragment : Fragment() {
 
     private lateinit var previewViewModel: PreviewViewModel
     private lateinit var slideViewModel: SlideViewModel
+    private lateinit var homeViewModel: HomeViewModel
 
     private lateinit var adapter: PreviewSlideAdapter
 
@@ -39,6 +44,8 @@ class PreviewFragment : Fragment() {
         _binding = DataBindingUtil.inflate(inflater, R.layout.fragment_preview, container, false)
         previewViewModel = ViewModelProvider(this)[PreviewViewModel::class.java]
         slideViewModel = ViewModelProvider(requireActivity())[SlideViewModel::class.java]
+        val homeFactory = HomeViewModelFactory(requireActivity())
+        homeViewModel = ViewModelProvider(requireActivity(), homeFactory)[HomeViewModel::class.java]
 
         // 뷰를 status bar와 navigation bar의 위치에서 떨어진 원래 위치로 복구(회전 방향에 따라 달라짐)
         when (requireActivity().display?.rotation) {
@@ -77,9 +84,15 @@ class PreviewFragment : Fragment() {
         binding.buttonDownload.setOnClickListener {
             showSelectFormatDialog { format ->
                 when(format) {
-                    "png", "jpg", "pdf" -> {
+                    // 이미지로 저장
+                    "png", "jpg" -> {
                         binding.layoutLoading.root.visibility = View.VISIBLE
-                        saveSlides(format)
+                        saveSlidesAsImage(format)
+                    }
+                    // pdf로 저장
+                    "pdf" -> {
+                        binding.layoutLoading.root.visibility = View.VISIBLE
+                        saveSlidesAsPdf()
                     }
                     else -> throw IllegalStateException("존재하지 않는 선택지 입니다")
                 }
@@ -151,29 +164,65 @@ class PreviewFragment : Fragment() {
     }
 
     // 이미지를 알맞은 형태로 저장
-    private fun saveSlides(format: String) {
+    private fun saveSlidesAsImage(format: String) {
         lifecycleScope.launch(Dispatchers.IO) {
-            previewViewModel.previewSlides.value?.forEachIndexed { index, previewSlide ->
-                when (previewSlide.viewType) {
-                    ORIGINAL -> {
-                        saveSlideAsOriginal(requireContext(), previewSlide,
-                            "slides", "slide list 0", "$index", format)
-                    }
-                    INSTAR_SIZE -> {
+            val bitmaps = arrayListOf<Bitmap>()
 
-                    }
-                    ORIGINAL_BINDING -> {
-                        saveSlideAsOriginalBinding(requireContext(), previewSlide,
-                        "slides", "slide list 1", "$index", format)
-                    }
-                    INSTAR_SIZE_BINDING -> {
-
-                    }
-                    else -> {
-
-                    }
+            previewViewModel.previewSlides.value?.forEach {
+                when (it.viewType) {
+                    ORIGINAL ->
+                        bitmaps.add(it.getAsOriginal())
+                    INSTAR_SIZE ->
+                        bitmaps.add(it.getAsInstarSize())
+                    ORIGINAL_BINDING ->
+                        bitmaps.add(it.getAsOriginalBinding())
+                    INSTAR_SIZE_BINDING ->
+                        bitmaps.add(it.getAsInstarSizeBinding())
+                    else -> throw IllegalStateException("있을 수 없는 뷰 타입")
                 }
             }
+
+            // 슬라이드 이미지를 내부저장소에 이미지로 저장
+            saveBitmapsAsImage(requireContext(), bitmaps, "slides", homeViewModel.nextDirectory, format)
+
+            // result slide를 뷰 모델에 추가시켜 저장
+            val thumbnail = getResized(bitmaps.first(), 100, 100)
+            val resultSlide = ResultSlide(0, format, bitmaps.size, thumbnail)
+            homeViewModel.addResultSlide(resultSlide)
+
+            // 홈 화면으로 돌아가기
+            withContext(Dispatchers.Main) {
+                findNavController().navigate(R.id.action_previewFragment_to_homeFragment)
+            }
+        }
+    }
+
+    // 이미지들을 pdf 형태로 저장
+    private fun saveSlidesAsPdf() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val bitmaps = arrayListOf<Bitmap>()
+
+            previewViewModel.previewSlides.value?.forEach {
+                when (it.viewType) {
+                    ORIGINAL ->
+                        bitmaps.add(it.getAsOriginal())
+                    INSTAR_SIZE ->
+                        bitmaps.add(it.getAsInstarSize())
+                    ORIGINAL_BINDING ->
+                        bitmaps.add(it.getAsOriginalBinding())
+                    INSTAR_SIZE_BINDING ->
+                        bitmaps.add(it.getAsInstarSizeBinding())
+                    else -> throw IllegalStateException("있을 수 없는 뷰 타입")
+                }
+            }
+
+            // 비트맵 리스트를 pdf로 묶어서 내부저장소에 저장하기
+            saveBitmapsAsPdf(requireContext(), bitmaps, "slides", homeViewModel.nextDirectory, "0")
+
+            // result slide를 뷰 모델에 추가시켜 저장
+            val thumbnail = getResized(bitmaps.first(), 100, 100)
+            val resultSlide = ResultSlide(0, "pdf", bitmaps.size, thumbnail)
+            homeViewModel.addResultSlide(resultSlide)
 
             // 홈 화면으로 돌아가기
             withContext(Dispatchers.Main) {

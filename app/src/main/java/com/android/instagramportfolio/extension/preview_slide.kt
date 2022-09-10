@@ -53,7 +53,6 @@ fun saveBitmapsAsImage(
     }
 }
 
-
 // 인자로 받은 비트맵을 이미지로 저장
 fun saveBitmap(
     context: Context,

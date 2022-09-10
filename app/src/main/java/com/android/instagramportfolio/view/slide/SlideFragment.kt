@@ -2,7 +2,6 @@ package com.android.instagramportfolio.view.slide
 
 import android.Manifest
 import android.content.Intent
-import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
@@ -10,8 +9,6 @@ import android.os.Environment
 import android.provider.Settings
 import android.util.Log
 import android.view.*
-import android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.WindowInsetsControllerCompat
@@ -139,12 +136,17 @@ class SlideFragment : Fragment() {
             }
         })
 
-        // uri 리스트가 변할때마다 이미지로 가공
-        viewModel.uriWithExtension.observe(viewLifecycleOwner) { it ->
-            if (it.isNullOrEmpty()) {
-                findNavController().popBackStack()
-            }
-            handleUri(it)
+        // 기존의 파일을 편집할 경우
+        if (viewModel.resultSlideWithExtension.value != null) {
+            handleResultSlide()
+        }
+        // 새로운 파일을 열었을 경우
+        else if (!viewModel.uriWithExtension.value.isNullOrEmpty()) {
+            handleUri(viewModel.uriWithExtension.value!!)
+        }
+        // 상정하지 않은 상황, 에러
+        else {
+            findNavController().popBackStack()
         }
 
         // 이미지 사이즈 조절
@@ -205,22 +207,83 @@ class SlideFragment : Fragment() {
         return binding.root
     }
 
-    private fun handleUri(uris: MutableList<Pair<Uri, String>>) {
-        if (uris.isNullOrEmpty()) return
+    // 기존 파일을 편집할 경우
+    private fun handleResultSlide() {
+        lifecycleScope.launch(Dispatchers.Main) {
 
-        lifecycleScope.launch(exceptionHandler) {
-
+            // 이미 로딩 끝났었으면 패스
             if (!viewModel.slides.value.isNullOrEmpty()) {
                 binding.imagePreview.setImageBitmap(viewModel.slides.value!![0].bitmap)
                 adapter.replaceItems(viewModel.slides.value!!, viewModel.bindingPairs.value!!)
-                adapter.bindingPairs = viewModel.bindingPairs.value!!
-//                binding.text.text = "done"
+
                 // 로딩 화면 끄기
                 binding.layoutLoading.root.visibility = View.GONE
                 return@launch
             }
 
-//            binding.text.text = "processing"
+            val pair = viewModel.resultSlideWithExtension.value ?: return@launch
+            val resultSlide = pair.first
+            val format = pair.second
+
+            // 백그라운드 스레드에서 처리
+            val waitingSlides = async(Dispatchers.IO) {
+                // pdf 파일
+                if (format == "pdf") {
+                    val bitmaps = pdfToBitmaps(resultSlide.getFileOfPdf(requireContext()))
+                    bitmaps.map { Slide(it) }
+                }
+                // 이미지 파일
+                else {
+                    val imageBitmaps = resultSlide.getFileAsImages(requireContext())
+                    imageBitmaps.map { Slide(it) }
+                }
+            }
+
+            // 이미지 불러오는걸 기다림
+            val slides = waitingSlides.await().toMutableList()
+
+            // 가공 완료된 slide들을 view model에 전달
+            if (viewModel.slides.value == null) {
+                viewModel.slides.value = slides
+            } else {
+                viewModel.slides.value!!.clear()
+                viewModel.slides.value!!.addAll(slides)
+            }
+
+            // slide 리스트가 변할때마다 리사이클러뷰에 반영
+            if (viewModel.slides.value!!.size > 0) {
+                binding.imagePreview.setImageBitmap(viewModel.slides.value!![0].bitmap)
+                adapter.replaceItems(viewModel.slides.value!!, viewModel.bindingPairs.value!!)
+            } else {
+                // TODO 나중에 다이얼로그로 변경
+                Toast.makeText(requireContext(), "선택한 파일을 열 수 없습니다", Toast.LENGTH_SHORT).show()
+                findNavController().popBackStack()
+            }
+
+            // 로딩 끄기
+            binding.layoutLoading.root.visibility = View.GONE
+        }
+    }
+
+
+
+    // 새로운 파일을 열었을 경우
+    private fun handleUri(uris: MutableList<Pair<Uri, String>>) {
+        if (uris.isNullOrEmpty()) return
+
+        lifecycleScope.launch(exceptionHandler) {
+
+            // 이미 로딩 끝났었으면 패스
+            if (!viewModel.slides.value.isNullOrEmpty()) {
+                binding.imagePreview.setImageBitmap(viewModel.slides.value!![0].bitmap)
+                adapter.replaceItems(viewModel.slides.value!!, viewModel.bindingPairs.value!!)
+                adapter.bindingPairs = viewModel.bindingPairs.value!!
+
+                // 로딩 화면 끄기
+                binding.layoutLoading.root.visibility = View.GONE
+                return@launch
+            }
+
             val slides: MutableList<Slide> = processIntoSlides(uris)
 
             // 가공 완료된 slide들을 view model에 전달
@@ -232,7 +295,6 @@ class SlideFragment : Fragment() {
             }
 
             // slide 리스트가 변할때마다 리사이클러뷰에 반영
-//            binding.text.text = "done"
             if (viewModel.slides.value!!.size > 0) {
                 binding.imagePreview.setImageBitmap(viewModel.slides.value!![0].bitmap)
                 adapter.replaceItems(viewModel.slides.value!!, viewModel.bindingPairs.value!!)

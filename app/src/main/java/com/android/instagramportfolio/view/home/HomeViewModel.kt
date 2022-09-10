@@ -18,7 +18,7 @@ class HomeViewModel(context: Context): ViewModel() {
 
     val resultSlides: LiveData<MutableList<ResultSlide>> = repository.resultSlides
 
-    val nextDirectory get() = "id_" + resultSlides.value!!.size
+    val nextDirectory get() = "id_" + (resultSlides.value!!.size + 1)
 
     fun addResultSlide(resultSlide: ResultSlide) {
         CoroutineScope(Dispatchers.Main).launch {

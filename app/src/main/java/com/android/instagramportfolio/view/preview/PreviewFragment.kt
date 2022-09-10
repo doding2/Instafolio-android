@@ -186,7 +186,7 @@ class PreviewFragment : Fragment() {
             saveBitmapsAsImage(requireContext(), bitmaps, "slides", homeViewModel.nextDirectory, format)
 
             // result slide를 뷰 모델에 추가시켜 저장
-            val thumbnail = getResized(bitmaps.first(), 100, 100)
+            val thumbnail = getResized(bitmaps.first(), 200, 200)
             val resultSlide = ResultSlide(0, format, bitmaps.size, thumbnail)
             homeViewModel.addResultSlide(resultSlide)
 
@@ -220,7 +220,7 @@ class PreviewFragment : Fragment() {
             saveBitmapsAsPdf(requireContext(), bitmaps, "slides", homeViewModel.nextDirectory, "0")
 
             // result slide를 뷰 모델에 추가시켜 저장
-            val thumbnail = getResized(bitmaps.first(), 100, 100)
+            val thumbnail = getResized(bitmaps.first(), 200, 200)
             val resultSlide = ResultSlide(0, "pdf", bitmaps.size, thumbnail)
             homeViewModel.addResultSlide(resultSlide)
 

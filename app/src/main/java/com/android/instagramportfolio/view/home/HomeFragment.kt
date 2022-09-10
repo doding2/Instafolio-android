@@ -158,8 +158,21 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         return binding.root
     }
 
-    private fun onItemClick(slideResult: ResultSlide) {
-        Toast.makeText(requireContext(), slideResult.id.toString(), Toast.LENGTH_SHORT).show()
+
+    // result slide 클릭하면 편집 화면으로 이동
+    private fun onItemClick(resultSlide: ResultSlide) {
+        // slide view model 초기화
+        slideViewModel.clear()
+        slideViewModel.resultSlideWithExtension.value =
+            if (resultSlide.format == "pdf") {
+            resultSlide to resultSlide.format
+        } else {
+            resultSlide to "image"
+        }
+
+        // Slide Fragment로 이동
+        findNavController()
+            .navigate(R.id.action_homeFragment_to_slideFragment)
     }
 
     // 뒤로가기 할 때 sourceOfFiles bottom sheet이 확장되어 있으면 축소시킴

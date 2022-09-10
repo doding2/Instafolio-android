@@ -1,8 +1,13 @@
 package com.android.instagramportfolio.view.preview
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.*
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
@@ -23,6 +28,7 @@ import com.android.instagramportfolio.view.home.HomeViewModel
 import com.android.instagramportfolio.view.home.HomeViewModelFactory
 import com.android.instagramportfolio.view.slide.SlideViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -67,7 +73,6 @@ class PreviewFragment : Fragment() {
         WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightStatusBars = false
         WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightNavigationBars = false
 
-
         // 리사이클러뷰에 어답터 추가
         adapter = PreviewSlideAdapter(previewViewModel.previewSlides.value!!, slideViewModel.isInstarSize.value!!)
         binding.recyclerView.adapter = adapter
@@ -79,23 +84,15 @@ class PreviewFragment : Fragment() {
         val snapHelper = PagerSnapHelper()
         snapHelper.attachToRecyclerView(binding.recyclerView)
 
-
         // 다운로드 버튼
         binding.buttonDownload.setOnClickListener {
-            showSelectFormatDialog { format ->
-                when(format) {
-                    // 이미지로 저장
-                    "png", "jpg" -> {
-                        binding.layoutLoading.root.visibility = View.VISIBLE
-                        saveSlidesAsImage(format)
-                    }
-                    // pdf로 저장
-                    "pdf" -> {
-                        binding.layoutLoading.root.visibility = View.VISIBLE
-                        saveSlidesAsPdf()
-                    }
-                    else -> throw IllegalStateException("존재하지 않는 선택지 입니다")
-                }
+            // write external storage 퍼미션 체크
+            val isGranted = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            if (isGranted == PackageManager.PERMISSION_GRANTED) {
+                showDialog()
+            } else {
+                // write storage 퍼미션 요청
+                permissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             }
         }
 
@@ -105,6 +102,41 @@ class PreviewFragment : Fragment() {
         return binding.root
     }
 
+    // 어떤 형식으로 다운 받을 것인지 선택하는 다이얼로그
+    private fun showDialog() {
+        showSelectFormatDialog { format ->
+            when(format) {
+                // 이미지로 저장
+                "png", "jpg" -> {
+                    binding.layoutLoading.root.visibility = View.VISIBLE
+                    saveSlidesAsImage(format)
+                }
+                // pdf로 저장
+                "pdf" -> {
+                    binding.layoutLoading.root.visibility = View.VISIBLE
+                    saveSlidesAsPdf()
+                }
+                else -> throw IllegalStateException("존재하지 않는 선택지 입니다")
+            }
+        }
+    }
+
+    // 퍼미션 런처
+    private val permissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        // 승인 됐으면 다운 시작
+        if (isGranted) {
+            showDialog()
+        }
+        // 아니면 빠꾸
+        else {
+            Toast.makeText(requireContext(), "사진 및 미디어 액세스 권한을 허용해 주세요", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
+    // 슬라이드를 프리뷰 슬라이드로 변환
     private fun processSlidesIntoPreviewSlides() {
         binding.layoutLoading.root.visibility = View.VISIBLE
 
@@ -182,8 +214,22 @@ class PreviewFragment : Fragment() {
                 }
             }
 
-            // 슬라이드 이미지를 내부저장소에 이미지로 저장
-            saveBitmapsAsImage(requireContext(), bitmaps, "slides", homeViewModel.nextDirectory, format)
+            // 슬라이드를 내부저장소에 이미지로 저장
+            val inInnerStorage = async {
+                saveBitmapsAsImage(requireContext(), bitmaps, "slides", homeViewModel.nextDirectory, format)
+            }
+            // 슬라이드를 외부저장소에 이미지로 저장
+            val inExternalStorage = async {
+                saveBitmapsAsImageInExternalStorage(
+                    bitmaps,
+                    "포트폴리오 ${homeViewModel.resultSlides.value!!.size + 1}",
+                    format
+                )
+            }
+            
+            // 저장 기다리기
+            inInnerStorage.await()
+            inExternalStorage.await()
 
             // result slide를 뷰 모델에 추가시켜 저장
             val thumbnail = getResized(bitmaps.first(), 200, 200)
@@ -216,8 +262,23 @@ class PreviewFragment : Fragment() {
                 }
             }
 
-            // 비트맵 리스트를 pdf로 묶어서 내부저장소에 저장하기
-            saveBitmapsAsPdf(requireContext(), bitmaps, "slides", homeViewModel.nextDirectory, "0")
+
+            // 슬라이드를 내부저장소에 pdf로 저장
+            val inInnerStorage = async {
+                saveBitmapsAsPdf(requireContext(), bitmaps, "slides", homeViewModel.nextDirectory, "0")
+            }
+            // 슬라이드를 외부저장소에 pdf로 저장
+            val inExternalStorage = async {
+                saveBitmapsAsPdfInExternalStorage(
+                    bitmaps,
+                    "포트폴리오 ${homeViewModel.resultSlides.value!!.size + 1}",
+                "pdf"
+                )
+            }
+
+            // 저장 기다리기
+            inInnerStorage.await()
+            inExternalStorage.await()
 
             // result slide를 뷰 모델에 추가시켜 저장
             val thumbnail = getResized(bitmaps.first(), 200, 200)

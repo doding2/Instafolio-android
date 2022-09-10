@@ -5,6 +5,9 @@ import android.content.ContextWrapper
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import com.android.instagramportfolio.model.PreviewSlide
 import com.itextpdf.text.Document
 import com.itextpdf.text.Image
@@ -13,6 +16,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.lang.Integer.max
+
 
 // 슬라이드 이미지를 오리지널로 리턴
 fun PreviewSlide.getAsOriginal(): Bitmap {
@@ -113,6 +117,88 @@ fun saveBitmapsAsPdf(
     }
 
     document.close()
+}
+
+
+// 비트맵들을 pdf로 외부저장소에 저장
+fun saveBitmapsAsPdfInExternalStorage(
+    bitmaps: List<Bitmap>,
+    innerDirectory: String,
+    name: String
+) {
+    val externalStorage = getExternalStorageDir("인스타그램 포트폴리오", innerDirectory)
+
+    val pdfPath = File(externalStorage, "${name}.pdf")
+
+    val document = Document()
+    PdfWriter.getInstance(document, FileOutputStream(pdfPath))
+
+    document.open()
+
+    for (bitmap in bitmaps) {
+        val stream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+
+        val image = Image.getInstance(stream.toByteArray())
+
+        document.pageSize = image
+        document.newPage()
+
+        image.setAbsolutePosition(0f, 0f)
+        document.add(image)
+        stream.close()
+    }
+
+    document.close()
+}
+
+// 비트맵들을 이미지로 외부저장소에 저장
+fun saveBitmapsAsImageInExternalStorage(
+    bitmaps: List<Bitmap>,
+    innerDirectory: String,
+    extension: String,
+) {
+    bitmaps.forEachIndexed { index, bitmap ->
+        saveBitmapInExternalStorage(bitmap, innerDirectory, "$index", extension)
+    }
+}
+
+// 비트맵들을 이미지로 외부저장소에 저장
+fun saveBitmapInExternalStorage(
+    bitmap: Bitmap,
+    innerDirectory: String,
+    name: String,
+    extension: String
+) {
+    val externalStorage = getExternalStorageDir("인스타그램 포트폴리오", innerDirectory)
+    val imagePath = File(externalStorage, "${name}.${extension}")
+
+    val out = FileOutputStream(imagePath)
+    if (extension == "jpg") {
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
+    } else {
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+    }
+    out.close()
+}
+
+// 외부 저장소 주소를 리턴하는 함수
+fun getExternalStorageDir(directory: String, innerDirectory: String): File {
+
+    val dir: File = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        File(
+            "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)}" +
+                    "/$directory/$innerDirectory"
+        )
+    } else {
+        File("${Environment.getExternalStorageDirectory()}/$directory/$innerDirectory")
+    }
+
+    if (!dir.exists()) {
+        dir.mkdirs()
+    }
+
+    return dir
 }
 
 

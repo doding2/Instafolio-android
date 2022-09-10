@@ -7,13 +7,13 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.os.Build
 import android.os.Environment
-import android.provider.MediaStore
 import com.android.instagramportfolio.model.PreviewSlide
 import com.itextpdf.text.Document
 import com.itextpdf.text.Image
 import com.itextpdf.text.pdf.PdfWriter
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.lang.Integer.max
 
@@ -21,11 +21,12 @@ import java.lang.Integer.max
 // 슬라이드 이미지를 오리지널로 리턴
 fun PreviewSlide.getAsOriginal(): Bitmap {
     return bitmap.run {
-        if ((width == 1080 && height <= 1080) || (height == 1080 && width <= 1080))  {
-            return bitmap
-        } else {
-            getResized(this)
-        }
+//        if ((width == 1080 && height <= 1080) || (height == 1080 && width <= 1080))  {
+//            return bitmap
+//        } else {
+//            getResized(this)
+//        }
+        return bitmap
     }
 }
 
@@ -99,7 +100,6 @@ fun saveBitmapsAsPdf(
 
     val document = Document()
     PdfWriter.getInstance(document, FileOutputStream(pdfPath))
-
     document.open()
 
     for (bitmap in bitmaps) {
@@ -128,10 +128,20 @@ fun saveBitmapsAsPdfInExternalStorage(
 ) {
     val externalStorage = getExternalStorageDir("인스타그램 포트폴리오", innerDirectory)
 
-    val pdfPath = File(externalStorage, "${name}.pdf")
-
     val document = Document()
-    PdfWriter.getInstance(document, FileOutputStream(pdfPath))
+    var fileName = name
+    var count = 1
+
+    do {
+        try {
+            val pdfPath = File(externalStorage, "${fileName}.pdf")
+            PdfWriter.getInstance(document, FileOutputStream(pdfPath))
+            break
+        } catch (e: FileNotFoundException) {
+            fileName = "$name ($count)"
+            count++
+        }
+    } while(true)
 
     document.open()
 
@@ -194,7 +204,9 @@ fun getExternalStorageDir(directory: String, innerDirectory: String): File {
         File("${Environment.getExternalStorageDirectory()}/$directory/$innerDirectory")
     }
 
-    if (!dir.exists()) {
+    if (dir.exists()) {
+        dir.deleteRecursively()
+    } else {
         dir.mkdirs()
     }
 

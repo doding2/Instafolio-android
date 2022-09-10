@@ -50,18 +50,28 @@ class SlideFragment : Fragment() {
             }
             // pdf exception
             is NoManageStoragePermissionException -> {
-                // manage storage 퍼미션 허용하라고 유저를 보내버림
-                viewModel.isAppPausedBecauseOfPermission.value = true
-                Toast.makeText(requireContext(), "모든 파일에 대한 접근 권한을 허용해 주세요", Toast.LENGTH_SHORT).show()
-                
-                val intent = Intent()
-                intent.action = Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION
-                val uri = Uri.fromParts("package", requireActivity().packageName, null)
-                intent.data = uri
-                startActivity(intent)
+                showMessageDialog(
+                    "파일을 열 수 없습니다.",
+                    "모든 파일에 대한 접근 권한을 허용해 주세요.",
+                    onDismiss = {
+                        val intent = Intent()
+                        intent.action = Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION
+                        val uri = Uri.fromParts("package", requireActivity().packageName, null)
+                        intent.data = uri
+                        // manage storage 퍼미션 허용하라고 유저를 보내버림
+                        viewModel.isAppPausedBecauseOfPermission.value = true
+                        startActivity(intent)
+                    }
+                )
             }
             else -> {
-                Toast.makeText(requireContext(), "에러 발생: ${throwable.message}", Toast.LENGTH_LONG).show()
+                showMessageDialog(
+                    "에러 발생",
+                    "${throwable.message}",
+                    onDismiss = {
+                        findNavController().popBackStack()
+                    }
+                )
             }
         }
     }
@@ -170,7 +180,7 @@ class SlideFragment : Fragment() {
                 }
             }
             else {
-                Toast.makeText(requireContext(), "적어도 두 개의 이미지가 필요합니다", Toast.LENGTH_SHORT).show()
+                showAlertDialog("적어도 두 개의 이미지가 필요합니다.")
             }
         }
 
@@ -255,9 +265,12 @@ class SlideFragment : Fragment() {
                 binding.imagePreview.setImageBitmap(viewModel.slides.value!![0].bitmap)
                 adapter.replaceItems(viewModel.slides.value!!, viewModel.bindingPairs.value!!)
             } else {
-                // TODO 나중에 다이얼로그로 변경
-                Toast.makeText(requireContext(), "선택한 파일을 열 수 없습니다", Toast.LENGTH_SHORT).show()
-                findNavController().popBackStack()
+                showAlertDialog(
+                    "파일을 열 수 없습니다.",
+                    onDismiss =  {
+                        findNavController().popBackStack()
+                    }
+                )
             }
 
             // 로딩 끄기
@@ -300,8 +313,12 @@ class SlideFragment : Fragment() {
                 adapter.replaceItems(viewModel.slides.value!!, viewModel.bindingPairs.value!!)
             } else {
                 // TODO 변환된 비트맵 이미지가 0개
-                Toast.makeText(requireContext(), "선택한 파일을 열 수 없습니다", Toast.LENGTH_SHORT).show()
-                findNavController().popBackStack()
+                showAlertDialog(
+                    "파일을 열 수 없습니다.",
+                    onDismiss =  {
+                        findNavController().popBackStack()
+                    }
+                )
             }
 
             viewModel.bindingPairs.value = adapter.bindingPairs
@@ -315,7 +332,6 @@ class SlideFragment : Fragment() {
     private fun onItemClick(slide: Slide) {
         if (viewModel.enableBinding.value == true) {
             if (viewModel.slides.value?.size!! <= 1) {
-                Toast.makeText(requireContext(), "슬라이드 수가 부족합니다", Toast.LENGTH_SHORT).show()
                 return
             }
 
@@ -349,7 +365,7 @@ class SlideFragment : Fragment() {
                 showFirstBindingToPreview()
             }
             else {
-                Log.i(TAG, "일어날 수가 없는 에러: 슬라이드 두개가 전부 등록되어있는데 if문에서 안 걸러짐")
+                showAlertDialog("예상치 못한 에러가 발생했습니다")
             }
 
         } else {
@@ -472,8 +488,13 @@ class SlideFragment : Fragment() {
             handleUri(viewModel.uriWithExtension.value!!)
         }
         else {
-            Toast.makeText(requireContext(), "사진 및 미디어 액세스 권한을 허용해 주세요", Toast.LENGTH_SHORT).show()
-            findNavController().popBackStack()
+            showMessageDialog(
+                "파일을 열 수 없습니다.",
+                "사진 및 미디어 액세스 권한을 허용해 주세요.",
+                onDismiss = {
+                    findNavController().popBackStack()
+                }
+            )
         }
     }
 
@@ -489,9 +510,13 @@ class SlideFragment : Fragment() {
             }
             // 권한이 아직 수정 안 됨
             else {
-                Toast.makeText(requireContext(), "모든 파일에 대한 접근 권한을 허용해 주세요", Toast.LENGTH_SHORT).show()
-                findNavController().popBackStack()
+                // TODO
                 viewModel.isAppPausedBecauseOfPermission.value = false
+                findNavController().popBackStack()
+                showMessageDialog(
+                    "파일을 열 수 없습니다.",
+                    "모든 파일에 대한 접근 권한을 허용해 주세요."
+                )
             }
         }
     }
@@ -505,8 +530,6 @@ class SlideFragment : Fragment() {
                 launch(exceptionHandler) {
                     withContext(Dispatchers.IO) {
                         bitmap = imageToBitmap(imageUri)
-                        // TODO 이거 없어도 될듯?
-//                        bitmap = getResized(bitmap!!, 1080, 1080)
                     }
                 }
         }

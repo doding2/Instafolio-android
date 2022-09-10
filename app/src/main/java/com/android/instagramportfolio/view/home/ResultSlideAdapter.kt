@@ -29,7 +29,7 @@ class ResultSlideAdapter(
 
     fun replaceItems(items: List<ResultSlide>) {
         this.items.clear()
-        this.items.addAll(items)
+        this.items.addAll(items.reversed())
         notifyDataSetChanged()
     }
 

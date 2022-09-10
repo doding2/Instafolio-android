@@ -29,7 +29,6 @@ class PreviewSlideAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
 
-        Log.i("Adapter", "뷰 타입: ${viewType}")
         return when (viewType) {
             PreviewSlide.ORIGINAL -> {
                 val binding: ItemPreviewSlideOriginalBinding =

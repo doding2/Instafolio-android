@@ -4,13 +4,11 @@ import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.provider.DocumentsContract
 import android.util.Log
 import android.view.*
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.widget.FrameLayout
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
@@ -230,7 +228,7 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
             }
             // 모든 파일 관리 허용 퍼미션 수락하고 옴
             else {
-                Log.d(TAG, "퍼미션")
+                Log.d(TAG, "그 이외")
             }
         }
 
@@ -257,7 +255,7 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         }
 
         if (uriWithExtension.isEmpty()) {
-            Toast.makeText(requireContext(), "앱에서 지원하지 않는 파일입니다", Toast.LENGTH_SHORT).show()
+            showAlertDialog("지원하지 않는 파일입니다")
             return
         }
 

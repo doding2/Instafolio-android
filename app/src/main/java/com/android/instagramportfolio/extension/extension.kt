@@ -166,24 +166,26 @@ fun Fragment.pdfToBitmaps(pdfFile: File): ArrayList<Bitmap> {
             var height: Int
 
             // 너비 또는 높이 둘 중 큰 것을 1080으로 고정
-            val criteria = 1080.0
-            if (page.width > page.height) {
-                val scale = page.width / criteria
-                height = (page.height / scale).toInt()
-                width = criteria.toInt()
-            } else {
-                val scale = page.height / criteria
-                width = (page.width / scale).toInt()
-                height = criteria.toInt()
-            }
+//            val criteria = 1080.0
+//            if (page.width > page.height) {
+//                val scale = page.width / criteria
+//                height = (page.height / scale).toInt()
+//                width = criteria.toInt()
+//            } else {
+//                val scale = page.height / criteria
+//                width = (page.width / scale).toInt()
+//                height = criteria.toInt()
+//            }
 
             // 위에서 고정에 실패하면 크기 조절
-            var divider = 432
-            while (width <= 0 || height <= 0) {
-                width = resources.displayMetrics.densityDpi / divider * page.width
-                height = resources.displayMetrics.densityDpi / divider * page.height
-                divider /= 2
-            }
+//            var divider = 432
+//            while (width <= 0 || height <= 0) {
+//                width = resources.displayMetrics.densityDpi / divider * page.width
+//                height = resources.displayMetrics.densityDpi / divider * page.height
+//                divider /= 2
+//            }
+            width = page.width
+            height = page.height
             Log.d("extension", "pdf image $i  width: $width, height: $height")
 
             bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)

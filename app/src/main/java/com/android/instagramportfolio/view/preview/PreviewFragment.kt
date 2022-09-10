@@ -5,7 +5,6 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.*
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -131,7 +130,7 @@ class PreviewFragment : Fragment() {
         }
         // 아니면 빠꾸
         else {
-            Toast.makeText(requireContext(), "사진 및 미디어 액세스 권한을 허용해 주세요", Toast.LENGTH_SHORT).show()
+            showAlertDialog("권한이 허용되지 않으면\n다운로드 할 수 없습니다.")
         }
     }
 

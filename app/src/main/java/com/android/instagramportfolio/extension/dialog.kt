@@ -5,13 +5,26 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.widget.TextView
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.fragment.app.Fragment
 import com.android.instagramportfolio.R
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.dialog.MaterialDialogs
+
 
 fun Fragment.showSelectFormatDialog(onItemSelected: (String) -> Unit) {
-    val dialog = Dialog(requireContext()).apply {
+    requireContext().showSelectFormatDialog(onItemSelected)
+}
+
+fun Fragment.showAlertDialog(message: String, onOk: () -> Unit = { }, onDismiss: () -> Unit = { }) {
+    requireContext().showAlertDialog(message, onOk, onDismiss)
+}
+
+fun Fragment.showMessageDialog(title: String, message: String, onOk: () -> Unit = { }, onDismiss: () -> Unit = { }) {
+    requireContext().showMessageDialog(title, message, onOk, onDismiss)
+}
+
+
+fun Context.showSelectFormatDialog(onItemSelected: (String) -> Unit) {
+    val dialog = Dialog(this).apply {
         setContentView(R.layout.dialog_select_format)
         window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
     }
@@ -30,6 +43,54 @@ fun Fragment.showSelectFormatDialog(onItemSelected: (String) -> Unit) {
     pdfButton.setOnClickListener {
         onItemSelected("pdf")
         dialog.dismiss()
+    }
+
+    dialog.show()
+}
+
+
+fun Context.showAlertDialog(message: String, onOk: () -> Unit = { }, onDismiss: () -> Unit = { }) {
+    val dialog = Dialog(this).apply {
+        setContentView(R.layout.dialog_alert)
+        window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+    }
+
+    val errorText = dialog.findViewById<TextView>(R.id.text_error)
+    errorText.text = message
+
+    val okButton = dialog.findViewById<TextView>(R.id.button_ok)
+    okButton.setOnClickListener {
+        onOk()
+        dialog.dismiss()
+    }
+
+    dialog.setOnDismissListener {
+        onDismiss()
+    }
+
+    dialog.show()
+}
+
+fun Context.showMessageDialog(title: String, message: String, onOk: () -> Unit = { }, onDismiss: () -> Unit = { }) {
+    val dialog = Dialog(this).apply {
+        setContentView(R.layout.dialog_message)
+        window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+    }
+
+    val titleText = dialog.findViewById<TextView>(R.id.text_title)
+    titleText.text = title
+
+    val messageText = dialog.findViewById<TextView>(R.id.text_message)
+    messageText.text = message
+
+    val okButton = dialog.findViewById<TextView>(R.id.button_ok)
+    okButton.setOnClickListener {
+        onOk()
+        dialog.dismiss()
+    }
+
+    dialog.setOnDismissListener {
+        onDismiss()
     }
 
     dialog.show()

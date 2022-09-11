@@ -122,14 +122,14 @@
                     <FrameLayout
                         android:id="@+id/layout_shadowed_pointed_background_image"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="100dp"
                         android:visibility="gone"
                         android:background="@drawable/bottom_sheet_shadowed_pointed"/>
 
                     <FrameLayout
                         android:id="@+id/layout_pointed_background_image"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="100dp"
                         android:background="@drawable/bottom_sheet_pointed_black"/>
 
                     <LinearLayout

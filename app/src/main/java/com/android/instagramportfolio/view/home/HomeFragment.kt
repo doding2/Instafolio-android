@@ -18,6 +18,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.android.instagramportfolio.R
 import com.android.instagramportfolio.databinding.FragmentHomeBinding
+import com.android.instagramportfolio.databinding.ItemResultSlideBinding
 import com.android.instagramportfolio.extension.*
 import com.android.instagramportfolio.model.ResultSlide
 import com.android.instagramportfolio.view.common.MainActivity
@@ -83,7 +84,8 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
 
 
         // 리사이클러 뷰 설정
-        adapter = ResultSlideAdapter(arrayListOf(), ::onItemClick)
+        adapter = ResultSlideAdapter(arrayListOf(), ::onItemClick, ::onItemLongClick,
+            homeViewModel.selectedResultSlides, homeViewModel.isEditMode)
         binding.recyclerView.adapter = this.adapter
 
         // 인스타 파일들 재등록
@@ -112,8 +114,15 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
 
         // 파일 종류 선택 bottom sheet 확장시키기
         binding.buttonShowSheet.setOnClickListener {
-            behavior.state = BottomSheetBehavior.STATE_EXPANDED
-            setViewsExpanded()
+            // 편집모드가 아니라면 파일 선택
+            if (!homeViewModel.isEditMode()) {
+                behavior.state = BottomSheetBehavior.STATE_EXPANDED
+                setViewsExpanded()
+            }
+            // 편집모드라면 선택된 파일 열기
+            else {
+                openResultSlides()
+            }
         }
 
         // 검은 화면 클릭하면 bottom sheet 다시 줄어들음
@@ -154,29 +163,106 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
             behavior.state = BottomSheetBehavior.STATE_COLLAPSED
         }
 
+        // 편집모드 변동 관찰
+        homeViewModel.isEditMode.observe(viewLifecycleOwner) {
+            if (it) {
+                behavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                adapter.enableEditMode(true)
+            } else {
+                adapter.enableEditMode(false)
+            }
+        }
+
         return binding.root
     }
 
+    // 편집모드에서 여러 파일 동시에 열기
+    private fun openResultSlides() {
+        if (homeViewModel.selectedResultSlides.value.isNullOrEmpty())
+            return
 
-    // result slide 클릭하면 편집 화면으로 이동
-    private fun onItemClick(resultSlide: ResultSlide) {
-        // slide view model 초기화
+        // 한번 초기화
         slideViewModel.clear()
-        slideViewModel.resultSlideWithExtension.value =
-            if (resultSlide.format == "pdf") {
-            resultSlide to resultSlide.format
-        } else {
-            resultSlide to "image"
+
+        for (resultSlide in homeViewModel.selectedResultSlides.value!!) {
+
+            val pair = if (resultSlide.format == "pdf") {
+                resultSlide to resultSlide.format
+            } else {
+                resultSlide to "image"
+            }
+
+            slideViewModel.resultSlideWithExtension.value!!.add(pair)
         }
+
+        // 이동후에는 편집모드 해제
+        homeViewModel.isEditMode.value = false
+        homeViewModel.selectedResultSlides.value = mutableListOf()
 
         // Slide Fragment로 이동
         findNavController()
             .navigate(R.id.action_homeFragment_to_slideFragment)
     }
 
-    // 뒤로가기 할 때 sourceOfFiles bottom sheet이 확장되어 있으면 축소시킴
+
+    // result slide 클릭하면 편집 화면으로 이동
+    private fun onItemClick(resultSlide: ResultSlide, binding: ItemResultSlideBinding) {
+        // 편집모드
+        if (homeViewModel.isEditMode()){
+            // 편집모드일때 아이템 클릭하면
+            // 선택 / 선택 해제 동작만 수행
+            
+            // 선택 해제
+            if (resultSlide in homeViewModel.selectedResultSlides.value!!) {
+                homeViewModel.selectedResultSlides.value!!.remove(resultSlide)
+                binding.imageChecked.visibility = View.GONE
+            }
+            // 선택
+            else {
+                homeViewModel.selectedResultSlides.value!!.add(resultSlide)
+                binding.imageChecked.visibility = View.VISIBLE
+            }
+            return
+        }
+        
+        // 편집모드가 아닐땐, 그냥 파일 열기 동작 수행
+
+
+        val pair = if (resultSlide.format == "pdf") {
+            resultSlide to resultSlide.format
+        } else {
+            resultSlide to "image"
+        }
+
+        // slide view model 초기화
+        slideViewModel.clear()
+        slideViewModel.resultSlideWithExtension.value!!.add(pair)
+
+
+        // Slide Fragment로 이동
+        findNavController()
+            .navigate(R.id.action_homeFragment_to_slideFragment)
+    }
+
+    // result slide 롱 클릭하면 편집모드 활성화
+    private fun onItemLongClick(resultSlide: ResultSlide, binding: ItemResultSlideBinding) {
+        // 이미 편집모드라면 아무 동작 안함
+        if (!homeViewModel.isEditMode()) {
+            homeViewModel.isEditMode.value = true
+            homeViewModel.selectedResultSlides.value = mutableListOf()
+            binding.imageChecked.visibility = View.VISIBLE
+            homeViewModel.selectedResultSlides.value!!.add(resultSlide)
+
+        }
+    }
+
+    // 뒤로가기 할 때 편집보드 켜져있으면 끔
+    // sourceOfFiles bottom sheet이 확장되어 있으면 축소시킴
     override fun onBackPressed() {
-        if (behavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+        if (homeViewModel.isEditMode()) {
+            homeViewModel.isEditMode.value = false
+        }
+        else if (behavior.state == BottomSheetBehavior.STATE_EXPANDED) {
             behavior.state = BottomSheetBehavior.STATE_COLLAPSED
         }
         else {

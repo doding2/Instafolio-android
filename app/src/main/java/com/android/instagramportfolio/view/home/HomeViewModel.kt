@@ -25,6 +25,20 @@ class HomeViewModel(context: Context): ViewModel() {
         value = null
     }
 
+    // 편집모드인지 아닌지 저장
+    val isEditMode = MutableLiveData<Boolean>().apply {
+        value = false
+    }
+
+    // 편집모드에서 선택된 애들
+    val selectedResultSlides = MutableLiveData<MutableList<ResultSlide>>().apply {
+        value = mutableListOf()
+    }
+
+    fun isEditMode(): Boolean {
+        return isEditMode.value == true
+    }
+
     suspend fun addResultSlide(resultSlide: ResultSlide): Long {
         var id = 0L
 

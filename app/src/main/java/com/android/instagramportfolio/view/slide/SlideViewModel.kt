@@ -9,7 +9,9 @@ import com.android.instagramportfolio.model.Slide
 class SlideViewModel: ViewModel() {
 
     // 기존 파일을 편집할 경우
-    val resultSlideWithExtension = MutableLiveData<Pair<ResultSlide, String>>()
+    val resultSlideWithExtension = MutableLiveData<MutableList<Pair<ResultSlide, String>>>().apply {
+        value = mutableListOf()
+    }
 
     // 새로운 파일을 열었을 경우
     val uriWithExtension = MutableLiveData<MutableList<Pair<Uri, String>>>().apply {
@@ -44,7 +46,7 @@ class SlideViewModel: ViewModel() {
 
 
     fun clear() {
-        resultSlideWithExtension.value = null
+        resultSlideWithExtension.value = mutableListOf()
         uriWithExtension.value = mutableListOf()
         slides.value = mutableListOf()
         bindingPairs.value = mutableListOf()

@@ -154,7 +154,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
         })
 
         // 기존의 파일을 편집할 경우
-        if (viewModel.resultSlideWithExtension.value != null) {
+        if (!viewModel.resultSlideWithExtension.value.isNullOrEmpty()) {
             handleResultSlide()
         }
         // 새로운 파일을 열었을 경우
@@ -238,38 +238,45 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
                 return@launch
             }
 
-            val pair = viewModel.resultSlideWithExtension.value ?: return@launch
-            val resultSlide = pair.first
-            val format = pair.second
+            val pairList = viewModel.resultSlideWithExtension.value ?: return@launch
+            val slides = mutableListOf<Slide>()
 
-            // 백그라운드 스레드에서 처리
-            val waitingSlides = async(Dispatchers.IO) {
-                // pdf 파일
-                if (format == "pdf") {
-                    val bitmaps = pdfToBitmaps(resultSlide.getFileOfPdf(requireContext()))
-                    bitmaps.map { Slide(it) }
-                }
-                // 이미지 파일
-                else {
-                    val imageBitmaps = resultSlide.getFileAsImages(requireContext())
-                    imageBitmaps.map { Slide(it) }
-                }
-            }
+            for (pair in pairList) {
 
-            // 이미지 불러오는걸 기다림
-            val slides = waitingSlides.await().toMutableList()
+                val resultSlide = pair.first
+                val format = pair.second
 
-
-            // 손상된 파일이라
-            // 삭제시키기
-            if (resultSlide.size != slides.size) {
-                showAlertDialog(
-                    "손상된 파일입니다.",
-                    onDismiss = {
-                        homeViewModel.deleteResultSlide(resultSlide.id)
-                        findNavController().popBackStack()
+                // 백그라운드 스레드에서 처리
+                val waitingSlides = async(Dispatchers.IO) {
+                    // pdf 파일
+                    if (format == "pdf") {
+                        val bitmaps = pdfToBitmaps(resultSlide.getFileOfPdf(requireContext()))
+                        bitmaps.map { Slide(it) }
                     }
-                )
+                    // 이미지 파일
+                    else {
+                        val imageBitmaps = resultSlide.getFileAsImages(requireContext())
+                        imageBitmaps.map { Slide(it) }
+                    }
+                }
+
+                // 이미지 불러오는걸 기다림
+                val loadedSlide = waitingSlides.await().toMutableList()
+
+                // 손상된 파일이라
+                // 삭제시키기
+                if (resultSlide.size != loadedSlide.size) {
+                    showAlertDialog(
+                        "손상된 파일이 포함되어 있습니다.",
+                        onDismiss = {
+                            homeViewModel.deleteResultSlide(resultSlide.id)
+                            findNavController().popBackStack()
+                        }
+                    )
+                }
+
+                // 슬라이드 리스트에 변환 완료된 것들 추가
+                slides.addAll(loadedSlide)
             }
 
 
@@ -287,9 +294,8 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
                 adapter.replaceItems(viewModel.slides.value!!, viewModel.bindingPairs.value!!)
             } else {
                 showAlertDialog(
-                    "손상된 파일입니다.",
+                    "파일을 열 수 없습니다.",
                     onDismiss =  {
-                        homeViewModel.deleteResultSlide(resultSlide.id)
                         findNavController().popBackStack()
                     }
                 )

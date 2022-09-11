@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.android.instagramportfolio.model.ResultSlide
 import com.android.instagramportfolio.model.Slide
+import com.bumptech.glide.Glide.init
 
 class SlideViewModel: ViewModel() {
 

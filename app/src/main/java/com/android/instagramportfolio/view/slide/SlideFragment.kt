@@ -610,5 +610,8 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+
+        // pdf 파일 열때마다 생기는 이상한 놈들 없애기
+        requireContext().optimizeDocumentCache()
     }
 }

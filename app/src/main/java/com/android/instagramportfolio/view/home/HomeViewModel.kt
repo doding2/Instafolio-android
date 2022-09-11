@@ -19,12 +19,6 @@ class HomeViewModel(context: Context): ViewModel() {
 
     val resultSlides: LiveData<MutableList<ResultSlide>> = repository.resultSlides
 
-    // 저장 중에 도중에 나갈때 대비해서
-    // DB에 등록된놈 삭제시킴
-    val savingSlide = MutableLiveData<ResultSlide>().apply {
-        value = null
-    }
-
     // 편집모드인지 아닌지 저장
     val isEditMode = MutableLiveData<Boolean>().apply {
         value = false

@@ -31,6 +31,7 @@ import com.android.instagramportfolio.view.slide.SlideViewModel
 import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.coroutines.coroutineContext
 
 class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
 
@@ -100,8 +101,6 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
             }
         }
 
-
-        Log.d(TAG, getTimeStamp())
 
         return binding.root
     }
@@ -233,19 +232,19 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
             resultSlide.id = id
 
             withContext(Dispatchers.Main) {
-                homeViewModel.savingSlide.value = resultSlide
+                previewViewModel.savingSlide.value = resultSlide
             }
 
-            // 슬라이드를 내부저장소에 이미지로 저장
             val inInnerStorage = async {
-                saveBitmapsAsImage(requireContext(), bitmaps, "slides", "id_${id}", format)
+                saveBitmapsAsImage(requireContext(), bitmaps, "slides", "id_${id}", format, previewViewModel.savingSlide)
             }
             // 슬라이드를 외부저장소에 이미지로 저장
             val inExternalStorage = async {
                 saveBitmapsAsImageInExternalStorage(
                     bitmaps,
                     "포트폴리오 ${getTimeStamp()}",
-                    format
+                    format,
+                    previewViewModel.savingSlide
                 )
             }
 
@@ -255,9 +254,9 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
 
             // 홈 화면으로 돌아가기
             withContext(Dispatchers.Main) {
-                homeViewModel.savingSlide.value = null
                 showAlertDialog("저장 완료",
                     onDismiss = {
+                        previewViewModel.savingSlide.value = null
                         findNavController().navigate(R.id.action_previewFragment_to_homeFragment)
                     }
                 )
@@ -267,7 +266,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
 
     // 이미지들을 pdf 형태로 저장
     private fun saveSlidesAsPdf() {
-        val d = lifecycleScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch(Dispatchers.IO) {
             val bitmaps = arrayListOf<Bitmap>()
 
             previewViewModel.previewSlides.value?.forEach {
@@ -292,21 +291,21 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
             resultSlide.id = id
 
             withContext(Dispatchers.Main) {
-                homeViewModel.savingSlide.value = resultSlide
+                previewViewModel.savingSlide.value = resultSlide
             }
-
 
             // 슬라이드를 내부저장소에 pdf로 저장 <-------- 수정함
             // pdf 파일도 내부저장소는 이미지로 저장
             val inInnerStorage = async {
-                saveBitmapsAsImage(requireContext(), bitmaps, "slides", "id_$id", "png")
-//                saveBitmapsAsPdf(requireContext(), bitmaps, "slides", "id_$id", "0")
+                saveBitmapsAsImage(requireContext(), bitmaps, "slides", "id_$id", "png", previewViewModel.savingSlide)
             }
             // 슬라이드를 외부저장소에 pdf로 저장
             val inExternalStorage = async {
                 saveBitmapsAsPdfInExternalStorage(
                     bitmaps,
-                    name="포트폴리오 ${getTimeStamp()}"
+                    name="포트폴리오 ${getTimeStamp()}",
+
+                    isSavingSlide=previewViewModel.savingSlide
                 )
             }
 
@@ -316,9 +315,12 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
 
             // 홈 화면으로 돌아가기
             withContext(Dispatchers.Main) {
-                previewViewModel.previewSlides.value = null
-                homeViewModel.savingSlide.value = null
-                findNavController().navigate(R.id.action_previewFragment_to_homeFragment)
+                showAlertDialog("저장 완료",
+                    onDismiss = {
+                        previewViewModel.savingSlide.value = null
+                        findNavController().navigate(R.id.action_previewFragment_to_homeFragment)
+                    }
+                )
             }
         }
 
@@ -328,23 +330,17 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
     // 뒤로가기
     override fun onBackPressed() {
         // 저장중
-        if (homeViewModel.savingSlide.value != null) {
+        if (previewViewModel.savingSlide.value != null) {
             showConfirmDialog(
                 "아직 저장중입니다.",
                 "저장을 중지하시겠습니까?",
                 onOk = {
-                    previewViewModel.previewSlides.value = null
-                    homeViewModel.savingSlide.value?.let {
-                        homeViewModel.deleteResultSlide(it)
-                    }
-                    homeViewModel.savingSlide.value = null
                     findNavController().popBackStack()
                 }
             )
         }
         // 저장중이 아님
         else {
-            previewViewModel.previewSlides.value = null
             findNavController().popBackStack()
         }
     }
@@ -352,12 +348,14 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        if (homeViewModel.savingSlide.value != null) {
-            homeViewModel.savingSlide.value?.let {
-                homeViewModel.deleteResultSlide(it)
-            }
-            homeViewModel.savingSlide.value = null
+
+        // 저장중에 나가면
+        // 기록 삭제시킴
+        previewViewModel.savingSlide.value?.let {
+            homeViewModel.deleteResultSlide(it)
+            it.deleteCache(requireContext())
         }
+        previewViewModel.savingSlide.value = null
     }
 
 }

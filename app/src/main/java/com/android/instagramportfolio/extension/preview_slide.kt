@@ -7,10 +7,16 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.os.Build
 import android.os.Environment
+import android.util.Log
+import androidx.lifecycle.MutableLiveData
 import com.android.instagramportfolio.model.PreviewSlide
+import com.android.instagramportfolio.model.ResultSlide
 import com.itextpdf.text.Document
 import com.itextpdf.text.Image
 import com.itextpdf.text.pdf.PdfWriter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileNotFoundException
@@ -53,8 +59,12 @@ fun saveBitmapsAsImage(
     directory: String,
     innerDirectory: String,
     extension: String,
+    isSavingSlide: MutableLiveData<ResultSlide>
 ) {
     bitmaps.forEachIndexed { index, bitmap ->
+        // 유저가 저장 도중에 나갈때
+        isSavingSlide.value ?: return@forEachIndexed
+
         saveBitmap(context, bitmap, directory, innerDirectory, "$index", extension)
     }
 }
@@ -134,7 +144,8 @@ fun deleteExternalStorageDirectory(
 fun saveBitmapsAsPdfInExternalStorage(
     bitmaps: List<Bitmap>,
     innerDirectory: String? = null,
-    name: String
+    name: String,
+    isSavingSlide: MutableLiveData<ResultSlide>
 ) {
     val externalStorage = if (innerDirectory == null) {
         getExternalStorageDirWithoutInner("인스타그램 포트폴리오")
@@ -160,6 +171,12 @@ fun saveBitmapsAsPdfInExternalStorage(
     document.open()
 
     for (bitmap in bitmaps) {
+        // 유저가 저장 중간에 나갈때
+        if (isSavingSlide.value == null) {
+            document.close()
+            return
+        }
+
         val stream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
 
@@ -181,8 +198,12 @@ fun saveBitmapsAsImageInExternalStorage(
     bitmaps: List<Bitmap>,
     innerDirectory: String,
     extension: String,
+    isSavingSlide: MutableLiveData<ResultSlide>
 ) {
     bitmaps.forEachIndexed { index, bitmap ->
+        // 유저가 중간에 나갈때
+        isSavingSlide.value ?: return@forEachIndexed
+        
         saveBitmapInExternalStorage(bitmap, innerDirectory, "image $index", extension)
     }
 }

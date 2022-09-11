@@ -329,7 +329,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                 "저장을 중지하시겠습니까?",
                 onOk = {
                     previewViewModel.previewSlides.value = null
-                    homeViewModel.deleteResultSlide(homeViewModel.savingId.value!!)
+                    homeViewModel.deleteResultSlideOf(homeViewModel.savingId.value!!)
                     homeViewModel.savingId.value = null
                     findNavController().popBackStack()
                 }
@@ -346,7 +346,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
         super.onDestroyView()
         _binding = null
         if (homeViewModel.savingId.value != null) {
-            homeViewModel.deleteResultSlide(homeViewModel.savingId.value!!)
+            homeViewModel.deleteResultSlideOf(homeViewModel.savingId.value!!)
             homeViewModel.savingId.value = null
         }
     }

@@ -7,9 +7,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
-import android.util.Log
 import android.view.*
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
@@ -269,7 +267,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
                     showAlertDialog(
                         "손상된 파일이 포함되어 있습니다.",
                         onDismiss = {
-                            homeViewModel.deleteResultSlide(resultSlide.id)
+                            homeViewModel.deleteResultSlide(resultSlide)
                             findNavController().popBackStack()
                         }
                     )

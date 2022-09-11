@@ -53,9 +53,15 @@ class HomeViewModel(context: Context): ViewModel() {
         return id
     }
 
-    fun deleteResultSlide(id: Long) {
+    fun deleteResultSlideOf(id: Long) {
         CoroutineScope(Dispatchers.Main).launch {
             val resultSlide = repository.get(id)
+            repository.delete(resultSlide)
+        }
+    }
+
+    fun deleteResultSlide(resultSlide: ResultSlide) {
+        CoroutineScope(Dispatchers.Main).launch {
             repository.delete(resultSlide)
         }
     }

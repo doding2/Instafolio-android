@@ -233,6 +233,13 @@
                         </LinearLayout>
                     </LinearLayout>
 
+
+                    <include layout="@layout/layout_edit_mode"
+                        android:id="@+id/layout_edit_mode"
+                        android:layout_width="match_parent"
+                        android:layout_height="75dp"
+                        android:layout_marginTop="48dp"/>
+
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/button_show_sheet"
                         android:layout_width="wrap_content"

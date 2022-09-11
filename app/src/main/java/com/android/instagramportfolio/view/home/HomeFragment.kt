@@ -168,8 +168,23 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
             if (it) {
                 behavior.state = BottomSheetBehavior.STATE_COLLAPSED
                 adapter.enableEditMode(true)
+                binding.layoutEditMode.root.visibility = View.VISIBLE
             } else {
                 adapter.enableEditMode(false)
+                binding.layoutEditMode.root.visibility = View.GONE
+            }
+        }
+
+        // 슬라이드 삭제
+        binding.layoutEditMode.buttonDelete.setOnClickListener {
+            if (homeViewModel.isEditMode()) {
+                showConfirmDialog(
+                    "포트폴리오 삭제",
+                    "정말 삭제하시겠습니까?",
+                    onOk = {
+                        deleteResultSlides()
+                    }
+                )
             }
         }
 
@@ -195,13 +210,38 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
             slideViewModel.resultSlideWithExtension.value!!.add(pair)
         }
 
-        // 이동후에는 편집모드 해제
-        homeViewModel.isEditMode.value = false
-        homeViewModel.selectedResultSlides.value = mutableListOf()
-
         // Slide Fragment로 이동
         findNavController()
             .navigate(R.id.action_homeFragment_to_slideFragment)
+
+        // 이동후에는 편집모드 해제
+        homeViewModel.isEditMode.value = false
+        homeViewModel.selectedResultSlides.value = mutableListOf()
+    }
+
+
+    // 편집모드에서 여러 슬라이드 삭제시키기
+    private fun deleteResultSlides() {
+        homeViewModel.run {
+            if (selectedResultSlides.value.isNullOrEmpty())
+                return
+
+            // ConcurrentModificationException 피하기 위해
+            val copyList = selectedResultSlides.value!!.toList()
+
+            for (resultSlide in copyList) {
+                deleteResultSlide(resultSlide)
+                adapter.removeItem(resultSlide)
+                // 이미지도 삭제
+                resultSlide.deleteCache(requireContext())
+            }
+
+            // 편집모드 해제
+            isEditMode.value = false
+
+            // 선택된 놈들 초기화
+            selectedResultSlides.value = mutableListOf()
+        }
     }
 
 
@@ -216,6 +256,11 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
             if (resultSlide in homeViewModel.selectedResultSlides.value!!) {
                 homeViewModel.selectedResultSlides.value!!.remove(resultSlide)
                 binding.imageChecked.visibility = View.GONE
+
+                // 선택된 아이템이 아무것도 없게 된다면
+                // 편집모드 해제
+                if (homeViewModel.selectedResultSlides.value.isNullOrEmpty())
+                    homeViewModel.isEditMode.value = false
             }
             // 선택
             else {
@@ -224,9 +269,9 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
             }
             return
         }
-        
-        // 편집모드가 아닐땐, 그냥 파일 열기 동작 수행
 
+
+        // 편집모드가 아닐땐, 그냥 파일 열기 동작 수행
 
         val pair = if (resultSlide.format == "pdf") {
             resultSlide to resultSlide.format

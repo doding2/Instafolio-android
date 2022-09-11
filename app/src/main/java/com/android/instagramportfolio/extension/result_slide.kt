@@ -5,9 +5,22 @@ import android.content.ContextWrapper
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.android.instagramportfolio.model.ResultSlide
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
+
+// 캐싱된 이미지 삭제하기
+fun ResultSlide.deleteCache(context: Context) {
+    CoroutineScope(Dispatchers.IO).launch {
+        val cw = ContextWrapper(context)
+        var cacheDir = cw.getDir("slides", Context.MODE_PRIVATE)
+        cacheDir = File(cacheDir, "id_$id")
+        cacheDir.deleteRecursively()
+    }
+}
 
 // result slide의 정보를 이용해 내부 pdf 파일의 위치를 알리는 File 객체를 리턴
 fun ResultSlide.getFileOfPdf(context: Context): File {

@@ -41,6 +41,16 @@ class ResultSlideAdapter(
         notifyDataSetChanged()
     }
 
+    // 아이템 삭제
+    fun removeItem(resultSlide: ResultSlide) {
+        val index = items.indexOf(resultSlide)
+        viewHolders.remove(resultSlide)
+        items.removeAt(index)
+        selectedItems.value?.remove(resultSlide)
+        notifyItemRemoved(index)
+    }
+
+    // 편집모드 UI 보이도록 활성화
     fun enableEditMode(enabled: Boolean) {
         val visibility =
             if (enabled) View.VISIBLE

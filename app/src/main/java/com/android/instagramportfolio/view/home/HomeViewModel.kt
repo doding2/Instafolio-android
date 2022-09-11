@@ -21,7 +21,7 @@ class HomeViewModel(context: Context): ViewModel() {
 
     // 저장 중에 도중에 나갈때 대비해서
     // DB에 등록된놈 삭제시킴
-    val savingId = MutableLiveData<Long>().apply {
+    val savingSlide = MutableLiveData<ResultSlide>().apply {
         value = null
     }
 

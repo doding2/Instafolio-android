@@ -28,10 +28,7 @@ import com.android.instagramportfolio.view.common.MainActivity
 import com.android.instagramportfolio.view.home.HomeViewModel
 import com.android.instagramportfolio.view.home.HomeViewModelFactory
 import com.android.instagramportfolio.view.slide.SlideViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -233,8 +230,10 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
             val thumbnail = getResized(bitmaps.first(), 200, 200)
             val resultSlide = ResultSlide(0, format, bitmaps.size, thumbnail)
             val id = homeViewModel.addResultSlide(resultSlide)
+            resultSlide.id = id
+
             withContext(Dispatchers.Main) {
-                homeViewModel.savingId.value = id
+                homeViewModel.savingSlide.value = resultSlide
             }
 
             // 슬라이드를 내부저장소에 이미지로 저장
@@ -256,7 +255,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
 
             // 홈 화면으로 돌아가기
             withContext(Dispatchers.Main) {
-                homeViewModel.savingId.value = null
+                homeViewModel.savingSlide.value = null
                 showAlertDialog("저장 완료",
                     onDismiss = {
                         findNavController().navigate(R.id.action_previewFragment_to_homeFragment)
@@ -268,7 +267,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
 
     // 이미지들을 pdf 형태로 저장
     private fun saveSlidesAsPdf() {
-        lifecycleScope.launch(Dispatchers.IO) {
+        val d = lifecycleScope.launch(Dispatchers.IO) {
             val bitmaps = arrayListOf<Bitmap>()
 
             previewViewModel.previewSlides.value?.forEach {
@@ -290,14 +289,18 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
             val thumbnail = getResized(bitmaps.first(), 200, 200)
             val resultSlide = ResultSlide(0, "pdf", bitmaps.size, thumbnail)
             val id = homeViewModel.addResultSlide(resultSlide)
+            resultSlide.id = id
+
             withContext(Dispatchers.Main) {
-                homeViewModel.savingId.value = id
+                homeViewModel.savingSlide.value = resultSlide
             }
 
 
-            // 슬라이드를 내부저장소에 pdf로 저장
+            // 슬라이드를 내부저장소에 pdf로 저장 <-------- 수정함
+            // pdf 파일도 내부저장소는 이미지로 저장
             val inInnerStorage = async {
-                saveBitmapsAsPdf(requireContext(), bitmaps, "slides", "id_$id", "0")
+                saveBitmapsAsImage(requireContext(), bitmaps, "slides", "id_$id", "png")
+//                saveBitmapsAsPdf(requireContext(), bitmaps, "slides", "id_$id", "0")
             }
             // 슬라이드를 외부저장소에 pdf로 저장
             val inExternalStorage = async {
@@ -314,23 +317,27 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
             // 홈 화면으로 돌아가기
             withContext(Dispatchers.Main) {
                 previewViewModel.previewSlides.value = null
-                homeViewModel.savingId.value = null
+                homeViewModel.savingSlide.value = null
                 findNavController().navigate(R.id.action_previewFragment_to_homeFragment)
             }
         }
+
+
     }
 
     // 뒤로가기
     override fun onBackPressed() {
         // 저장중
-        if (homeViewModel.savingId.value != null) {
+        if (homeViewModel.savingSlide.value != null) {
             showConfirmDialog(
                 "아직 저장중입니다.",
                 "저장을 중지하시겠습니까?",
                 onOk = {
                     previewViewModel.previewSlides.value = null
-                    homeViewModel.deleteResultSlideOf(homeViewModel.savingId.value!!)
-                    homeViewModel.savingId.value = null
+                    homeViewModel.savingSlide.value?.let {
+                        homeViewModel.deleteResultSlide(it)
+                    }
+                    homeViewModel.savingSlide.value = null
                     findNavController().popBackStack()
                 }
             )
@@ -345,9 +352,11 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        if (homeViewModel.savingId.value != null) {
-            homeViewModel.deleteResultSlideOf(homeViewModel.savingId.value!!)
-            homeViewModel.savingId.value = null
+        if (homeViewModel.savingSlide.value != null) {
+            homeViewModel.savingSlide.value?.let {
+                homeViewModel.deleteResultSlide(it)
+            }
+            homeViewModel.savingSlide.value = null
         }
     }
 

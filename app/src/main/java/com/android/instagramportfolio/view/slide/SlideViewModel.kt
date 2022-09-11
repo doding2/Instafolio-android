@@ -44,6 +44,10 @@ class SlideViewModel: ViewModel() {
         value = false
     }
 
+    // 기존 파일 열었을때 아무런 수정 안해으면 뒤로가기 다이얼로그 안뜨게 하기 위해
+    val isSlideMoved = MutableLiveData<Boolean>().apply {
+        value = false
+    }
 
     fun clear() {
         resultSlideWithExtension.value = mutableListOf()
@@ -54,5 +58,6 @@ class SlideViewModel: ViewModel() {
         isInstarSize.value = true
         enableBinding.value = false
         isAppPausedBecauseOfPermission.value = false
+        isSlideMoved.value = false
     }
 }

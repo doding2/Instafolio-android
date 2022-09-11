@@ -132,7 +132,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
         binding.layoutLoading.root.visibility = View.VISIBLE
 
         // 리사이클러 뷰 설정
-        adapter = SlideAdapter(requireContext(), arrayListOf(), ::onItemClick, viewModel.isInstarSize)
+        adapter = SlideAdapter(requireContext(), arrayListOf(), ::onItemClick, viewModel)
         binding.recyclerViewSlide.adapter = adapter
         val layoutManager = FlexboxLayoutManager(requireContext()).apply {
             flexDirection = FlexDirection.ROW
@@ -248,8 +248,11 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
                 val waitingSlides = async(Dispatchers.IO) {
                     // pdf 파일
                     if (format == "pdf") {
-                        val bitmaps = pdfToBitmaps(resultSlide.getFileOfPdf(requireContext()))
-                        bitmaps.map { Slide(it) }
+                        // pdf 파일도 내부저장소는 이미지로 저장
+//                        val bitmaps = pdfToBitmaps(resultSlide.getFileOfPdf(requireContext()))
+//                        bitmaps.map { Slide(it) }
+                        val imageBitmaps = resultSlide.getFileAsImages(requireContext())
+                        imageBitmaps.map { Slide(it) }
                     }
                     // 이미지 파일
                     else {
@@ -579,15 +582,25 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
 
     // 뒤로가기
     override fun onBackPressed() {
-        if (viewModel.slides.value.isNullOrEmpty()) {
-            viewModel.slides.value = null
-            findNavController().popBackStack()
-        } else {
+        // 기존 파일 열었을때
+        // 수정된게 없으면
+        // 확인 다이얼로그 안 띄워도 됨
+        viewModel.run {
+            if (!resultSlideWithExtension.value.isNullOrEmpty()
+                && isSlideMoved.value == false
+                && adapter.bindingPairs.isEmpty()
+                && isInstarSize.value == true
+            ) {
+                slides.value = null
+                findNavController().popBackStack()
+                return
+            }
+
             showConfirmDialog(
                 "저장되지 않았습니다.",
                 "정말 뒤로가시겠습니까?",
                 onOk = {
-                    viewModel.slides.value = null
+                    slides.value = null
                     findNavController().popBackStack()
                 }
             )

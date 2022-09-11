@@ -3,6 +3,7 @@ package com.android.instagramportfolio.view.slide
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,7 +22,7 @@ class SlideAdapter(
     private val context: Context,
     val items: MutableList<Slide>,
     private val clickListener: (Slide) -> Unit,
-    private val isInstarSize: MutableLiveData<Boolean>,
+    private val viewModel: SlideViewModel,
 ): RecyclerView.Adapter<SlideAdapter.ViewHolder>(), ItemTouchHelperCallback.OnItemMoveListener {
 
     private lateinit var dragListener: OnStartDragListener
@@ -45,7 +46,7 @@ class SlideAdapter(
 
             binding.imageSlide.setImageBitmap(item.bitmap)
             // 인스타 사이즈
-            if (isInstarSize.value == true) {
+            if (viewModel.isInstarSize.value == true) {
                 binding.imageSlideBefore.setBackgroundResource(R.color.white)
                 binding.imageSlide.setBackgroundResource(R.color.white)
                 binding.imageSlideAfter.setBackgroundResource(R.color.white)
@@ -341,6 +342,10 @@ class SlideAdapter(
             }
         }
         notifyItemMoved(fromPosition, toPosition2)
+
+        if (fromPosition != toPosition2) {
+            viewModel.isSlideMoved.value = true
+        }
     }
 
     override fun onItemSwiped(position: Int) {

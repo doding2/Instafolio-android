@@ -133,10 +133,14 @@ fun deleteExternalStorageDirectory(
 // 비트맵들을 pdf로 외부저장소에 저장
 fun saveBitmapsAsPdfInExternalStorage(
     bitmaps: List<Bitmap>,
-    innerDirectory: String,
+    innerDirectory: String? = null,
     name: String
 ) {
-    val externalStorage = getExternalStorageDir("인스타그램 포트폴리오", innerDirectory)
+    val externalStorage = if (innerDirectory == null) {
+        getExternalStorageDirWithoutInner("인스타그램 포트폴리오")
+    } else {
+        getExternalStorageDir("인스타그램 포트폴리오", innerDirectory)
+    }
 
     val document = Document()
     var fileName = name
@@ -225,6 +229,24 @@ fun getExternalStorageDir(directory: String, innerDirectory: String): File {
         )
     } else {
         File("${Environment.getExternalStorageDirectory()}/$directory/$innerDirectory")
+    }
+
+    if (!dir.exists()) {
+        dir.mkdirs()
+    }
+
+    return dir
+}
+
+// inner directory 없는 버전
+fun getExternalStorageDirWithoutInner(directory: String): File {
+    val dir: File = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        File(
+            "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)}" +
+                    "/$directory"
+        )
+    } else {
+        File("${Environment.getExternalStorageDirectory()}/$directory")
     }
 
     if (!dir.exists()) {

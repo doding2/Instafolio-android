@@ -32,6 +32,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.*
 
 class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
 
@@ -102,9 +104,16 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
         }
 
 
-
+        Log.d(TAG, getTimeStamp())
 
         return binding.root
+    }
+
+    // 외부저장소에 다운받을 때 폴더 이름으로 사용할거임
+    private fun getTimeStamp(): String {
+        val format = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault())
+        val date = Calendar.getInstance().time
+        return format.format(date)
     }
 
     // 어떤 형식으로 다운 받을 것인지 선택하는 다이얼로그
@@ -236,7 +245,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
             val inExternalStorage = async {
                 saveBitmapsAsImageInExternalStorage(
                     bitmaps,
-                    "포트폴리오 $id",
+                    "포트폴리오 ${getTimeStamp()}",
                     format
                 )
             }
@@ -294,8 +303,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
             val inExternalStorage = async {
                 saveBitmapsAsPdfInExternalStorage(
                     bitmaps,
-                    "포트폴리오 $id",
-                "portfolio"
+                    name="포트폴리오 ${getTimeStamp()}"
                 )
             }
 

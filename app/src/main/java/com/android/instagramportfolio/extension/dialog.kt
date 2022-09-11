@@ -22,6 +22,10 @@ fun Fragment.showMessageDialog(title: String, message: String, onOk: () -> Unit 
     requireContext().showMessageDialog(title, message, onOk, onDismiss)
 }
 
+fun Fragment.showConfirmDialog(title: String, message: String, onOk: () -> Unit = { }, onCancel: () -> Unit = { }, onDismiss: () -> Unit = { }) {
+    requireContext().showConfirmDialog(title, message, onOk, onCancel, onDismiss)
+}
+
 
 fun Context.showSelectFormatDialog(onItemSelected: (String) -> Unit) {
     val dialog = Dialog(this).apply {
@@ -86,6 +90,43 @@ fun Context.showMessageDialog(title: String, message: String, onOk: () -> Unit =
     val okButton = dialog.findViewById<TextView>(R.id.button_ok)
     okButton.setOnClickListener {
         onOk()
+        dialog.dismiss()
+    }
+
+    dialog.setOnDismissListener {
+        onDismiss()
+    }
+
+    dialog.show()
+}
+
+fun Context.showConfirmDialog(
+    title: String,
+    message: String,
+    onOk: () -> Unit = { },
+    onCancel: () -> Unit =  { },
+    onDismiss: () -> Unit = { }
+) {
+    val dialog = Dialog(this).apply {
+        setContentView(R.layout.dialog_confirm)
+        window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+    }
+
+    val titleText = dialog.findViewById<TextView>(R.id.text_title)
+    titleText.text = title
+
+    val messageText = dialog.findViewById<TextView>(R.id.text_message)
+    messageText.text = message
+
+    val okButton = dialog.findViewById<TextView>(R.id.button_ok)
+    okButton.setOnClickListener {
+        onOk()
+        dialog.dismiss()
+    }
+
+    val cancelButton = dialog.findViewById<TextView>(R.id.button_cancel)
+    cancelButton.setOnClickListener {
+        onCancel()
         dialog.dismiss()
     }
 

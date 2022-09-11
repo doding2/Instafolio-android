@@ -24,6 +24,7 @@ import com.android.instagramportfolio.model.PreviewSlide.Companion.INSTAR_SIZE_B
 import com.android.instagramportfolio.model.PreviewSlide.Companion.ORIGINAL
 import com.android.instagramportfolio.model.PreviewSlide.Companion.ORIGINAL_BINDING
 import com.android.instagramportfolio.model.ResultSlide
+import com.android.instagramportfolio.view.common.MainActivity
 import com.android.instagramportfolio.view.home.HomeViewModel
 import com.android.instagramportfolio.view.home.HomeViewModelFactory
 import com.android.instagramportfolio.view.slide.SlideViewModel
@@ -32,7 +33,11 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class PreviewFragment : Fragment() {
+class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
+
+    companion object {
+        const val TAG = "PreviewFragment"
+    }
 
     private var _binding: FragmentPreviewBinding? = null
     private val binding get() = _binding!!
@@ -243,7 +248,11 @@ class PreviewFragment : Fragment() {
             // 홈 화면으로 돌아가기
             withContext(Dispatchers.Main) {
                 homeViewModel.savingId.value = null
-                findNavController().navigate(R.id.action_previewFragment_to_homeFragment)
+                showAlertDialog("저장 완료",
+                    onDismiss = {
+                        findNavController().navigate(R.id.action_previewFragment_to_homeFragment)
+                    }
+                )
             }
         }
     }
@@ -296,9 +305,32 @@ class PreviewFragment : Fragment() {
 
             // 홈 화면으로 돌아가기
             withContext(Dispatchers.Main) {
+                previewViewModel.previewSlides.value = null
                 homeViewModel.savingId.value = null
                 findNavController().navigate(R.id.action_previewFragment_to_homeFragment)
             }
+        }
+    }
+
+    // 뒤로가기
+    override fun onBackPressed() {
+        // 저장중
+        if (homeViewModel.savingId.value != null) {
+            showConfirmDialog(
+                "아직 저장중입니다.",
+                "저장을 중지하시겠습니까?",
+                onOk = {
+                    previewViewModel.previewSlides.value = null
+                    homeViewModel.deleteResultSlide(homeViewModel.savingId.value!!)
+                    homeViewModel.savingId.value = null
+                    findNavController().popBackStack()
+                }
+            )
+        }
+        // 저장중이 아님
+        else {
+            previewViewModel.previewSlides.value = null
+            findNavController().popBackStack()
         }
     }
 

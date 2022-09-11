@@ -22,6 +22,7 @@ import com.android.instagramportfolio.R
 import com.android.instagramportfolio.databinding.FragmentSlideBinding
 import com.android.instagramportfolio.extension.*
 import com.android.instagramportfolio.model.Slide
+import com.android.instagramportfolio.view.common.MainActivity
 import com.android.instagramportfolio.view.home.HomeViewModel
 import com.android.instagramportfolio.view.home.HomeViewModelFactory
 import com.google.android.flexbox.FlexDirection
@@ -31,7 +32,7 @@ import com.google.android.flexbox.JustifyContent
 import kotlinx.coroutines.*
 import java.io.File
 
-class SlideFragment : Fragment() {
+class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
 
     companion object {
         const val TAG = "SlideFragment"
@@ -572,6 +573,22 @@ class SlideFragment : Fragment() {
             ?: throw Exception("Converting PDF to Image Failed")
     }
 
+    // 뒤로가기
+    override fun onBackPressed() {
+        if (viewModel.slides.value.isNullOrEmpty()) {
+            viewModel.slides.value = null
+            findNavController().popBackStack()
+        } else {
+            showConfirmDialog(
+                "저장되지 않았습니다.",
+                "정말 뒤로가시겠습니까?",
+                onOk = {
+                    viewModel.slides.value = null
+                    findNavController().popBackStack()
+                }
+            )
+        }
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()

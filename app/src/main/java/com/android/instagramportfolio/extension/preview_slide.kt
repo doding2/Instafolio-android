@@ -173,7 +173,7 @@ fun saveBitmapsAsPdfInExternalStorage(
         }
 
         val stream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPG, 100, stream)
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
 
         val image = Image.getInstance(stream.toByteArray())
 

@@ -183,6 +183,13 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
                     binding.layoutBinding.visibility = View.GONE
                     binding.imagePreview.visibility = View.VISIBLE
                 }
+                // 바인딩 버튼 눌렀을때
+                // 바인딩된 슬라이드가 존재하지 않으면
+                // 1, 2번 놈 바인딩 된 샘플 이미지 보이기
+                else if (viewModel.enableBinding.value == true && adapter.bindingFlattenSlides.isEmpty()) {
+                    binding.imageBindingPreviewFirst.setImageBitmap(adapter.items[0].bitmap)
+                    binding.imageBindingPreviewSecond.setImageBitmap(adapter.items[1].bitmap)
+                }
             }
             else {
                 showAlertDialog("적어도 두 개의 이미지가 필요합니다.")

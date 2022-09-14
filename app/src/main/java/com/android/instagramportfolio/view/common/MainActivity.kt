@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.Window
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.databinding.DataBindingUtil
 import com.android.instagramportfolio.R
 import com.android.instagramportfolio.databinding.ActivityMainBinding
@@ -23,6 +24,7 @@ class MainActivity : AppCompatActivity() {
         window.setFlags(
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+
     }
 
     override fun onDestroy() {

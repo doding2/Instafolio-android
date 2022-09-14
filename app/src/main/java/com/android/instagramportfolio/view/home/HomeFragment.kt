@@ -10,6 +10,7 @@ import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.widget.FrameLayout
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment

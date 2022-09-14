@@ -183,13 +183,6 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
                     binding.layoutBinding.visibility = View.GONE
                     binding.imagePreview.visibility = View.VISIBLE
                 }
-                // 바인딩 버튼 눌렀을때
-                // 바인딩된 슬라이드가 존재하지 않으면
-                // 1, 2번 놈 바인딩 된 샘플 이미지 보이기
-                else if (viewModel.enableBinding.value == true && adapter.bindingFlattenSlides.isEmpty()) {
-                    binding.imageBindingPreviewFirst.setImageBitmap(adapter.items[0].bitmap)
-                    binding.imageBindingPreviewSecond.setImageBitmap(adapter.items[1].bitmap)
-                }
             }
             else {
                 showAlertDialog("적어도 두 개의 이미지가 필요합니다.")
@@ -445,10 +438,14 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
         binding.imagePreview.visibility = View.GONE
         binding.layoutBinding.visibility = View.VISIBLE
 
-        // 등록된 바인딩 페어가 없으면 그냥 빈 화면 띄움
+        // 등록된 바인딩 페어가 없으면
+        // 1, 2번 놈 바인딩 된 샘플 이미지 보이기
         if (adapter.bindingPairs.isEmpty()) {
             binding.imageBindingPreviewFirst.setImageResource(android.R.color.transparent)
             binding.imageBindingPreviewSecond.setImageResource(android.R.color.transparent)
+
+            binding.imageBindingPreviewFirst.setImageBitmap(adapter.items[0].bitmap)
+            binding.imageBindingPreviewSecond.setImageBitmap(adapter.items[1].bitmap)
         }
         else {
             val pair = adapter.bindingPairs.minBy { adapter.getIndexOf(it.first) + adapter.getIndexOf(it.second) }

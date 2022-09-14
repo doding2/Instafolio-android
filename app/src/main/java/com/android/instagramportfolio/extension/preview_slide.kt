@@ -28,11 +28,6 @@ import java.util.*
 // 슬라이드 이미지를 오리지널로 리턴
 fun PreviewSlide.getAsOriginal(): Bitmap {
     return bitmap.run {
-//        if ((width == 1080 && height <= 1080) || (height == 1080 && width <= 1080))  {
-//            return bitmap
-//        } else {
-//            getResized(this)
-//        }
         return bitmap
     }
 }
@@ -178,7 +173,7 @@ fun saveBitmapsAsPdfInExternalStorage(
         }
 
         val stream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        bitmap.compress(Bitmap.CompressFormat.JPG, 100, stream)
 
         val image = Image.getInstance(stream.toByteArray())
 

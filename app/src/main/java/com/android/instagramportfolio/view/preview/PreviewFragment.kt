@@ -294,17 +294,15 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                 previewViewModel.savingSlide.value = resultSlide
             }
 
-            // 슬라이드를 내부저장소에 pdf로 저장 <-------- 수정함
-            // pdf 파일도 내부저장소는 이미지로 저장
+            // pdf 파일도 내부저장소는 이미지로 저장(포맷은 jpg)
             val inInnerStorage = async {
-                saveBitmapsAsImage(requireContext(), bitmaps, "slides", "id_$id", "png", previewViewModel.savingSlide)
+                saveBitmapsAsImage(requireContext(), bitmaps, "slides", "id_$id", "jpg", previewViewModel.savingSlide)
             }
-            // 슬라이드를 외부저장소에 pdf로 저장
+            // 슬라이드를 외부저장소에 pdf로 저장(포맷은 jpg)
             val inExternalStorage = async {
                 saveBitmapsAsPdfInExternalStorage(
                     bitmaps,
                     name="포트폴리오 ${getTimeStamp()}",
-
                     isSavingSlide=previewViewModel.savingSlide
                 )
             }

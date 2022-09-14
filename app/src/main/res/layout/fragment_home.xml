@@ -136,7 +136,7 @@
                         android:id="@+id/layout_source_list"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="54dp"
+                        android:layout_marginTop="47dp"
                         android:orientation="vertical"
                         android:background="@color/black" >
 

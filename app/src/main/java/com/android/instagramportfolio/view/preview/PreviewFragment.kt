@@ -14,7 +14,10 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
+import androidx.recyclerview.widget.RecyclerView
 import com.android.instagramportfolio.R
 import com.android.instagramportfolio.databinding.FragmentPreviewBinding
 import com.android.instagramportfolio.extension.*
@@ -53,10 +56,12 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
         savedInstanceState: Bundle?
     ): View {
         _binding = DataBindingUtil.inflate(inflater, R.layout.fragment_preview, container, false)
-        previewViewModel = ViewModelProvider(this)[PreviewViewModel::class.java]
-        slideViewModel = ViewModelProvider(requireActivity())[SlideViewModel::class.java]
         val homeFactory = HomeViewModelFactory(requireActivity())
         homeViewModel = ViewModelProvider(requireActivity(), homeFactory)[HomeViewModel::class.java]
+        slideViewModel = ViewModelProvider(requireActivity())[SlideViewModel::class.java]
+        previewViewModel = ViewModelProvider(this)[PreviewViewModel::class.java]
+        binding.viewModel = previewViewModel
+        binding.lifecycleOwner = this
 
         // 뷰를 status bar와 navigation bar의 위치에서 떨어진 원래 위치로 복구(회전 방향에 따라 달라짐)
         when (requireActivity().display?.rotation) {
@@ -100,6 +105,17 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                 permissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             }
         }
+
+        // 현재 보여지고 있는 아이템 포지션 화면에 띄우기
+        binding.recyclerView.addOnScrollListener(object: RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    val position = (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                    previewViewModel.currentSlide.value = position + 1
+                }
+            }
+        })
 
 
         return binding.root
@@ -148,6 +164,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
 
     // 슬라이드를 프리뷰 슬라이드로 변환
     private fun processSlidesIntoPreviewSlides() {
+        binding.textIndicator.visibility = View.GONE
         binding.layoutLoading.root.visibility = View.VISIBLE
 
         // 이미 해놓은거 있으면 패스
@@ -197,10 +214,15 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
             }
 
             withContext(Dispatchers.Main) {
+
                 // 리사이클러 뷰에 반영
                 adapter.replaceItems(previewSlideList)
                 // 로딩 끄기
                 binding.layoutLoading.root.visibility = View.GONE
+
+                // 현재 페이지 표시
+                previewViewModel.slidesSize.value = previewViewModel.previewSlides.value?.size
+                binding.textIndicator.visibility = View.VISIBLE
             }
         }
     }

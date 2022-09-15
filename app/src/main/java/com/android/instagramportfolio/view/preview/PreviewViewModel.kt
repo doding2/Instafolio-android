@@ -10,6 +10,13 @@ class PreviewViewModel: ViewModel() {
     val previewSlides = MutableLiveData<MutableList<PreviewSlide>>().apply {
         value = mutableListOf()
     }
+    // 현재 보여지고 있는 슬라이드의 포지션
+    val currentSlide = MutableLiveData<Int>().apply {
+        value = 1
+    }
+    val slidesSize = MutableLiveData<Int>().apply {
+        value = 0
+    }
 
     // 저장 중에 도중에 나갈때 대비해서
     // DB에 등록된놈 삭제시킴

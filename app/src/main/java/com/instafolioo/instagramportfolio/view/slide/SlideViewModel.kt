@@ -39,13 +39,8 @@ class SlideViewModel: ViewModel() {
         value = false
     }
 
-    // Intent로 유저를 manage storage 퍼미션을 수정하라고 보냈는지 아닌지 체크
-    val isAppPausedBecauseOfPermission = MutableLiveData<Boolean>().apply {
-        value = false
-    }
-
     // 기존 파일 열었을때 아무런 수정 안해으면 뒤로가기 다이얼로그 안뜨게 하기 위해
-    val isSlideMoved = MutableLiveData<Boolean>().apply {
+    val isSlideChanged = MutableLiveData<Boolean>().apply {
         value = false
     }
 
@@ -57,7 +52,6 @@ class SlideViewModel: ViewModel() {
         bindingFlattenSlides.value = listOf()
         isInstarSize.value = true
         enableBinding.value = false
-        isAppPausedBecauseOfPermission.value = false
-        isSlideMoved.value = false
+        isSlideChanged.value = false
     }
 }

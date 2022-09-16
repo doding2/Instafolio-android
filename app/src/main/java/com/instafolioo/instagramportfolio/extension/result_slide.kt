@@ -9,6 +9,7 @@ import com.instafolioo.instagramportfolio.model.ResultSlide
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
+import java.io.ObjectInputStream
 
 // document 파일을 열때마다 생기는 알 수 없는 놈들 삭제하기
 fun Context.optimizeDocumentCache() {
@@ -48,6 +49,10 @@ fun ResultSlide.getFileAsImages(context: Context): MutableList<Bitmap> {
     cacheDir = File(cacheDir, "id_$id")
 
     for (file in cacheDir.listFiles()) {
+        // 이미지 파일이 아니면 패스
+        if (file.extension == "dat")
+            continue
+
         val inputStream = FileInputStream(file)
         val bitmap = BitmapFactory.decodeStream(inputStream)
         bitmaps.add(bitmap)
@@ -55,6 +60,36 @@ fun ResultSlide.getFileAsImages(context: Context): MutableList<Bitmap> {
     }
 
     return bitmaps
+}
+
+// 내부저장소에서 인스타 사이즈 상태 가져오기
+fun ResultSlide.getInstarSizeState(context: Context): Boolean {
+    val cw = ContextWrapper(context)
+    var cacheDir = cw.getDir("slides", Context.MODE_PRIVATE)
+    cacheDir = File(cacheDir, "id_$id")
+
+    val instarSizeState = File(cacheDir, "instar_size_state.dat")
+
+    val input = ObjectInputStream(FileInputStream(instarSizeState))
+    val isInstarSize = input.readBoolean()
+    input.close()
+
+    return isInstarSize
+}
+
+// 내부저장소에서 바인딩 상태 가져오기
+fun ResultSlide.getBindingIndicesState(context: Context): List<Pair<Int, Int>> {
+    val cw = ContextWrapper(context)
+    var cacheDir = cw.getDir("slides", Context.MODE_PRIVATE)
+    cacheDir = File(cacheDir, "id_$id")
+
+    val bindingState = File(cacheDir, "binding_state.dat")
+
+    val input = ObjectInputStream(FileInputStream(bindingState))
+    val bindingIndices = input.readObject() as List<Pair<Int, Int>>
+    input.close()
+
+    return bindingIndices
 }
 
 // 내부 저장소에서 이미지 하나 불러오기

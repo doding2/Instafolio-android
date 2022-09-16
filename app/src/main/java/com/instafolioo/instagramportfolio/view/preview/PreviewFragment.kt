@@ -246,7 +246,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
 
             // result slide를 뷰 모델에 추가시켜 저장
             val thumbnail = getResized(bitmaps.first(), 200, 200)
-            val resultSlide = ResultSlide(0, format, bitmaps.size, thumbnail)
+            val resultSlide = ResultSlide(0, format, slideViewModel.slides.value!!.size, thumbnail)
             val id = homeViewModel.addResultSlide(resultSlide)
             resultSlide.id = id
 
@@ -254,8 +254,16 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                 previewViewModel.savingSlide.value = resultSlide
             }
 
+            // 내부저장소에 원본과 상태 저장 (무조건 png)
             val inInnerStorage = async {
-                saveBitmapsAsImage(requireContext(), bitmaps, "slides", "id_${id}", format, previewViewModel.savingSlide)
+                slideViewModel.run {
+                    val originalBitmaps = slides.value!!.map { it.bitmap }
+                    val isInstarSize = isInstarSize.value!!
+                    val bindingIndices = bindingPairs.value!!.map { slides.value!!.indexOf(it.first) to slides.value!!.indexOf(it.second) }
+
+                    saveOriginalSlidesWithState(requireContext(), originalBitmaps, isInstarSize, bindingIndices,
+                        "slides", "id_${id}", "png", previewViewModel.savingSlide)
+                }
             }
             // 슬라이드를 외부저장소에 이미지로 저장
             val inExternalStorage = async {
@@ -302,10 +310,9 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                 }
             }
 
-
             // result slide를 뷰 모델에 추가시켜 저장
             val thumbnail = getResized(bitmaps.first(), 200, 200)
-            val resultSlide = ResultSlide(0, "pdf", bitmaps.size, thumbnail)
+            val resultSlide = ResultSlide(0, "pdf", slideViewModel.slides.value!!.size, thumbnail)
             val id = homeViewModel.addResultSlide(resultSlide)
             resultSlide.id = id
 
@@ -313,9 +320,16 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                 previewViewModel.savingSlide.value = resultSlide
             }
 
-            // pdf 파일도 내부저장소는 이미지로 저장(포맷은 jpg)
+            // 내부저장소에 원본과 상태 저장 (무조건 png)
             val inInnerStorage = async {
-                saveBitmapsAsImage(requireContext(), bitmaps, "slides", "id_$id", "jpg", previewViewModel.savingSlide)
+                slideViewModel.run {
+                    val originalBitmaps = slides.value!!.map { it.bitmap }
+                    val isInstarSize = isInstarSize.value!!
+                    val bindingIndices = bindingPairs.value!!.map { slides.value!!.indexOf(it.first) to slides.value!!.indexOf(it.second) }
+
+                    saveOriginalSlidesWithState(requireContext(), originalBitmaps, isInstarSize, bindingIndices,
+                        "slides", "id_${id}", "png", previewViewModel.savingSlide)
+                }
             }
             // 슬라이드를 외부저장소에 pdf로 저장(포맷은 jpg)
             val inExternalStorage = async {

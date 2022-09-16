@@ -13,12 +13,8 @@ import com.instafolioo.instagramportfolio.model.ResultSlide
 import com.itextpdf.text.Document
 import com.itextpdf.text.Image
 import com.itextpdf.text.pdf.PdfWriter
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileNotFoundException
-import java.io.FileOutputStream
+import java.io.*
 import java.lang.Integer.max
-import java.util.*
 
 // 슬라이드 이미지를 오리지널로 리턴
 fun PreviewSlide.getAsOriginal(): Bitmap {
@@ -43,14 +39,21 @@ fun PreviewSlide.getAsInstarSizeBinding(): Bitmap {
     return setSlideInstarSize(bindedBitmap)
 }
 
-fun saveBitmapsAsImage(
+// 유저가 수정한 상태를 원본 이미지와 함께 저장
+fun saveOriginalSlidesWithState(
     context: Context,
     bitmaps: List<Bitmap>,
+    isInstarSize: Boolean,
+    bindingIndices: List<Pair<Int, Int>>,
     directory: String,
     innerDirectory: String,
     extension: String,
     isSavingSlide: MutableLiveData<ResultSlide>
 ) {
+    // state 저장
+    saveState(context, isInstarSize, bindingIndices, directory, innerDirectory)
+    
+    // 비트맵 저장
     bitmaps.forEachIndexed { index, bitmap ->
         // 유저가 저장 도중에 나갈때
         isSavingSlide.value ?: return@forEachIndexed
@@ -58,6 +61,7 @@ fun saveBitmapsAsImage(
         saveBitmap(context, bitmap, directory, innerDirectory, "$index", extension)
     }
 }
+
 
 // 인자로 받은 비트맵을 이미지로 저장
 fun saveBitmap(
@@ -82,6 +86,33 @@ fun saveBitmap(
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
     }
     out.close()
+}
+
+// state 저장
+fun saveState(
+    context: Context,
+    isInstarSize: Boolean,
+    bindingPairs: List<Pair<Int, Int>>,
+    directory: String,
+    innerDirectory: String
+) {
+    val cw = ContextWrapper(context)
+    var cacheDir = cw.getDir(directory, Context.MODE_PRIVATE)
+    cacheDir = File(cacheDir, innerDirectory)
+    cacheDir.mkdirs()
+
+    val instarSizeState = File(cacheDir, "instar_size_state.dat")
+    val bindingState = File(cacheDir, "binding_state.dat")
+
+    // instar size 정보 저장
+    val instarSizeWriter = ObjectOutputStream(FileOutputStream(instarSizeState))
+    instarSizeWriter.writeBoolean(isInstarSize)
+    instarSizeWriter.close()
+
+    // binding 정보 저장
+    val bindingWriter = ObjectOutputStream(FileOutputStream(bindingState))
+    bindingWriter.writeObject(bindingPairs)
+    bindingWriter.close()
 }
 
 // 비트맵들을 pdf로 저장
@@ -118,16 +149,6 @@ fun saveBitmapsAsPdf(
     }
 
     document.close()
-}
-
-// 외부 저장소 파일들 삭제
-fun deleteExternalStorageDirectory(
-    innerDirectory: String
-) {
-    val externalDirectory = getExternalStorageDir("인스타그램 포트폴리오", innerDirectory)
-    if (externalDirectory.exists()) {
-        externalDirectory.deleteRecursively()
-    }
 }
 
 // 비트맵들을 pdf로 외부저장소에 저장

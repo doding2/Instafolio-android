@@ -53,19 +53,10 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
             }
             // pdf exception
             is NoManageStoragePermissionException -> {
-                showMessageDialog(
-                    "권한요청",
-                    "파일을 열기 위해서는\n모든 파일에 대한 접근 권한이 필요합니다.",
+                showAlertDialog("지원하지 않는 경로로부터의 파일입니다.",
                     onDismiss = {
-                        val intent = Intent()
-                        intent.action = Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION
-                        val uri = Uri.fromParts("package", requireActivity().packageName, null)
-                        intent.data = uri
-                        // manage storage 퍼미션 허용하라고 유저를 보내버림
-                        viewModel.isAppPausedBecauseOfPermission.value = true
-                        startActivity(intent)
-                    }
-                )
+                        findNavController().popBackStack()
+                })
             }
             else -> {
                 showMessageDialog(
@@ -167,6 +158,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
         // 이미지 사이즈 조절
         initImagesScale()
         binding.buttonScale.setOnClickListener {
+            viewModel.isSlideChanged.value = true
             scaleImages()
         }
 
@@ -246,19 +238,26 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
 
                 // 백그라운드 스레드에서 처리
                 val waitingSlides = async(Dispatchers.IO) {
-                    // pdf 파일
-                    if (format == "pdf") {
-                        // pdf 파일도 내부저장소는 이미지로 저장
-//                        val bitmaps = pdfToBitmaps(resultSlide.getFileOfPdf(requireContext()))
-//                        bitmaps.map { Slide(it) }
-                        val imageBitmaps = resultSlide.getFileAsImages(requireContext())
-                        imageBitmaps.map { Slide(it) }
+                    val imageBitmaps = resultSlide.getFileAsImages(requireContext())
+                    val slides = imageBitmaps.map { Slide(it) }
+
+                    // 인스타 사이즈 상태 불러오기
+                    val isInstarSize = resultSlide.getInstarSizeState(requireContext())
+
+                    // 바인딩 페어 정보 불러오기
+                    val bindingIndices = resultSlide.getBindingIndicesState(requireContext())
+                    val bindingPairs = bindingIndices.map { slides[it.first] to slides[it.second] }.toMutableList()
+
+                    // 뷰 모델에 정보 저장
+                    withContext(Dispatchers.Main) {
+                        if (!isInstarSize) {
+                            viewModel.isInstarSize.value = isInstarSize
+                            initImagesScale()
+                        }
+                        viewModel.bindingPairs.value?.addAll(bindingPairs)
                     }
-                    // 이미지 파일
-                    else {
-                        val imageBitmaps = resultSlide.getFileAsImages(requireContext())
-                        imageBitmaps.map { Slide(it) }
-                    }
+
+                    return@async slides
                 }
 
                 // 이미지 불러오는걸 기다림
@@ -363,6 +362,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
             if (viewModel.slides.value?.size!! <= 1) {
                 return
             }
+            viewModel.isSlideChanged.value = true
 
             var firstIdx = adapter.getIndexOf(slide)
             if (firstIdx >= adapter.itemCount - 1) {
@@ -398,7 +398,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
             }
 
         } else {
-            // 만약 클릭한 이 슬라이드가 바인딩 됐을 때
+            // 만약 클릭한 이 슬라이드가 바인딩 된 놈일 때
             if (adapter.isBindingContains(slide)) {
                 binding.imagePreview.visibility = View.GONE
                 binding.layoutBinding.visibility = View.VISIBLE
@@ -531,25 +531,6 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
         }
     }
 
-    // manage storage 권한 요청이 받아졌는지 확인
-    override fun onResume() {
-        super.onResume()
-        // 유저가 manage storage 권한을 수정하러 보내졌는가?
-        if (viewModel.isAppPausedBecauseOfPermission.value == true) {
-            // 권한이 성공적으로 수정됨
-            if (Environment.isExternalStorageManager()) {
-                viewModel.isAppPausedBecauseOfPermission.value = false
-                handleUri(viewModel.uriWithExtension.value!!)
-            }
-            // 권한이 아직 수정 안 됨
-            else {
-                viewModel.isAppPausedBecauseOfPermission.value = false
-                findNavController().popBackStack()
-            }
-        }
-    }
-
-
     // image의 uri를 가지고 bitmap으로 변환
     private suspend fun convertImageUriToBitmap(imageUri: Uri): Bitmap {
         var bitmap: Bitmap? = null
@@ -558,6 +539,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
                 launch(exceptionHandler) {
                     withContext(Dispatchers.IO) {
                         bitmap = imageToBitmap(imageUri)
+                        bitmap = getResized(bitmap!!)
                     }
                 }
         }
@@ -591,9 +573,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
         // 확인 다이얼로그 안 띄워도 됨
         viewModel.run {
             if (!resultSlideWithExtension.value.isNullOrEmpty()
-                && isSlideMoved.value == false
-                && adapter.bindingPairs.isEmpty()
-                && isInstarSize.value == true
+                && isSlideChanged.value == false
             ) {
                 slides.value = null
                 findNavController().popBackStack()

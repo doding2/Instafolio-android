@@ -341,7 +341,7 @@ class SlideAdapter(
         notifyItemMoved(fromPosition, toPosition2)
 
         if (fromPosition != toPosition2) {
-            viewModel.isSlideMoved.value = true
+            viewModel.isSlideChanged.value = true
         }
     }
 

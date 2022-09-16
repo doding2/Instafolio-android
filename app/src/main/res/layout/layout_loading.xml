@@ -9,20 +9,9 @@
     android:background="@color/less_transparent_black"
     android:gravity="center">
 
-    <com.github.ybq.android.spinkit.SpinKitView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/SpinKitView.FoldingCube"/>
-
-<!--    <TextView-->
-<!--        android:id="@+id/text_loading"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_margin="10dp"-->
-<!--        android:text="PDF 변환 중..."-->
-<!--        android:textSize="16sp"-->
-<!--        android:textColor="@color/white"-->
-<!--        android:textStyle="bold"-->
-<!--        android:gravity="center"/>-->
+    <ImageView
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:src="@drawable/instafolio_logo"/>
 
 </LinearLayout>

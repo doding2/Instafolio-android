@@ -1,18 +1,21 @@
 package com.instafolioo.instagramportfolio.view.instagram.upload
 
 import android.content.Context
+import android.content.Context.INPUT_METHOD_SERVICE
 import android.content.ContextWrapper
 import android.graphics.Bitmap
-import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.github.instagram4j.instagram4j.IGClient
 import com.github.instagram4j.instagram4j.requests.media.MediaConfigureSidecarRequest
@@ -31,6 +34,7 @@ import kotlinx.coroutines.*
 import java.io.File
 import java.io.FileNotFoundException
 import java.nio.file.Files
+
 
 class InstagramUploadFragment: Fragment(), MainActivity.OnBackPressedListener {
 
@@ -79,9 +83,12 @@ class InstagramUploadFragment: Fragment(), MainActivity.OnBackPressedListener {
         WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightStatusBars = true
         WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightNavigationBars = true
 
+        val imm = requireContext().getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
 
         // 인스타그램에 업로드
         binding.buttonUpload.setOnClickListener {
+            binding.editTextContent.clearFocus()
+            imm.hideSoftInputFromWindow(binding.editTextContent.windowToken, 0)
             upload()
         }
 
@@ -232,11 +239,11 @@ class InstagramUploadFragment: Fragment(), MainActivity.OnBackPressedListener {
                 previewViewModel.previewSlides.value?.forEach {
                     when (it.viewType) {
                         PreviewSlide.ORIGINAL ->
-                            bitmaps.add(it.getAsOriginal())
+                            bitmaps.add(it.getAsOriginal().setInstagramRatio())
                         PreviewSlide.INSTAR_SIZE ->
                             bitmaps.add(it.getAsInstarSize())
                         PreviewSlide.ORIGINAL_BINDING ->
-                            bitmaps.add(it.getAsOriginalBinding())
+                            bitmaps.add(it.getAsOriginalBinding().setInstagramRatio())
                         PreviewSlide.INSTAR_SIZE_BINDING ->
                             bitmaps.add(it.getAsInstarSizeBinding())
                         else -> throw IllegalStateException("있을 수 없는 뷰 타입")

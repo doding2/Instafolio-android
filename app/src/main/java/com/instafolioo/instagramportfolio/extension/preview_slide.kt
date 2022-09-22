@@ -374,6 +374,30 @@ fun bindSlide(
     return backgroundBitmap
 }
 
+// 인스타그램에 업로드 하려면 1대1 비율이어야 됨
+fun Bitmap.setInstagramRatio(): Bitmap {
+    // 비트맵 크기 1080으로 변환
+    val resizedBitmap = if (this.width != 1080 || this.height != 1080) {
+        getResized(this)
+    } else {
+        this
+    }
+    // 비트맵 타입을 hardware type에서 내가 수정할 수 있도록 변경
+    val bitmapCopied = resizedBitmap.copy(Bitmap.Config.ARGB_8888, false)
+
+    val backgroundBitmap = Bitmap.createBitmap(1080, 1080, Bitmap.Config.ARGB_8888)
+
+    val canvas = Canvas(backgroundBitmap)
+    canvas.drawColor(Color.TRANSPARENT)
+    canvas.drawBitmap(
+        bitmapCopied,
+        (backgroundBitmap.width - bitmapCopied.width) / 2f,
+        (backgroundBitmap.height - bitmapCopied.height) / 2f,
+        null
+    )
+
+    return backgroundBitmap
+}
 
 // 이미지의 높이를 무조건 1080으로 맞추고
 // 너비는 그에 비례하여 키움

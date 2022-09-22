@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
@@ -73,9 +74,13 @@ class InstagramLogInFragment : Fragment() {
         WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightStatusBars = true
         WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightNavigationBars = true
 
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 
         // 로그인
         binding.buttonLogIn.setOnClickListener {
+            binding.editTextNickname.clearFocus()
+            binding.editTextPassword.clearFocus()
+            imm.hideSoftInputFromWindow(binding.editTextPassword.windowToken, 0)
             logIn()
         }
 

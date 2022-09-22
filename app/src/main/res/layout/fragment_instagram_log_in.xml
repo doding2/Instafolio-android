@@ -22,6 +22,7 @@
             tools:context=".view.instagram.log_in.InstagramLogInFragment">
 
             <EditText
+                android:id="@+id/edit_text_nickname"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@={viewModel.nickname}"
@@ -31,6 +32,7 @@
                 android:hint="인스타그램 닉네임"/>
 
             <EditText
+                android:id="@+id/edit_text_password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@={viewModel.password}"

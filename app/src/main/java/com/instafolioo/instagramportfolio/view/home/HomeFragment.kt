@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import com.github.instagram4j.instagram4j.IGClient
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.instafolioo.instagramportfolio.R
 import com.instafolioo.instagramportfolio.databinding.FragmentHomeBinding

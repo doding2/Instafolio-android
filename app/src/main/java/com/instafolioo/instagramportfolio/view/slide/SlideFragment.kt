@@ -83,29 +83,29 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
         when (requireActivity().display?.rotation) {
             // 폰이 왼쪽으로 누움
             Surface.ROTATION_90 -> {
-                binding.root.setPadding(0, getStatusBarHeight(), getNaviBarHeight(), 0)
+                binding.layoutRoot.setPadding(0, getStatusBarHeight(), getNaviBarHeight(), 0)
 
                 // 뷰가 화면에 너무 크게 차지하지 않게 조절
-                binding.root.post {
+                binding.layoutRoot.post {
                     val params = binding.layoutPreviewBackground.layoutParams
-                    params.width = (binding.root.height / 3.0).toInt()
+                    params.width = (binding.layoutRoot.height / 3.0).toInt()
                     binding.layoutPreviewBackground.layoutParams = params
                 }
             }
             // 폰이 오른쪽으로 누움
             Surface.ROTATION_270 -> {
-                binding.root.setPadding(getNaviBarHeight(), getStatusBarHeight(), 0, 0)
+                binding.layoutRoot.setPadding(getNaviBarHeight(), getStatusBarHeight(), 0, 0)
 
                 // 뷰가 화면에 너무 크게 차지하지 않게 조절
-                binding.root.post {
+                binding.layoutRoot.post {
                     val params = binding.layoutPreviewBackground.layoutParams
-                    params.width = (binding.root.height / 3.0).toInt()
+                    params.width = (binding.layoutRoot.height / 3.0).toInt()
                     binding.layoutPreviewBackground.layoutParams = params
                 }
             }
             // 그 외는 그냥 정방향으으로 처리함
             else -> {
-                binding.root.setPadding(0, getStatusBarHeight(), 0, getNaviBarHeight())
+                binding.layoutRoot.setPadding(0, getStatusBarHeight(), 0, getNaviBarHeight())
 
                 // 정상 상태
                 val params = binding.layoutPreviewBackground.layoutParams

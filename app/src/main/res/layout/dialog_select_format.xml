@@ -64,8 +64,24 @@
         android:gravity="center"
         android:clickable="true"
         android:focusable="true"
-        android:background="@drawable/selector_dialog_button_round"
+        android:background="@drawable/selector_dialog_button"
         android:text="PDF"
+        android:textColor="@color/black"
+        android:textSize="17sp"/>
+
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="match_parent"
+        android:layout_height="0.3dp"/>
+
+    <TextView
+        android:id="@+id/button_instagram"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:gravity="center"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="@drawable/selector_dialog_button_round"
+        android:text="Instagram"
         android:textColor="@color/black"
         android:textSize="17sp"/>
 </LinearLayout>

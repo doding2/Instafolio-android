@@ -24,4 +24,11 @@ class PreviewViewModel: ViewModel() {
         value = null
     }
 
+    fun clear() {
+        previewSlides.value?.clear()
+        currentSlide.value = 1
+        slidesSize.value = 0
+        savingSlide.value = null
+    }
+
 }

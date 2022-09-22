@@ -1,6 +1,8 @@
 package com.instafolioo.instagramportfolio.view.preview
 
 import android.Manifest
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -16,6 +18,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.github.instagram4j.instagram4j.IGClient
 import com.instafolioo.instagramportfolio.R
 import com.instafolioo.instagramportfolio.databinding.FragmentPreviewBinding
 import com.instafolioo.instagramportfolio.extension.*
@@ -30,6 +33,7 @@ import com.instafolioo.instagramportfolio.view.home.HomeViewModel
 import com.instafolioo.instagramportfolio.view.home.HomeViewModelFactory
 import com.instafolioo.instagramportfolio.view.slide.SlideViewModel
 import kotlinx.coroutines.*
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -56,23 +60,26 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
         val homeFactory = HomeViewModelFactory(requireActivity())
         homeViewModel = ViewModelProvider(requireActivity(), homeFactory)[HomeViewModel::class.java]
         slideViewModel = ViewModelProvider(requireActivity())[SlideViewModel::class.java]
-        previewViewModel = ViewModelProvider(this)[PreviewViewModel::class.java]
+        previewViewModel = ViewModelProvider(requireActivity())[PreviewViewModel::class.java]
         binding.viewModel = previewViewModel
         binding.lifecycleOwner = this
 
+        // 프리뷰 초기화
+        previewViewModel.clear()
+        
         // 뷰를 status bar와 navigation bar의 위치에서 떨어진 원래 위치로 복구(회전 방향에 따라 달라짐)
         when (requireActivity().display?.rotation) {
             // 폰이 왼쪽으로 누움
             Surface.ROTATION_90 -> {
-                binding.root.setPadding(0, getStatusBarHeight(), getNaviBarHeight(), 0)
+                binding.layoutRoot.setPadding(0, getStatusBarHeight(), getNaviBarHeight(), 0)
             }
             // 폰이 오른쪽으로 누움
             Surface.ROTATION_270 -> {
-                binding.root.setPadding(getNaviBarHeight(), getStatusBarHeight(), 0, 0)
+                binding.layoutRoot.setPadding(getNaviBarHeight(), getStatusBarHeight(), 0, 0)
             }
             // 그 외는 그냥 정방향으으로 처리함
             else -> {
-                binding.root.setPadding(0, getStatusBarHeight(), 0, getNaviBarHeight())
+                binding.layoutRoot.setPadding(0, getStatusBarHeight(), 0, getNaviBarHeight())
             }
         }
 
@@ -131,16 +138,40 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
             when(format) {
                 // 이미지로 저장
                 "png", "jpg" -> {
-                    binding.layoutLoading.root.visibility = View.VISIBLE
                     saveSlidesAsImage(format)
                 }
                 // pdf로 저장
                 "pdf" -> {
-                    binding.layoutLoading.root.visibility = View.VISIBLE
                     saveSlidesAsPdf()
+                }
+                // 인스타그램에 업로드
+                "instagram" -> {
+                    navigateToInstagram()
                 }
                 else -> throw IllegalStateException("존재하지 않는 선택지 입니다")
             }
+            binding.layoutLoading.root.visibility = View.VISIBLE
+        }
+    }
+    
+    // 인스타그램 프래그먼트로 이동
+    private fun navigateToInstagram() {
+        try {
+            val cw = ContextWrapper(context)
+            var directory = cw.getDir("instagram", Context.MODE_PRIVATE)
+            directory = File(directory, "log_in")
+
+            val clientFile = File(directory, "client.ser")
+            val cookieFile = File(directory, "cookie.ser")
+
+            val client = IGClient.deserialize(clientFile, cookieFile)
+
+            if (client.isLoggedIn)
+                findNavController().navigate(R.id.action_previewFragment_to_instagramUploadFragment)
+            else
+                throw Exception("Not Logged In")
+        } catch (e: Exception) {
+            findNavController().navigate(R.id.action_previewFragment_to_instagramLogInFragment)
         }
     }
 
@@ -281,7 +312,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
 
             // 홈 화면으로 돌아가기
             withContext(Dispatchers.Main) {
-                showAlertDialog("저장 완료",
+                showAlertDialog("저장에 성공했습니다.",
                     onDismiss = {
                         previewViewModel.savingSlide.value = null
                         findNavController().navigate(R.id.action_previewFragment_to_homeFragment)
@@ -346,7 +377,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
 
             // 홈 화면으로 돌아가기
             withContext(Dispatchers.Main) {
-                showAlertDialog("저장 완료",
+                showAlertDialog("저장에 성공했습니다.",
                     onDismiss = {
                         previewViewModel.savingSlide.value = null
                         findNavController().navigate(R.id.action_previewFragment_to_homeFragment)

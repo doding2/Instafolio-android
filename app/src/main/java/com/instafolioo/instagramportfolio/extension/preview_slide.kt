@@ -62,6 +62,29 @@ fun saveOriginalSlidesWithState(
     }
 }
 
+// 프리뷰 이미지를 그대로 저장
+fun savePreviewSlides(
+    context: Context,
+    bitmaps: List<Bitmap>,
+    directory: String,
+    innerDirectory: String,
+    extension: String,
+    isSavingSlide: MutableLiveData<ResultSlide>
+): List<File> {
+    // 파일 리스트
+    val files = arrayListOf<File>()
+
+    // 비트맵 저장
+    bitmaps.forEachIndexed { index, bitmap ->
+        // 유저가 저장 도중에 나갈때
+        isSavingSlide.value ?: return@forEachIndexed
+
+        val file = saveBitmap(context, bitmap, directory, innerDirectory, "$index", extension)
+        files.add(file)
+    }
+
+    return files
+}
 
 // 인자로 받은 비트맵을 이미지로 저장
 fun saveBitmap(
@@ -71,7 +94,7 @@ fun saveBitmap(
     innerDirectory: String,
     name: String,
     extension: String
-) {
+): File {
     val cw = ContextWrapper(context)
     var cacheDir = cw.getDir(directory, Context.MODE_PRIVATE)
     cacheDir = File(cacheDir, innerDirectory)
@@ -86,6 +109,8 @@ fun saveBitmap(
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
     }
     out.close()
+
+    return imagePath
 }
 
 // state 저장

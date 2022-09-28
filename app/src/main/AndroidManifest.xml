@@ -18,6 +18,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.InstagramPortfolio"
         tools:targetApi="31">
+         <provider
+             android:authorities="${applicationId}.provider"
+             android:name="androidx.core.content.FileProvider"
+             android:exported="false"
+             android:grantUriPermissions="true">
+             <meta-data
+                 android:name="android.support.FILE_PROVIDER_PATHS"
+                 android:resource="@xml/provider_paths"/>
+         </provider>
         <activity
             android:name="com.instafolioo.instagramportfolio.view.common.MainActivity"
             android:exported="true">

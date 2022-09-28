@@ -15,7 +15,6 @@ import com.instafolioo.instagramportfolio.model.PreviewSlide
 
 class PreviewSlideAdapter(
     private val items: MutableList<PreviewSlide>,
-    private val isInstarSize: Boolean,
 ): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     // 얘가 있어야지 뷰 타입이 갈림

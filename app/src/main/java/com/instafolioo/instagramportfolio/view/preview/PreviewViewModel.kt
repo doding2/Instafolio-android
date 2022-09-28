@@ -24,11 +24,27 @@ class PreviewViewModel: ViewModel() {
         value = null
     }
 
+    // 분할 위치 지정
+    val cutPositions = MutableLiveData<MutableList<Int>>().apply {
+        value = mutableListOf()
+    }
+
     fun clear() {
         previewSlides.value?.clear()
         currentSlide.value = 1
         slidesSize.value = 0
         savingSlide.value = null
+        cutPositions.value?.clear()
     }
 
+    // 분할
+    val isAlreadyCut get() = cutPositions.value!!.contains(currentSlide.value!! - 1)
+
+    fun addCutPosition() {
+        cutPositions.value?.add(currentSlide.value!! - 1)
+    }
+
+    fun removeCutPosition() {
+        cutPositions.value?.remove(currentSlide.value!! - 1)
+    }
 }

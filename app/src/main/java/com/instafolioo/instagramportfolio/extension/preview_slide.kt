@@ -79,7 +79,7 @@ fun savePreviewSlides(
         // 유저가 저장 도중에 나갈때
         isSavingSlide.value ?: return@forEachIndexed
 
-        val file = saveBitmap(context, bitmap, directory, innerDirectory, "$index", extension)
+        val file = saveBitmap(context, bitmap, directory, innerDirectory, "$index", extension, true)
         files.add(file)
     }
 
@@ -93,14 +93,25 @@ fun saveBitmap(
     directory: String,
     innerDirectory: String,
     name: String,
-    extension: String
+    extension: String,
+    isCache: Boolean = false
 ): File {
-    val cw = ContextWrapper(context)
-    var cacheDir = cw.getDir(directory, Context.MODE_PRIVATE)
-    cacheDir = File(cacheDir, innerDirectory)
-    cacheDir.mkdirs()
+    val dir = if (isCache) {
+        val cw = ContextWrapper(context)
+        var cacheDir = File(cw.cacheDir, directory)
+        cacheDir = File(cacheDir, innerDirectory)
+        cacheDir.mkdirs()
+        cacheDir
+    }
+    else {
+        val cw = ContextWrapper(context)
+        var fileDir = cw.getDir(directory, Context.MODE_PRIVATE)
+        fileDir = File(fileDir, innerDirectory)
+        fileDir.mkdirs()
+        fileDir
+    }
 
-    val imagePath = File(cacheDir, "${name}.${extension}")
+    val imagePath = File(dir, "${name}.${extension}")
 
     val out = FileOutputStream(imagePath)
     if (extension == "jpg") {

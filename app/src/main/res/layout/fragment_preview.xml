@@ -13,77 +13,167 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <FrameLayout
+        <RelativeLayout
             android:id="@+id/layout_root"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:orientation="vertical"
             android:background="@color/black"
             tools:context=".view.preview.PreviewFragment">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycler_view"
+            <FrameLayout
+                android:id="@+id/layout_preview"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_gravity="center"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                android:orientation="horizontal"/>
+                android:layout_alignParentStart="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentTop="true"
+                android:layout_above="@id/layout_cut">
 
-            <ImageView
-                android:id="@+id/button_download"
-                android:theme="@android:style/ThemeOverlay.Material.Dark"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="top|end"
-                android:src="@drawable/icon_download"
-                android:layout_marginVertical="10dp"
-                android:layout_marginEnd="15dp"
-                app:tint="@color/white" />
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    android:orientation="horizontal"/>
+
+                <ImageView
+                    android:id="@+id/button_download"
+                    android:theme="@android:style/ThemeOverlay.Material.Dark"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top|end"
+                    android:src="@drawable/icon_download"
+                    android:layout_marginVertical="10dp"
+                    android:layout_marginEnd="15dp"
+                    app:tint="@color/white" />
+
+                <LinearLayout
+                    android:id="@+id/text_indicator"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_gravity="top"
+                    android:gravity="center"
+                    android:layout_marginVertical="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="("
+                        android:textSize="18sp"
+                        android:textColor="@color/white"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@{String.valueOf(viewModel.currentSlide)}"
+                        android:textSize="18sp"
+                        android:textColor="@color/white"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="/"
+                        android:textSize="18sp"
+                        android:textColor="@color/white"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@{String.valueOf(viewModel.slidesSize)}"
+                        android:textSize="18sp"
+                        android:textColor="@color/white"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=")"
+                        android:textSize="18sp"
+                        android:textColor="@color/white"/>
+                </LinearLayout>
+            </FrameLayout>
+
 
             <LinearLayout
-                android:id="@+id/text_indicator"
+                android:id="@+id/layout_cut"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_gravity="top"
-                android:gravity="center"
-                android:layout_marginVertical="10dp">
+                android:orientation="vertical"
+                android:layout_margin="10dp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentBottom="true"
+                android:clipChildren="false">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <FrameLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="("
-                    android:textSize="18sp"
-                    android:textColor="@color/white"/>
+                    android:layout_marginHorizontal="10dp"
+                    android:clipChildren="false">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@{String.valueOf(viewModel.currentSlide)}"
-                    android:textSize="18sp"
-                    android:textColor="@color/white"/>
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recycler_view_cut"
+                        android:layout_width="wrap_content"
+                        android:layout_height="60dp"
+                        android:layout_marginVertical="20dp"
+                        android:layout_gravity="center"
+                        android:overScrollMode="never"/>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="/"
-                    android:textSize="18sp"
-                    android:textColor="@color/white"/>
+                    <FrameLayout
+                        android:id="@+id/divider"
+                        android:layout_width="wrap_content"
+                        android:layout_height="90dp"
+                        android:layout_gravity="center">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@{String.valueOf(viewModel.slidesSize)}"
-                    android:textSize="18sp"
-                    android:textColor="@color/white"/>
+                        <ImageView
+                            android:layout_width="5dp"
+                            android:layout_height="5dp"
+                            android:src="@drawable/icon_circle"
+                            app:tint="@color/red"
+                            android:layout_gravity="center|top"/>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text=")"
-                    android:textSize="18sp"
-                    android:textColor="@color/white"/>
+                        <View
+                            android:layout_width="0.5dp"
+                            android:layout_height="87dp"
+                            android:background="@color/red"
+                            android:layout_gravity="center|bottom"/>
+                    </FrameLayout>
+                </FrameLayout>
+
+                <LinearLayout
+                    android:id="@+id/button_cut"
+                    android:theme="@android:style/ThemeOverlay.Material.Dark"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:orientation="vertical"
+                    android:layout_gravity="center"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?selectableItemBackgroundBorderless">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/icon_cut"
+                        android:rotation="90"
+                        app:tint="@color/white"
+                        android:layout_weight="1"
+                        android:layout_gravity="center"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:layout_weight="1"
+                        android:text="분할"
+                        android:textSize="13sp"
+                        android:textColor="@color/white"/>
+                </LinearLayout>
             </LinearLayout>
-        </FrameLayout>
+        </RelativeLayout>
 
         <include
             layout="@layout/layout_loading"

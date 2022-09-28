@@ -7,7 +7,9 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
+import android.util.Log
 import android.view.*
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
@@ -222,6 +224,13 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
             if (!viewModel.slides.value.isNullOrEmpty()) {
                 binding.imagePreview.setImageBitmap(viewModel.slides.value!![0].bitmap)
                 adapter.replaceItems(viewModel.slides.value!!, viewModel.bindingPairs.value!!)
+                adapter.bindingPairs = viewModel.bindingPairs.value!!
+
+                Log.d(TAG, "${adapter.items.size}")
+
+                if (viewModel.enableBinding.value == true) {
+                    showFirstBindingToPreview()
+                }
 
                 // 로딩 화면 끄기
                 binding.layoutLoading.root.visibility = View.GONE
@@ -301,6 +310,8 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
                 )
             }
 
+            viewModel.bindingPairs.value = adapter.bindingPairs
+
             // 로딩 끄기
             binding.layoutLoading.root.visibility = View.GONE
         }
@@ -340,7 +351,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
                 binding.imagePreview.setImageBitmap(viewModel.slides.value!![0].bitmap)
                 adapter.replaceItems(viewModel.slides.value!!, viewModel.bindingPairs.value!!)
             } else {
-                // TODO 변환된 비트맵 이미지가 0개
+                // 변환된 비트맵 이미지가 0개
                 showAlertDialog(
                     "파일을 열 수 없습니다.",
                     onDismiss =  {
@@ -437,6 +448,8 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
 
         binding.imagePreview.visibility = View.GONE
         binding.layoutBinding.visibility = View.VISIBLE
+
+        if (adapter.items.isEmpty()) return
 
         // 등록된 바인딩 페어가 없으면
         // 1, 2번 놈 바인딩 된 샘플 이미지 보이기

@@ -223,7 +223,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                     cutAdapter.paste(previewViewModel.currentSlide.value!! - 1)
                     binding.textCut.text = "분할"
                 }
-                else {
+                else if (previewSlides.value!!.size != currentSlide.value){
                     addCutPosition()
                     cutAdapter.cut(previewViewModel.currentSlide.value!! - 1)
                     binding.textCut.text = "분할해제"

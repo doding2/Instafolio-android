@@ -33,36 +33,5 @@
             app:destination="@id/homeFragment"
             app:popUpTo="@id/homeFragment"
             app:popUpToInclusive="true"/>
-        <action
-            android:id="@+id/action_previewFragment_to_instagramLogInFragment"
-            app:destination="@id/instagramLogInFragment" />
-        <action
-            android:id="@+id/action_previewFragment_to_instagramUploadFragment"
-            app:destination="@id/instagramUploadFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/instagramLogInFragment"
-        android:name="com.instafolioo.instagramportfolio.view.instagram.log_in.InstagramLogInFragment"
-        android:label="InstagramLogInFragment"
-        tools:layout="@layout/fragment_instagram_log_in" >
-        <action
-            android:id="@+id/action_instagramLogInFragment_to_instagramUploadFragment"
-            app:destination="@id/instagramUploadFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/instagramUploadFragment"
-        android:name="com.instafolioo.instagramportfolio.view.instagram.upload.InstagramUploadFragment"
-        android:label="InstagramUploadFragment"
-        tools:layout="@layout/fragment_instagram_upload" >
-        <action
-            android:id="@+id/action_instagramUploadFragment_to_previewFragment"
-            app:destination="@id/previewFragment"
-            app:popUpTo="@id/previewFragment"
-            app:popUpToInclusive="true"/>
-        <action
-            android:id="@+id/action_instagramUploadFragment_to_homeFragment"
-            app:destination="@id/homeFragment"
-            app:popUpTo="@id/homeFragment"
-            app:popUpToInclusive="true"/>
     </fragment>
 </navigation>

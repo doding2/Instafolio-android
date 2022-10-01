@@ -48,7 +48,7 @@ fun saveOriginalSlidesWithState(
     directory: String,
     innerDirectory: String,
     extension: String,
-    isSavingSlide: MutableLiveData<ResultSlide>
+    isSavingSlide: MutableLiveData<MutableList<ResultSlide>>
 ) {
     // state 저장
     saveState(context, isInstarSize, bindingIndices, directory, innerDirectory)
@@ -56,7 +56,7 @@ fun saveOriginalSlidesWithState(
     // 비트맵 저장
     bitmaps.forEachIndexed { index, bitmap ->
         // 유저가 저장 도중에 나갈때
-        isSavingSlide.value ?: return@forEachIndexed
+        if (isSavingSlide.value.isNullOrEmpty()) return@forEachIndexed
 
         saveBitmap(context, bitmap, directory, innerDirectory, "$index", extension)
     }
@@ -192,7 +192,7 @@ fun saveBitmapsAsPdfInExternalStorage(
     bitmaps: List<Bitmap>,
     innerDirectory: String? = null,
     name: String,
-    isSavingSlide: MutableLiveData<ResultSlide>
+    isSavingSlide: MutableLiveData<MutableList<ResultSlide>>
 ) {
     val externalStorage = if (innerDirectory == null) {
         getExternalStorageDirWithoutInner("인스타그램 포트폴리오")
@@ -219,7 +219,7 @@ fun saveBitmapsAsPdfInExternalStorage(
 
     for (bitmap in bitmaps) {
         // 유저가 저장 중간에 나갈때
-        if (isSavingSlide.value == null) {
+        if (isSavingSlide.value.isNullOrEmpty()) {
             document.close()
             return
         }
@@ -245,11 +245,11 @@ fun saveBitmapsAsImageInExternalStorage(
     bitmaps: List<Bitmap>,
     innerDirectory: String,
     extension: String,
-    isSavingSlide: MutableLiveData<ResultSlide>
+    isSavingSlide: MutableLiveData<MutableList<ResultSlide>>
 ) {
     bitmaps.forEachIndexed { index, bitmap ->
         // 유저가 중간에 나갈때
-        isSavingSlide.value ?: return@forEachIndexed
+        if (isSavingSlide.value.isNullOrEmpty()) return@forEachIndexed
         
         saveBitmapInExternalStorage(bitmap, innerDirectory, "image $index", extension)
     }

@@ -44,15 +44,8 @@ android {
 }
 
 dependencies {
-    // define a BOM and its version
-    implementation(platform("com.squareup.okhttp3:okhttp-bom:4.10.0"))
 
-    // define any required OkHttp artifacts without version
-    implementation("com.squareup.okhttp3:okhttp")
-    implementation("com.squareup.okhttp3:logging-interceptor")
-
-    // 비공식 인스타그램 api
-    implementation 'com.github.instagram4j:instagram4j:2.0.7'
+    implementation 'com.github.rubensousa:gravitysnaphelper:2.2.2'
 
     // Bitmap을 PDF로 변환할 때 사용
     implementation 'com.itextpdf:itextg:5.5.10'

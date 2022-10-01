@@ -1,13 +1,11 @@
 package com.instafolioo.instagramportfolio.view.preview
 
-import android.content.res.Configuration
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import androidx.constraintlayout.widget.ConstraintLayout
+import android.widget.ImageView
 import androidx.databinding.DataBindingUtil
-import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.instafolioo.instagramportfolio.R
@@ -20,7 +18,8 @@ import com.instafolioo.instagramportfolio.model.PreviewSlide.Companion.ORIGINAL_
 
 class PreviewSlideCutAdapter(
     private val items: MutableList<PreviewSlide>,
-    private val cutPositions: MutableLiveData<MutableList<Int>>
+    private val cutPositions: MutableLiveData<MutableList<Int>>,
+    private val onItemClick: (PreviewSlide, Int) -> Unit,
 ): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val viewHolders = mutableMapOf<Int, CutViewHolder>()
@@ -41,22 +40,22 @@ class PreviewSlideCutAdapter(
         return when (viewType) {
             ORIGINAL -> {
                 val binding: ItemCutOriginalBinding =
-                    DataBindingUtil.inflate(inflater, com.instafolioo.instagramportfolio.R.layout.item_cut_original, parent, false)
+                    DataBindingUtil.inflate(inflater, R.layout.item_cut_original, parent, false)
                 OriginalViewHolder(binding)
             }
             INSTAR_SIZE -> {
                 val binding: ItemCutInstaSizeBinding =
-                    DataBindingUtil.inflate(inflater, com.instafolioo.instagramportfolio.R.layout.item_cut_insta_size, parent, false)
+                    DataBindingUtil.inflate(inflater, R.layout.item_cut_insta_size, parent, false)
                 InstarSizeViewHolder(binding)
             }
             ORIGINAL_BINDING -> {
                 val binding: ItemCutOriginalBindingBinding =
-                    DataBindingUtil.inflate(inflater, com.instafolioo.instagramportfolio.R.layout.item_cut_original_binding, parent, false)
+                    DataBindingUtil.inflate(inflater, R.layout.item_cut_original_binding, parent, false)
                 OriginalBindingViewHolder(binding)
             }
             INSTAR_SIZE_BINDING -> {
                 val binding: ItemCutInstaSizeBindingBinding =
-                    DataBindingUtil.inflate(inflater, com.instafolioo.instagramportfolio.R.layout.item_cut_insta_size_binding, parent, false)
+                    DataBindingUtil.inflate(inflater, R.layout.item_cut_insta_size_binding, parent, false)
                 InstarSizeBindingViewHolder(binding)
             }
             else -> throw IllegalStateException(
@@ -82,21 +81,21 @@ class PreviewSlideCutAdapter(
 
     override fun getItemCount(): Int = items.size
 
-    // 슬라이드 분할시키기
-    fun cutSlide(position: Int) {
-        if (position != items.size - 1) {
-            val viewHolder = viewHolders[position]
-            viewHolder?.cutSlide()
-        }
+    fun getItemWidth() = viewHolders.values.firstOrNull()?.root?.getMarginedWidth()
+        ?: throw IllegalStateException(
+            "오리지널, 인스타 사이즈, 오리지널 바인딩, 인스타 사이즈 바인딩 이외의 타입은 존재하지 않습니다."
+        )
+
+    private fun View.getMarginedWidth(): Int {
+        val params = layoutParams as RecyclerView.LayoutParams
+        val hMargin = params.marginStart + params.marginEnd
+        return measuredWidth + hMargin
     }
 
-    // 분할된 슬라이드 이어붙이기
-    fun connectSlide(position: Int) {
-        if (position != items.size - 1) {
-            val viewHolder = viewHolders[position]
-            viewHolder?.connectSlide()
-        }
-    }
+    fun getItemViewAt(position: Int) = viewHolders[position]?.root
+        ?: throw IllegalStateException(
+            "오리지널, 인스타 사이즈, 오리지널 바인딩, 인스타 사이즈 바인딩 이외의 타입은 존재하지 않습니다."
+        )
 
     fun replaceItems(items: List<PreviewSlide>) {
         this.items.clear()
@@ -104,21 +103,23 @@ class PreviewSlideCutAdapter(
         notifyDataSetChanged()
     }
 
-    // 분할 함수를 모든 뷰 홀더가 가지게 하기 위한 클래스
-    open inner class CutViewHolder(val root: View): RecyclerView.ViewHolder(root) {
+    fun cut(position: Int) {
+        viewHolders[position]?.cut()
+    }
 
-        fun cutSlide() {
-            val image = root.findViewById<View>(R.id.image)
-            val param = image.layoutParams as FrameLayout.LayoutParams
-            param.marginEnd = (itemWidth / 2).toInt()
-            image.layoutParams = param
+    fun paste(position: Int) {
+        viewHolders[position]?.paste()
+    }
+
+    open inner class CutViewHolder(val root: View): RecyclerView.ViewHolder(root) {
+        val divider: View = root.findViewById(R.id.divider)
+
+        fun cut() {
+            divider.visibility = View.VISIBLE
         }
 
-        fun connectSlide() {
-            val image = root.findViewById<View>(R.id.image)
-            val param = image.layoutParams as FrameLayout.LayoutParams
-            param.marginEnd = 0
-            image.layoutParams = param
+        fun paste() {
+            divider.visibility = View.GONE
         }
     }
 
@@ -129,12 +130,13 @@ class PreviewSlideCutAdapter(
 
         fun bind(item: PreviewSlide) {
             binding.image.setImageBitmap(item.bitmap)
+            binding.root.setOnClickListener { onItemClick(item, items.indexOf(item)) }
 
             if (items.indexOf(item) in cutPositions.value!!) {
-                cutSlide()
+                cut()
             }
             else {
-                connectSlide()
+                paste()
             }
         }
     }
@@ -146,12 +148,13 @@ class PreviewSlideCutAdapter(
 
         fun bind(item: PreviewSlide) {
             binding.image.setImageBitmap(item.bitmap)
+            binding.root.setOnClickListener { onItemClick(item, items.indexOf(item)) }
 
             if (items.indexOf(item) in cutPositions.value!!) {
-                cutSlide()
+                cut()
             }
             else {
-                connectSlide()
+                paste()
             }
         }
     }
@@ -163,12 +166,13 @@ class PreviewSlideCutAdapter(
 
         fun bind(item: PreviewSlide) {
             binding.image.setImageBitmap(item.bitmap)
+            binding.root.setOnClickListener { onItemClick(item, items.indexOf(item)) }
 
             if (items.indexOf(item) in cutPositions.value!!) {
-                cutSlide()
+                cut()
             }
             else {
-                connectSlide()
+                paste()
             }
         }
     }
@@ -179,14 +183,15 @@ class PreviewSlideCutAdapter(
     ): CutViewHolder(binding.root) {
 
         fun bind(item: PreviewSlide) {
-            binding.imageFirst.setImageBitmap(item.bitmap)
-            binding.imageSecond.setImageBitmap(item.bitmapSecond)
+            binding.imagePreviewFirst.setImageBitmap(item.bitmap)
+            binding.imagePreviewSecond.setImageBitmap(item.bitmapSecond)
+            binding.root.setOnClickListener { onItemClick(item, items.indexOf(item)) }
 
             if (items.indexOf(item) in cutPositions.value!!) {
-                cutSlide()
+                cut()
             }
             else {
-                connectSlide()
+                paste()
             }
         }
     }

@@ -20,8 +20,8 @@ class PreviewViewModel: ViewModel() {
 
     // 저장 중에 도중에 나갈때 대비해서
     // DB에 등록된놈 삭제시킴
-    val savingSlide = MutableLiveData<ResultSlide>().apply {
-        value = null
+    val savingSlides = MutableLiveData<MutableList<ResultSlide>>().apply {
+        value = mutableListOf()
     }
 
     // 분할 위치 지정
@@ -33,7 +33,7 @@ class PreviewViewModel: ViewModel() {
         previewSlides.value?.clear()
         currentSlide.value = 1
         slidesSize.value = 0
-        savingSlide.value = null
+        savingSlides.value = mutableListOf()
         cutPositions.value?.clear()
     }
 

@@ -44,8 +44,8 @@ android {
 }
 
 dependencies {
-
-    implementation 'com.github.rubensousa:gravitysnaphelper:2.2.2'
+    // 광고
+    implementation 'com.google.android.gms:play-services-ads:21.2.0'
 
     // Bitmap을 PDF로 변환할 때 사용
     implementation 'com.itextpdf:itextg:5.5.10'

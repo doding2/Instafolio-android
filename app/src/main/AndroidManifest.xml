@@ -18,6 +18,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.InstagramPortfolio"
         tools:targetApi="31">
+        <!--    애드몹 광고     -->
+         <meta-data
+             android:name="com.google.android.gms.ads.APPLICATION_ID"
+             android:value="ca-app-pub-7852302700024355~4518830635"/>
          <provider
              android:authorities="${applicationId}.provider"
              android:name="androidx.core.content.FileProvider"

@@ -1,23 +1,26 @@
 package com.instafolioo.instagramportfolio.view.preview
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Surface
+import android.view.View
+import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.*
-import com.github.rubensousa.gravitysnaphelper.GravitySnapHelper
+import androidx.recyclerview.widget.LinearSmoothScroller
+import androidx.recyclerview.widget.LinearSnapHelper
+import androidx.recyclerview.widget.PagerSnapHelper
+import androidx.recyclerview.widget.RecyclerView
 import com.instafolioo.instagramportfolio.R
 import com.instafolioo.instagramportfolio.databinding.FragmentPreviewBinding
 import com.instafolioo.instagramportfolio.extension.*
@@ -35,8 +38,6 @@ import com.instafolioo.instagramportfolio.view.slide.SlideViewModel
 import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.math.ceil
-import kotlin.math.floor
 import kotlin.math.round
 
 class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
@@ -72,9 +73,6 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
         previewViewModel = ViewModelProvider(requireActivity())[PreviewViewModel::class.java]
         binding.viewModel = previewViewModel
         binding.lifecycleOwner = this
-
-        // 프리뷰 초기화
-        previewViewModel.clear()
 
         // 뷰를 status bar와 navigation bar의 위치에서 떨어진 원래 위치로 복구(회전 방향에 따라 달라짐)
         when (requireActivity().display?.rotation) {
@@ -236,9 +234,11 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
     }
 
     private fun onCutItemClick(previewSlide: PreviewSlide, position: Int) {
+        cutAreaIsScrolling = true
         binding.recyclerView.scrollToPosition(position)
         scroller.targetPosition = position
         binding.recyclerViewCut.layoutManager?.startSmoothScroll(scroller)
+        cutAreaIsScrolling = false
     }
 
     // 외부저장소에 다운받을 때 폴더 이름으로 사용할거임
@@ -440,7 +440,20 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
 
         // 이미 해놓은거 있으면 패스
         if (slideAdapter.itemCount > 0) {
+            binding.recyclerViewCut.post {
+                cutWidth = binding.recyclerViewCut.width
+                val itemWidth = cutAdapter.getItemWidth()
+                val padding = (cutWidth - itemWidth) / 2
+
+                binding.recyclerViewCut.setPadding(padding, 0, padding, 0)
+                scroller.targetPosition = 0
+                binding.recyclerViewCut.layoutManager?.startSmoothScroll(scroller)
+            }
             binding.layoutLoading.root.visibility = View.GONE
+
+            // 현재 페이지 표시
+            previewViewModel.slidesSize.value = previewViewModel.previewSlides.value?.size
+            binding.textIndicator.visibility = View.VISIBLE
             return
         }
 

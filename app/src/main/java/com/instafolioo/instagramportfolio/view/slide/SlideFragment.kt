@@ -1,15 +1,14 @@
 package com.instafolioo.instagramportfolio.view.slide
 
 import android.Manifest
-import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
-import android.provider.Settings
 import android.util.Log
-import android.view.*
-import android.widget.Toast
+import android.view.LayoutInflater
+import android.view.Surface
+import android.view.View
+import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
@@ -18,6 +17,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
+import com.google.android.flexbox.FlexDirection
+import com.google.android.flexbox.FlexWrap
+import com.google.android.flexbox.FlexboxLayoutManager
+import com.google.android.flexbox.JustifyContent
 import com.instafolioo.instagramportfolio.R
 import com.instafolioo.instagramportfolio.databinding.FragmentSlideBinding
 import com.instafolioo.instagramportfolio.extension.*
@@ -25,10 +28,7 @@ import com.instafolioo.instagramportfolio.model.Slide
 import com.instafolioo.instagramportfolio.view.common.MainActivity
 import com.instafolioo.instagramportfolio.view.home.HomeViewModel
 import com.instafolioo.instagramportfolio.view.home.HomeViewModelFactory
-import com.google.android.flexbox.FlexDirection
-import com.google.android.flexbox.FlexWrap
-import com.google.android.flexbox.FlexboxLayoutManager
-import com.google.android.flexbox.JustifyContent
+import com.instafolioo.instagramportfolio.view.preview.PreviewViewModel
 import kotlinx.coroutines.*
 import java.io.File
 
@@ -45,6 +45,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
     private lateinit var adapter: SlideAdapter
 
     private lateinit var homeViewModel: HomeViewModel
+    private lateinit var previewViewModel: PreviewViewModel
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         when (throwable) {
@@ -80,6 +81,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
         viewModel= ViewModelProvider(requireActivity())[SlideViewModel::class.java]
         val factory = HomeViewModelFactory(requireActivity())
         homeViewModel = ViewModelProvider(requireActivity(), factory)[HomeViewModel::class.java]
+        previewViewModel = ViewModelProvider(requireActivity())[PreviewViewModel::class.java]
 
         // 뷰를 status bar와 navigation bar의 위치에서 떨어진 원래 위치로 복구(회전 방향에 따라 달라짐)
         when (requireActivity().display?.rotation) {
@@ -209,6 +211,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
                 viewModel.slides.value = adapter.items
                 viewModel.bindingPairs.value = adapter.bindingPairs
                 viewModel.bindingFlattenSlides.value = adapter.bindingFlattenSlides
+                previewViewModel.clear()
                 findNavController().navigate(R.id.action_slideFragment_to_previewFragment)
             }
         }

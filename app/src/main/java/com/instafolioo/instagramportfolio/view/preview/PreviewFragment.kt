@@ -1,10 +1,12 @@
 package com.instafolioo.instagramportfolio.view.preview
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
@@ -36,9 +38,11 @@ import com.instafolioo.instagramportfolio.view.home.HomeViewModel
 import com.instafolioo.instagramportfolio.view.home.HomeViewModelFactory
 import com.instafolioo.instagramportfolio.view.slide.SlideViewModel
 import kotlinx.coroutines.*
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.round
+
 
 class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
 
@@ -113,13 +117,10 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                 val view = snapHelper.findSnapView(recyclerView.layoutManager ?: return)!!
                 val position = recyclerView.layoutManager!!.getPosition(view)
 
-
                 _binding?.root?.post {
                     val screenWidth = binding.root.width
                     val cutItemWidth = cutAdapter.getItemWidth()
-                    var ddx = round(dx * cutItemWidth.toFloat() / screenWidth.toFloat()).toInt()
-
-                    Log.d(TAG, "original dx: $dx, ddx: $ddx, ")
+                    val ddx = round(dx * cutItemWidth.toFloat() / screenWidth.toFloat()).toInt()
                     binding.recyclerViewCut.scrollBy(ddx, 0)
                 }
 
@@ -141,8 +142,10 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                     RecyclerView.SCROLL_STATE_IDLE -> {
                         previewAreaIsScrolling = false
 
-                        scroller.targetPosition = currentPosition
-                        binding.recyclerViewCut.layoutManager?.startSmoothScroll(scroller)
+                        if (currentPosition == previewViewModel.currentSlide.value!! - 1) {
+                            scroller.targetPosition = currentPosition
+                            binding.recyclerViewCut.layoutManager?.startSmoothScroll(scroller)
+                        }
                     }
                     else -> previewAreaIsScrolling = true
                 }
@@ -234,11 +237,9 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
     }
 
     private fun onCutItemClick(previewSlide: PreviewSlide, position: Int) {
-        cutAreaIsScrolling = true
         binding.recyclerView.scrollToPosition(position)
         scroller.targetPosition = position
         binding.recyclerViewCut.layoutManager?.startSmoothScroll(scroller)
-        cutAreaIsScrolling = false
     }
 
     // 외부저장소에 다운받을 때 폴더 이름으로 사용할거임
@@ -568,12 +569,14 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                 }
                 // 슬라이드를 외부저장소에 이미지로 저장
                 val inExternalStorage = async {
-                    saveBitmapsAsImageInExternalStorage(
+                    val externalFile = saveBitmapsAsImageInExternalStorage(
                         bitmaps,
                         "포트폴리오 $title",
                         format,
                         previewViewModel.savingSlides
                     )
+
+                    refreshFile(externalFile)
                 }
 
                 // 저장 기다리기
@@ -630,17 +633,35 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                 }
                 // 슬라이드를 외부저장소에 pdf로 저장(포맷은 jpg)
                 val inExternalStorage = async {
-                    saveBitmapsAsPdfInExternalStorage(
+                    val externalFile = saveBitmapsAsPdfInExternalStorage(
                         bitmaps,
                         name = "포트폴리오 $title",
                         isSavingSlide = previewViewModel.savingSlides
                     )
+
+                    refreshFile(externalFile)
                 }
 
                 // 저장 기다리기
                 inInnerStorage.await()
                 inExternalStorage.await()
             }
+        }
+    }
+
+    // 파일이 다운되도 안드로이드 시스템에서 인지 못하는 에러 수정
+    private fun refreshFile(file: File) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            val scanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
+            val contentUri = Uri.fromFile(file)
+            scanIntent.data = contentUri
+            requireActivity(). sendBroadcast(scanIntent)
+        } else {
+            val intent = Intent(
+                Intent.ACTION_MEDIA_MOUNTED,
+                Uri.fromFile(file)
+            )
+            requireActivity().sendBroadcast(intent)
         }
     }
 

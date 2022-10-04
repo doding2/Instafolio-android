@@ -193,7 +193,7 @@ fun saveBitmapsAsPdfInExternalStorage(
     innerDirectory: String? = null,
     name: String,
     isSavingSlide: MutableLiveData<MutableList<ResultSlide>>
-) {
+): File {
     val externalStorage = if (innerDirectory == null) {
         getExternalStorageDirWithoutInner("인스타그램 포트폴리오")
     } else {
@@ -221,7 +221,7 @@ fun saveBitmapsAsPdfInExternalStorage(
         // 유저가 저장 중간에 나갈때
         if (isSavingSlide.value.isNullOrEmpty()) {
             document.close()
-            return
+            return externalStorage
         }
 
         val stream = ByteArrayOutputStream()
@@ -238,6 +238,8 @@ fun saveBitmapsAsPdfInExternalStorage(
     }
 
     document.close()
+
+    return externalStorage
 }
 
 // 비트맵들을 이미지로 외부저장소에 저장
@@ -246,13 +248,16 @@ fun saveBitmapsAsImageInExternalStorage(
     innerDirectory: String,
     extension: String,
     isSavingSlide: MutableLiveData<MutableList<ResultSlide>>
-) {
+): File {
+
     bitmaps.forEachIndexed { index, bitmap ->
         // 유저가 중간에 나갈때
         if (isSavingSlide.value.isNullOrEmpty()) return@forEachIndexed
         
         saveBitmapInExternalStorage(bitmap, innerDirectory, "image $index", extension)
     }
+
+    return getExternalStorageDir("인스타그램 포트폴리오", innerDirectory)
 }
 
 // 비트맵들을 이미지로 외부저장소에 저장
@@ -261,16 +266,16 @@ fun saveBitmapInExternalStorage(
     innerDirectory: String,
     name: String,
     extension: String
-) {
+): File {
     val externalStorage = getExternalStorageDir("인스타그램 포트폴리오", innerDirectory)
 
     var out: FileOutputStream
     var fileName = name
     var count = 1
+    val imagePath = File(externalStorage, "${fileName}.${extension}")
 
     do {
         try {
-            val imagePath = File(externalStorage, "${fileName}.${extension}")
             out = FileOutputStream(imagePath)
             break
         } catch (e: FileNotFoundException) {
@@ -285,6 +290,8 @@ fun saveBitmapInExternalStorage(
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
     }
     out.close()
+
+    return imagePath
 }
 
 // 외부 저장소 주소를 리턴하는 함수

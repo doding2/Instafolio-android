@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="75dp"
+    android:layout_height="80dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
     android:background="@color/black"
@@ -9,9 +9,9 @@
 
     <ImageView
         android:id="@+id/button_delete"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginEnd="15dp"
+        android:layout_width="27dp"
+        android:layout_height="27dp"
+        android:layout_marginEnd="20dp"
         android:layout_gravity="center_vertical"
         android:src="@drawable/icon_delete"
         app:tint="@color/white"/>

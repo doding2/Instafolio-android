@@ -2,6 +2,7 @@ package com.instafolioo.instagramportfolio.view.slide
 
 import android.Manifest
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -87,8 +88,6 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
         when (requireActivity().display?.rotation) {
             // 폰이 왼쪽으로 누움
             Surface.ROTATION_90 -> {
-                binding.layoutRoot.setPadding(0, getStatusBarHeight(), getNaviBarHeight(), 0)
-
                 // 뷰가 화면에 너무 크게 차지하지 않게 조절
                 binding.layoutRoot.post {
                     val params = binding.layoutPreviewBackground.layoutParams
@@ -98,8 +97,6 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
             }
             // 폰이 오른쪽으로 누움
             Surface.ROTATION_270 -> {
-                binding.layoutRoot.setPadding(getNaviBarHeight(), getStatusBarHeight(), 0, 0)
-
                 // 뷰가 화면에 너무 크게 차지하지 않게 조절
                 binding.layoutRoot.post {
                     val params = binding.layoutPreviewBackground.layoutParams
@@ -109,8 +106,6 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
             }
             // 그 외는 그냥 정방향으으로 처리함
             else -> {
-                binding.layoutRoot.setPadding(0, getStatusBarHeight(), 0, getNaviBarHeight())
-
                 // 정상 상태
                 val params = binding.layoutPreviewBackground.layoutParams
                 params.width = ViewGroup.LayoutParams.MATCH_PARENT
@@ -119,6 +114,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
         }
 
         // status bar, navigation bar가 밝은 색이 아니라는 것을 알림
+        requireActivity().window.statusBarColor = Color.BLACK
         WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightStatusBars = false
         WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightNavigationBars = false
 

@@ -2,11 +2,15 @@ package com.instafolioo.instagramportfolio.view.home
 
 import android.app.Activity.RESULT_OK
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Surface
+import android.view.View
+import android.view.ViewGroup
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.widget.FrameLayout
@@ -19,7 +23,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.instafolioo.instagramportfolio.R
 import com.instafolioo.instagramportfolio.databinding.FragmentHomeBinding
 import com.instafolioo.instagramportfolio.databinding.ItemResultSlideBinding
 import com.instafolioo.instagramportfolio.extension.*
@@ -52,7 +55,7 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = DataBindingUtil.inflate(inflater, R.layout.fragment_home, container, false)
+        _binding = DataBindingUtil.inflate(inflater, com.instafolioo.instagramportfolio.R.layout.fragment_home, container, false)
         val factory = HomeViewModelFactory(requireActivity())
         homeViewModel = ViewModelProvider(requireActivity(), factory)[HomeViewModel::class.java]
         slideViewModel= ViewModelProvider(requireActivity())[SlideViewModel::class.java]
@@ -60,28 +63,22 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         when (requireActivity().display?.rotation) {
             // 폰이 왼쪽으로 누움
             Surface.ROTATION_90 -> {
-                binding.layoutRoot.setPadding(0, 0, getNaviBarHeight(), 0)
-                binding.layoutUser.setPadding(0, getStatusBarHeight(), 0, 0)
                 binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 6)
             }
             // 폰이 오른쪽으로 누움
             Surface.ROTATION_270 -> {
-                binding.layoutRoot.setPadding(getNaviBarHeight(), 0, 0, 0)
-                binding.layoutUser.setPadding(0, getStatusBarHeight(), 0, 0)
                 binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 6)
             }
             // 그 외는 그냥 정방향으으로 처리함
             else -> {
-                // ui가 아랫부분 navitaion bar를 침범하지 않도록 패딩
-                binding.layoutRoot.setPadding(0, 0, 0, getNaviBarHeight())
-                // 앱 실행 화면이 ui xml과 똑같이 보이도록 패딩
-                binding.layoutUser.setPadding(0, getStatusBarHeight(), 0, 0)
                 // 리사이클러뷰 한 줄에 아이템 3개씩 오도록 조정
                 binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
             }
         }
 
+
         // status bar, navigation bar가 밝은 색이라는 것을 알림
+        requireActivity().window.statusBarColor = Color.WHITE
         WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightStatusBars = true
         WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightNavigationBars = false
 
@@ -94,18 +91,10 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         // 인스타 파일들 재등록
         homeViewModel.resultSlides.observe(viewLifecycleOwner) {
             adapter.replaceItems(it)
-        }
 
-        // source of files bottom sheet 설정하기
-        // bottom sheet가 최대로 확장됐을 때 status bar 부분 침범하지 않도록 마진
-        val metrics = resources.displayMetrics
-        val screenHeight = metrics.heightPixels
-        val sourceOfFilesBehavior = BottomSheetBehavior.from(binding.layoutFilesBottomSheet)
-        sourceOfFilesBehavior.maxHeight = screenHeight - getStatusBarHeight()
-        binding.layoutUser.post {
-            sourceOfFilesBehavior.peekHeight = screenHeight - binding.layoutUser.height
+            binding.textNoResultSlide.visibility =
+                if (it.isEmpty()) View.VISIBLE else View.GONE
         }
-
 
         //  Navigation bottom sheet 설정하기
         // 기본적으로 드래그 비활성화
@@ -113,6 +102,7 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         behavior.isDraggable = false
         // 맨 위 선택지 처음엔 비활성화
         binding.buttonDirectory.isEnabled = false
+        binding.buttonGallery.isEnabled = false
         setListOpacity(0)
 
         // 파일 종류 선택 bottom sheet 확장시키기
@@ -148,7 +138,6 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
                 // 뷰 투명도 조절
                 val opacity = (slideOffset * 255).toInt()
                 binding.layoutBlockScreen.background.alpha = opacity
-                binding.layoutShadowedPointedBackgroundImage.background.alpha = 255 - opacity
 
                 // 파일 선택지들의 투명도 조절
                 setListOpacity(opacity)
@@ -215,7 +204,7 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
 
         // Slide Fragment로 이동
         findNavController()
-            .navigate(R.id.action_homeFragment_to_slideFragment)
+            .navigate(com.instafolioo.instagramportfolio.R.id.action_homeFragment_to_slideFragment)
 
         // 이동후에는 편집모드 해제
         homeViewModel.isEditMode.value = false
@@ -289,7 +278,7 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
 
         // Slide Fragment로 이동
         findNavController()
-            .navigate(R.id.action_homeFragment_to_slideFragment)
+            .navigate(com.instafolioo.instagramportfolio.R.id.action_homeFragment_to_slideFragment)
     }
 
     // result slide 롱 클릭하면 편집모드 활성화
@@ -400,7 +389,7 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
 
         // Slide Fragment로 이동
         findNavController()
-            .navigate(R.id.action_homeFragment_to_slideFragment)
+            .navigate(com.instafolioo.instagramportfolio.R.id.action_homeFragment_to_slideFragment)
     }
 
     // 인텐트를 가지고 파일 uri 리스트로 변환
@@ -441,6 +430,8 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         binding.buttonDirectory.isEnabled = true
         binding.buttonDirectory.isClickable = true
         binding.buttonDirectory.isFocusable = true
+
+        binding.buttonGallery.isEnabled = true
     }
 
     // navigation bottom sheet이 줄어들었을 때 관련 뷰들도 비활성화
@@ -449,6 +440,8 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         binding.buttonDirectory.isEnabled = false
         binding.buttonDirectory.isClickable = false
         binding.buttonDirectory.isFocusable = false
+
+        binding.buttonGallery.isEnabled = false
 
         // + 버튼 활성화(애니메이션과 같이)
         binding.buttonShowSheet.startAnimation(
@@ -471,14 +464,14 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
 
     // 파일 선택지들의 투명도 조절
     private fun setListOpacity(opacity: Int) {
-        binding.buttonDirectory.background.alpha = opacity
+        binding.buttonDirectory.background?.setAlpha(opacity)
+        binding.divider.background?.setAlpha(opacity)
+        binding.buttonGallery.background?.setAlpha(opacity)
 
         binding.imageDirectory.imageAlpha = opacity
-        binding.imageCloud.imageAlpha = opacity
         binding.imageGallery.imageAlpha = opacity
 
         binding.textDirectory.setTextColor(binding.textDirectory.textColors.withAlpha(opacity))
-        binding.textCloud.setTextColor(binding.textCloud.textColors.withAlpha(opacity))
         binding.textGallery.setTextColor(binding.textGallery.textColors.withAlpha(opacity))
     }
 

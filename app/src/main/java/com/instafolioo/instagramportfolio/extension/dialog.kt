@@ -47,6 +47,12 @@ fun Context.showSelectFormatDialog(onItemSelected: (String) -> Unit) {
         onItemSelected("pdf")
         dialog.dismiss()
     }
+    val instagramButton = dialog.findViewById<TextView>(R.id.button_instagram)
+    instagramButton.setOnClickListener {
+        onItemSelected("instagram")
+        dialog.dismiss()
+    }
+
 
     dialog.show()
 }

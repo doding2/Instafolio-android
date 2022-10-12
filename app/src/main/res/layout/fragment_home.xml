@@ -7,274 +7,183 @@
         android:id="@+id/layout_root"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/black"
+        android:background="@color/white"
         tools:context=".view.home.HomeFragment">
 
-        <FrameLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/white">
+            android:orientation="vertical">
 
-            <!--    User Info Area    -->
-            <LinearLayout
-                android:id="@+id/layout_user"
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:layout_height="65dp"
+                android:outlineSpotShadowColor="@color/light_gray"
+                app:cardElevation="20dp"
+                app:cardBackgroundColor="@color/white">
 
-                <!--    Profile Image    -->
-                <FrameLayout
-                    android:id="@+id/button_profile"
-                    android:layout_width="95dp"
-                    android:layout_height="95dp"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginVertical="50dp"
-                    android:layout_marginStart="5dp" >
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="내 프로젝트"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"/>
+            </com.google.android.material.card.MaterialCardView>
 
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/image_profile"
-                        android:layout_width="90dp"
-                        android:layout_height="90dp"
-                        app:cardCornerRadius="100dp"
-                        app:cardBackgroundColor="@color/black"
-                        app:cardElevation="0dp">
-
-                        <ImageView
-                            android:id="@+id/image_default"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:src="@drawable/icon_person"
-                            app:tint="@color/white"
-                            android:layout_margin="10dp"/>
-                    </androidx.cardview.widget.CardView>
-
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/image_plus"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:layout_gravity="bottom|end"
-                        app:cardCornerRadius="100dp"
-                        app:cardBackgroundColor="@color/light_gray"
-                        app:cardElevation="0dp">
-
-                        <ImageView
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:src="@drawable/icon_round_plus"
-                            android:layout_margin="5dp"
-                            app:tint="@color/black"/>
-                    </androidx.cardview.widget.CardView>
-                </FrameLayout>
-            </LinearLayout>
-
-
-            <!--    Files List Bottom Sheet    -->
-            <androidx.coordinatorlayout.widget.CoordinatorLayout
-                android:id="@+id/coordinator_files"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" >
-
-                <LinearLayout
-                    android:id="@+id/layout_files_bottom_sheet"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:background="@drawable/bottom_sheet_round"
-                    android:elevation="50dp"
-                    app:behavior_peekHeight="530dp"
-                    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/recycler_view"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginTop="40dp"
-                        android:layout_marginHorizontal="20dp"
-                        android:clipToPadding="false"
-                        android:paddingBottom="120dp"
-                        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                        app:spanCount="3" />
-                </LinearLayout>
-            </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
-            <View
-                android:id="@+id/layout_block_screen"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/transparent_black"
-                android:clickable="true"
-                android:focusable="true"
-                android:visibility="gone" />
+                android:layout_margin="8dp"
+                android:clipToPadding="false"
+                android:paddingBottom="80dp"
+                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                app:spanCount="3" />
+        </LinearLayout>
 
-            <!--    Navigation Bar and Source Of Files Bottom Sheet    -->
-            <androidx.coordinatorlayout.widget.CoordinatorLayout
-                android:id="@+id/coordinator_navigation"
+        <TextView
+            android:id="@+id/text_no_result_slide"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:text="버튼을 눌러 프로젝트를\n시작해주세요"
+            android:textColor="@color/gray"
+            android:textSize="15sp"
+            android:visibility="gone"/>
+
+        <View
+            android:id="@+id/layout_block_screen"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"
+            android:clickable="true"
+            android:focusable="true"
+            android:visibility="gone" />
+
+        <!--    Navigation Bar and Source Of Files Bottom Sheet    -->
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
+            android:id="@+id/coordinator_navigation"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <View
+                android:layout_width="wrap_content"
+                android:layout_height="35dp"
+                android:background="@drawable/shape_top_shadow"
+                app:layout_anchor="@+id/navigation_and_bottom_sheet"/>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/navigation_and_bottom_sheet"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="wrap_content"
+                app:behavior_peekHeight="80dp"
+                app:cardCornerRadius="0dp"
+                app:cardElevation="0dp"
+                app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
-                <FrameLayout
-                    android:id="@+id/navigation_and_bottom_sheet"
+                <LinearLayout
+                    android:id="@+id/layout_source_list"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:behavior_peekHeight="125dp"
-                    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
-
-                    <FrameLayout
-                        android:id="@+id/layout_shadowed_pointed_background_image"
-                        android:layout_width="match_parent"
-                        android:layout_height="100dp"
-                        android:visibility="gone"
-                        android:background="@drawable/bottom_sheet_shadowed_pointed"/>
-
-                    <FrameLayout
-                        android:id="@+id/layout_pointed_background_image"
-                        android:layout_width="match_parent"
-                        android:layout_height="100dp"
-                        android:background="@drawable/bottom_sheet_pointed_black"/>
+                    android:orientation="vertical"
+                    android:background="@color/black" >
 
                     <LinearLayout
-                        android:id="@+id/layout_source_list"
+                        android:id="@+id/button_directory"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="47dp"
-                        android:orientation="vertical"
-                        android:background="@color/black" >
+                        android:orientation="horizontal"
+                        android:paddingStart="25dp"
+                        android:padding="15dp"
+                        android:gravity="center">
 
-                        <LinearLayout
-                            android:id="@+id/button_directory"
-                            android:layout_width="match_parent"
+                        <ImageView
+                            android:id="@+id/image_directory"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:src="@drawable/icon_folder"
+                            app:tint="@color/white"/>
+
+                        <TextView
+                            android:id="@+id/text_directory"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:paddingStart="25dp"
-                            android:padding="15dp"
-                            android:clickable="false"
-                            android:focusable="false"
-                            android:background="?selectableItemBackground">
-
-                            <ImageView
-                                android:id="@+id/image_directory"
-                                android:layout_width="60dp"
-                                android:layout_height="60dp"
-                                android:src="@drawable/icon_folder"
-                                app:tint="@color/white"/>
-
-                            <TextView
-                                android:id="@+id/text_directory"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:layout_marginStart="10dp"
-                                android:text="파일 및 드라이브에서 가져오기"
-                                android:textSize="17sp"
-                                android:textColor="@color/white"
-                                android:textStyle="bold"/>
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:id="@+id/button_cloud"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:paddingStart="25dp"
-                            android:padding="15dp"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:background="?selectableItemBackground"
-                            android:visibility="gone">
-
-                            <ImageView
-                                android:id="@+id/image_cloud"
-                                android:layout_width="60dp"
-                                android:layout_height="60dp"
-                                android:src="@drawable/icon_cloud"
-                                app:tint="@color/white"/>
-
-                            <TextView
-                                android:id="@+id/text_cloud"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:layout_marginStart="10dp"
-                                android:text="클라우드에서 가져오기"
-                                android:textSize="17dp"
-                                android:textColor="@color/white"
-                                android:textStyle="bold"/>
-                        </LinearLayout>
-
-
-                        <LinearLayout
-                            android:id="@+id/button_gallery"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:paddingStart="25dp"
-                            android:padding="15dp"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:background="?selectableItemBackground">
-
-                            <ImageView
-                                android:id="@+id/image_gallery"
-                                android:layout_width="60dp"
-                                android:layout_height="60dp"
-                                android:src="@drawable/icon_image"
-                                app:tint="@color/white"/>
-
-                            <TextView
-                                android:id="@+id/text_gallery"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:layout_marginStart="10dp"
-                                android:text="갤러리에서 가져오기"
-                                android:textSize="17dp"
-                                android:textColor="@color/white"
-                                android:textStyle="bold"/>
-                        </LinearLayout>
+                            android:layout_gravity="center"
+                            android:layout_marginStart="10dp"
+                            android:text="드라이브에서 가져오기"
+                            android:textSize="16sp"
+                            android:textColor="@color/white"
+                            android:textStyle="bold"/>
                     </LinearLayout>
 
-
-                    <include layout="@layout/layout_edit_mode"
-                        android:id="@+id/layout_edit_mode"
+                    <com.google.android.material.divider.MaterialDivider
+                        android:id="@+id/divider"
                         android:layout_width="match_parent"
-                        android:layout_height="75dp"
-                        android:layout_marginTop="48dp"/>
+                        android:layout_height="0.1dp"
+                        android:background="#383838"/>
 
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/button_show_sheet"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:id="@+id/button_gallery"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="30dp"
-                        android:layout_gravity="center_horizontal|top"
-                        android:animateLayoutChanges="true"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:backgroundTint="@color/black"
-                        app:cardCornerRadius="100dp"
-                        app:cardElevation="0dp"
-                        app:strokeWidth="2dp"
-                        app:strokeColor="@color/white">
+                        android:orientation="horizontal"
+                        android:paddingStart="25dp"
+                        android:padding="15dp"
+                        android:gravity="center">
 
-                        <com.google.android.material.card.MaterialCardView
-                            android:layout_width="60dp"
-                            android:layout_height="60dp"
+                        <ImageView
+                            android:id="@+id/image_gallery"
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:src="@drawable/icon_image"
+                            app:tint="@color/white"/>
+
+                        <TextView
+                            android:id="@+id/text_gallery"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
                             android:layout_gravity="center"
-                            android:layout_margin="5dp"
-                            app:cardCornerRadius="100dp"
-                            app:cardElevation="0dp"
-                            app:cardBackgroundColor="@color/white">
+                            android:layout_marginStart="9dp"
+                            android:layout_marginEnd="16dp"
+                            android:text="갤러리에서 가져오기"
+                            android:textSize="16dp"
+                            android:textColor="@color/white"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+                </LinearLayout>
 
-                            <ImageView
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:src="@drawable/icon_round_plus"
-                                android:layout_margin="10dp"
-                                app:tint="@color/black"/>
-                        </com.google.android.material.card.MaterialCardView>
-                    </com.google.android.material.card.MaterialCardView>
 
+                <include layout="@layout/layout_edit_mode"
+                    android:id="@+id/layout_edit_mode"
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"/>
+
+                <FrameLayout
+                    android:id="@+id/button_show_sheet"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"
+                    android:layout_gravity="center_horizontal">
+
+                    <!-- 40 x 40 -->
+                    <ImageView
+                        android:layout_width="45dp"
+                        android:layout_height="45dp"
+                        android:src="@drawable/icon_show_sheet_inside"
+                        android:layout_gravity="center" />
+
+                    <!-- 44 x 44 -->
+                    <ImageView
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:src="@drawable/icon_show_sheet_outside"
+                        android:layout_gravity="center"/>
                 </FrameLayout>
-            </androidx.coordinatorlayout.widget.CoordinatorLayout>
-        </FrameLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+        </androidx.coordinatorlayout.widget.CoordinatorLayout>
     </FrameLayout>
 </layout>

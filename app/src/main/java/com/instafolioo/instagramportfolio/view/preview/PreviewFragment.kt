@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -78,23 +79,8 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
         binding.viewModel = previewViewModel
         binding.lifecycleOwner = this
 
-        // 뷰를 status bar와 navigation bar의 위치에서 떨어진 원래 위치로 복구(회전 방향에 따라 달라짐)
-        when (requireActivity().display?.rotation) {
-            // 폰이 왼쪽으로 누움
-            Surface.ROTATION_90 -> {
-                binding.layoutRoot.setPadding(0, getStatusBarHeight(), getNaviBarHeight(), 0)
-            }
-            // 폰이 오른쪽으로 누움
-            Surface.ROTATION_270 -> {
-                binding.layoutRoot.setPadding(getNaviBarHeight(), getStatusBarHeight(), 0, 0)
-            }
-            // 그 외는 그냥 정방향으으로 처리함
-            else -> {
-                binding.layoutRoot.setPadding(0, getStatusBarHeight(), 0, getNaviBarHeight())
-            }
-        }
-
         // status bar, navigation bar가 밝은 색이 아니라는 것을 알림
+        requireActivity().window.statusBarColor = Color.BLACK
         WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightStatusBars = false
         WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightNavigationBars = false
 
@@ -258,150 +244,21 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                 when(format) {
                     // 이미지로 저장
                     "png", "jpg" -> {
-                        // 범위로 나눠서 분할
-                        previewViewModel.apply {
-
-                            val time = getTimeStamp()
-
-                            // 분할 안 했을 경우
-                            if (cutPositions.value.isNullOrEmpty()) {
-                                val title = "$time 0 ~ ${previewSlides.value!!.size - 1}"
-                                saveSlidesAsImage(format, title, previewSlides.value!!, slideViewModel.slides.value!!)
-                                return@apply
-                            }
-
-                            val bindingIndices = slideViewModel.bindingFlattenSlides.value!!.map {
-                                slideViewModel.slides.value!!.indexOf(it)
-                            }
-
-                            // 얘 꼭 필요함
-                            cutPositions.value?.add(previewSlides.value!!.size - 1)
-
-                            cutPositions.value?.forEachIndexed { index, position ->
-                                val prevRangedPreviewSlides: List<PreviewSlide>
-                                val rangedPreviewSlides: List<PreviewSlide>
-                                val rangedOriginalSlides: List<Slide>
-                                var title: String
-
-                                rangedPreviewSlides = when (index) {
-                                    0 -> {
-                                        title = "$time 0 ~ ${position}"
-                                        previewSlides.value!!.subList(0, position + 1)
-                                    }
-                                    else -> {
-                                        title = "$time ${cutPositions.value!![index - 1] + 1} ~ ${position}"
-                                        previewSlides.value!!.subList(cutPositions.value!![index - 1] + 1, position + 1)
-                                    }
-                                }
-
-                                if (rangedPreviewSlides.size == 1) {
-                                    title = "$time $position"
-                                }
-
-                                prevRangedPreviewSlides = if (index >= 1) {
-                                    previewSlides.value!!.subList(0, cutPositions.value!![index - 1] + 1)
-                                } else {
-                                    listOf()
-                                }
-
-
-                                // 오리지널 슬라이드 뽑아내기 (바인딩 안 했을 경우 오프셋은 0)
-                                var prevBindingOffset = 0
-                                var currentBindingOffset = 0
-
-                                // 바인딩 했을 경우
-                                if (bindingIndices.isNotEmpty()) {
-                                    prevBindingOffset = prevRangedPreviewSlides.count { (it.viewType == ORIGINAL_BINDING) || (it.viewType == INSTAR_SIZE_BINDING) }
-                                    currentBindingOffset = rangedPreviewSlides.count { (it.viewType == ORIGINAL_BINDING) || (it.viewType == INSTAR_SIZE_BINDING) }
-                                }
-
-
-                                rangedOriginalSlides = when (index) {
-                                    0 -> {
-                                        slideViewModel.slides.value!!.subList(0, position + currentBindingOffset + 1)
-                                    }
-                                    else -> {
-                                        slideViewModel.slides.value!!.subList(cutPositions.value!![index - 1] + prevBindingOffset + 1, position + prevBindingOffset + currentBindingOffset + 1)
-                                    }
-                                }
-
-                                saveSlidesAsImage(format, title, rangedPreviewSlides, rangedOriginalSlides)
-                            }
-                        }
+                        saveImageWithCutting(format)
                     }
                     // pdf로 저장
                     "pdf" -> {
-                        // 범위로 나눠서 분할
-                        previewViewModel.apply {
+                        savePdfWithCutting()
+                    }
+                    // 인스타그램으로 전달
+                    "instagram" -> {
+                        // 일단 저장 후
+                        saveImageWithCutting("jpg")
+                        // 인스타그램에 전달
+                        openInstagram()
 
-                            val time = getTimeStamp()
-
-                            // 분할 안 했을 경우
-                            if (cutPositions.value.isNullOrEmpty()) {
-                                val title = "$time 0 ~ ${previewSlides.value!!.size - 1}"
-                                saveSlidesAsPdf(title, previewSlides.value!!, slideViewModel.slides.value!!)
-                                return@apply
-                            }
-
-                            val bindingIndices = slideViewModel.bindingFlattenSlides.value!!.map {
-                                slideViewModel.slides.value!!.indexOf(it)
-                            }
-
-                            // 얘 꼭 필요함
-                            cutPositions.value?.add(previewSlides.value!!.size - 1)
-
-                            cutPositions.value?.forEachIndexed { index, position ->
-                                val prevRangedPreviewSlides: List<PreviewSlide>
-                                val rangedPreviewSlides: List<PreviewSlide>
-                                val rangedOriginalSlides: List<Slide>
-                                var title: String
-
-                                rangedPreviewSlides = when (index) {
-                                    0 -> {
-                                        title = "$time 0 ~ ${position}"
-                                        previewSlides.value!!.subList(0, position + 1)
-                                    }
-                                    else -> {
-                                        title = "$time ${cutPositions.value!![index - 1] + 1} ~ ${position}"
-                                        previewSlides.value!!.subList(cutPositions.value!![index - 1] + 1, position + 1)
-                                    }
-                                }
-
-
-                                if (rangedPreviewSlides.size == 1) {
-                                    title = "$time $position"
-                                }
-
-                                prevRangedPreviewSlides = if (index >= 1) {
-                                    previewSlides.value!!.subList(0, cutPositions.value!![index - 1] + 1)
-                                } else {
-                                    listOf()
-                                }
-
-
-                                // 오리지널 슬라이드 뽑아내기 (바인딩 안 했을 경우 오프셋은 0)
-                                var prevBindingOffset = 0
-                                var currentBindingOffset = 0
-
-                                // 바인딩 했을 경우
-                                if (bindingIndices.isNotEmpty()) {
-                                    prevBindingOffset = prevRangedPreviewSlides.count { (it.viewType == ORIGINAL_BINDING) || (it.viewType == INSTAR_SIZE_BINDING) }
-                                    currentBindingOffset = rangedPreviewSlides.count { (it.viewType == ORIGINAL_BINDING) || (it.viewType == INSTAR_SIZE_BINDING) }
-                                }
-
-
-                                rangedOriginalSlides = when (index) {
-                                    0 -> {
-                                        slideViewModel.slides.value!!.subList(0, position + currentBindingOffset + 1)
-                                    }
-                                    else -> {
-                                        slideViewModel.slides.value!!.subList(cutPositions.value!![index - 1] + prevBindingOffset + 1, position + prevBindingOffset + currentBindingOffset + 1)
-                                    }
-                                }
-
-                                saveSlidesAsPdf(title, rangedPreviewSlides, rangedOriginalSlides)
-                            }
-                        }
+                        previewViewModel.savingSlides.value?.clear()
+                        findNavController().navigate(R.id.action_previewFragment_to_homeFragment)
                     }
                     else -> throw IllegalStateException("존재하지 않는 선택지 입니다")
                 }
@@ -418,7 +275,6 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
         }
     }
 
-
     // 퍼미션 런처
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -433,6 +289,23 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
         }
     }
 
+    private fun openInstagram() {
+        // 인스타그램 앱 열기
+        try {
+            val uri = Uri.parse("instagram://share")
+            val intent = Intent(Intent.ACTION_VIEW, uri)
+            intent.setPackage("com.instagram.android")
+            startActivity(intent)
+        }
+        // 마켓 인스타그램 페이지로 전송
+        catch (e: Exception) {
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                data = Uri.parse("market://details?id="+"com.instagram.android")
+            }
+            startActivity(intent)
+        }
+    }
 
     // 슬라이드를 프리뷰 슬라이드로 변환
     private fun processSlidesIntoPreviewSlides() {
@@ -523,6 +396,80 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
         }
     }
 
+    // 이미지를 분할해서 포맷에 맞게 저장
+    private suspend fun saveImageWithCutting(format: String) {
+        // 범위로 나눠서 분할
+        previewViewModel.apply {
+
+            val time = getTimeStamp()
+
+            // 분할 안 했을 경우
+            if (cutPositions.value.isNullOrEmpty()) {
+                val title = "$time 0 ~ ${previewSlides.value!!.size - 1}"
+                saveSlidesAsImage(format, title, previewSlides.value!!, slideViewModel.slides.value!!)
+                return@apply
+            }
+
+            val bindingIndices = slideViewModel.bindingFlattenSlides.value!!.map {
+                slideViewModel.slides.value!!.indexOf(it)
+            }
+
+            // 얘 꼭 필요함
+            cutPositions.value?.add(previewSlides.value!!.size - 1)
+
+            cutPositions.value?.forEachIndexed { index, position ->
+                val prevRangedPreviewSlides: List<PreviewSlide>
+                val rangedPreviewSlides: List<PreviewSlide>
+                val rangedOriginalSlides: List<Slide>
+                var title: String
+
+                rangedPreviewSlides = when (index) {
+                    0 -> {
+                        title = "$time 0 ~ ${position}"
+                        previewSlides.value!!.subList(0, position + 1)
+                    }
+                    else -> {
+                        title = "$time ${cutPositions.value!![index - 1] + 1} ~ ${position}"
+                        previewSlides.value!!.subList(cutPositions.value!![index - 1] + 1, position + 1)
+                    }
+                }
+
+                if (rangedPreviewSlides.size == 1) {
+                    title = "$time $position"
+                }
+
+                prevRangedPreviewSlides = if (index >= 1) {
+                    previewSlides.value!!.subList(0, cutPositions.value!![index - 1] + 1)
+                } else {
+                    listOf()
+                }
+
+
+                // 오리지널 슬라이드 뽑아내기 (바인딩 안 했을 경우 오프셋은 0)
+                var prevBindingOffset = 0
+                var currentBindingOffset = 0
+
+                // 바인딩 했을 경우
+                if (bindingIndices.isNotEmpty()) {
+                    prevBindingOffset = prevRangedPreviewSlides.count { (it.viewType == ORIGINAL_BINDING) || (it.viewType == INSTAR_SIZE_BINDING) }
+                    currentBindingOffset = rangedPreviewSlides.count { (it.viewType == ORIGINAL_BINDING) || (it.viewType == INSTAR_SIZE_BINDING) }
+                }
+
+
+                rangedOriginalSlides = when (index) {
+                    0 -> {
+                        slideViewModel.slides.value!!.subList(0, position + currentBindingOffset + 1)
+                    }
+                    else -> {
+                        slideViewModel.slides.value!!.subList(cutPositions.value!![index - 1] + prevBindingOffset + 1, position + prevBindingOffset + currentBindingOffset + 1)
+                    }
+                }
+
+                saveSlidesAsImage(format, title, rangedPreviewSlides, rangedOriginalSlides)
+            }
+        }
+    }
+    
     // 이미지를 알맞은 형태로 저장
     private suspend fun saveSlidesAsImage(format: String, title: String, previews: List<PreviewSlide>, originals: List<Slide>) {
         coroutineScope {
@@ -582,6 +529,81 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                 // 저장 기다리기
                 inInnerStorage.await()
                 inExternalStorage.await()
+            }
+        }
+    }
+
+    // 이미지를 분할해서 pdf로 저장
+    private suspend fun savePdfWithCutting() {
+        // 범위로 나눠서 분할
+        previewViewModel.apply {
+
+            val time = getTimeStamp()
+
+            // 분할 안 했을 경우
+            if (cutPositions.value.isNullOrEmpty()) {
+                val title = "$time 0 ~ ${previewSlides.value!!.size - 1}"
+                saveSlidesAsPdf(title, previewSlides.value!!, slideViewModel.slides.value!!)
+                return@apply
+            }
+
+            val bindingIndices = slideViewModel.bindingFlattenSlides.value!!.map {
+                slideViewModel.slides.value!!.indexOf(it)
+            }
+
+            // 얘 꼭 필요함
+            cutPositions.value?.add(previewSlides.value!!.size - 1)
+
+            cutPositions.value?.forEachIndexed { index, position ->
+                val prevRangedPreviewSlides: List<PreviewSlide>
+                val rangedPreviewSlides: List<PreviewSlide>
+                val rangedOriginalSlides: List<Slide>
+                var title: String
+
+                rangedPreviewSlides = when (index) {
+                    0 -> {
+                        title = "$time 0 ~ ${position}"
+                        previewSlides.value!!.subList(0, position + 1)
+                    }
+                    else -> {
+                        title = "$time ${cutPositions.value!![index - 1] + 1} ~ ${position}"
+                        previewSlides.value!!.subList(cutPositions.value!![index - 1] + 1, position + 1)
+                    }
+                }
+
+
+                if (rangedPreviewSlides.size == 1) {
+                    title = "$time $position"
+                }
+
+                prevRangedPreviewSlides = if (index >= 1) {
+                    previewSlides.value!!.subList(0, cutPositions.value!![index - 1] + 1)
+                } else {
+                    listOf()
+                }
+
+
+                // 오리지널 슬라이드 뽑아내기 (바인딩 안 했을 경우 오프셋은 0)
+                var prevBindingOffset = 0
+                var currentBindingOffset = 0
+
+                // 바인딩 했을 경우
+                if (bindingIndices.isNotEmpty()) {
+                    prevBindingOffset = prevRangedPreviewSlides.count { (it.viewType == ORIGINAL_BINDING) || (it.viewType == INSTAR_SIZE_BINDING) }
+                    currentBindingOffset = rangedPreviewSlides.count { (it.viewType == ORIGINAL_BINDING) || (it.viewType == INSTAR_SIZE_BINDING) }
+                }
+
+
+                rangedOriginalSlides = when (index) {
+                    0 -> {
+                        slideViewModel.slides.value!!.subList(0, position + currentBindingOffset + 1)
+                    }
+                    else -> {
+                        slideViewModel.slides.value!!.subList(cutPositions.value!![index - 1] + prevBindingOffset + 1, position + prevBindingOffset + currentBindingOffset + 1)
+                    }
+                }
+
+                saveSlidesAsPdf(title, rangedPreviewSlides, rangedOriginalSlides)
             }
         }
     }

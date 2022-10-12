@@ -57,7 +57,6 @@ class ResultSlideAdapter(
             else View.GONE
 
         for ((_, holder) in viewHolders) {
-            holder.binding.checkbox.visibility = visibility
             holder.binding.imageChecked.visibility = View.GONE
         }
     }
@@ -70,8 +69,6 @@ class ResultSlideAdapter(
 
             // 편집모드
             if (isEditMode.value == true) {
-                binding.checkbox.visibility = View.VISIBLE
-
                 // 얘가 선택됐다면 체크 활성화
                 if (item in selectedItems.value!!)
                     binding.imageChecked.visibility = View.VISIBLE
@@ -79,7 +76,6 @@ class ResultSlideAdapter(
                     binding.imageChecked.visibility = View.GONE
             }
             else {
-                binding.checkbox.visibility = View.GONE
                 binding.imageChecked.visibility = View.GONE
             }
 

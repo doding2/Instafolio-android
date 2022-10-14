@@ -15,4 +15,6 @@
     <color name="transparent_black">#b3000000</color>
     <color name="less_transparent_black">#bf000000</color>
     <color name="red">#FF0000</color>
+
+    <color name="pretendard_text_color">#494949</color>
 </resources>

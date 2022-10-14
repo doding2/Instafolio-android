@@ -13,7 +13,6 @@ import com.instafolioo.instagramportfolio.model.ResultSlide
 class ResultSlideAdapter(
     private val items: MutableList<ResultSlide>,
     private val clickListener: (ResultSlide, ItemResultSlideBinding) -> Unit,
-    private val onLongClickListener: (ResultSlide, ItemResultSlideBinding) -> Unit,
     private val selectedItems: MutableLiveData<MutableList<ResultSlide>>,
     private val isEditMode: MutableLiveData<Boolean>,
 ): RecyclerView.Adapter<ResultSlideAdapter.ViewHolder>() {
@@ -52,10 +51,6 @@ class ResultSlideAdapter(
 
     // 편집모드 UI 보이도록 활성화
     fun enableEditMode(enabled: Boolean) {
-        val visibility =
-            if (enabled) View.VISIBLE
-            else View.GONE
-
         for ((_, holder) in viewHolders) {
             holder.binding.imageChecked.visibility = View.GONE
         }
@@ -83,12 +78,7 @@ class ResultSlideAdapter(
             binding.root.setOnClickListener {
                 clickListener(item, binding)
             }
-            
-            // 롱 클릭
-            binding.root.setOnLongClickListener {
-                onLongClickListener(item, binding)
-                true
-            }
+
         }
     }
 

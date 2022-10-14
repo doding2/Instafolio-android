@@ -1,5 +1,7 @@
 package com.instafolioo.instagramportfolio.view.home
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.graphics.Color
@@ -27,6 +29,7 @@ import com.instafolioo.instagramportfolio.databinding.FragmentHomeBinding
 import com.instafolioo.instagramportfolio.databinding.ItemResultSlideBinding
 import com.instafolioo.instagramportfolio.extension.*
 import com.instafolioo.instagramportfolio.model.ResultSlide
+import com.instafolioo.instagramportfolio.model.getEmptyResultSlides
 import com.instafolioo.instagramportfolio.view.common.MainActivity
 import com.instafolioo.instagramportfolio.view.slide.SlideViewModel
 
@@ -79,21 +82,33 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
 
         // status bar, navigation bar가 밝은 색이라는 것을 알림
         requireActivity().window.statusBarColor = Color.WHITE
-        WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightStatusBars = true
-        WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightNavigationBars = false
+        WindowInsetsControllerCompat(requireActivity().window, binding.root).apply {
+            isAppearanceLightStatusBars = true
+            isAppearanceLightNavigationBars = true
+        }
 
 
         // 리사이클러 뷰 설정
-        adapter = ResultSlideAdapter(arrayListOf(), ::onItemClick, ::onItemLongClick,
+        adapter = ResultSlideAdapter(arrayListOf(), ::onItemClick,
             homeViewModel.selectedResultSlides, homeViewModel.isEditMode)
         binding.recyclerView.adapter = this.adapter
 
+
+
         // 인스타 파일들 재등록
         homeViewModel.resultSlides.observe(viewLifecycleOwner) {
-            adapter.replaceItems(it)
 
             binding.textNoResultSlide.visibility =
                 if (it.isEmpty()) View.VISIBLE else View.GONE
+
+            if (it.isNullOrEmpty()) {
+                adapter.replaceItems(getEmptyResultSlides())
+                binding.recyclerView.setOnTouchListener { _, _ -> true }
+                return@observe
+            }
+
+            binding.recyclerView.setOnTouchListener(null)
+            adapter.replaceItems(it)
         }
 
         //  Navigation bottom sheet 설정하기
@@ -155,33 +170,87 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
             behavior.state = BottomSheetBehavior.STATE_COLLAPSED
         }
 
+        var isEditModeInit = true
+
         // 편집모드 변동 관찰
         homeViewModel.isEditMode.observe(viewLifecycleOwner) {
+            if (isEditModeInit) {
+                isEditModeInit = false
+                binding.layoutEditMode.root.run {
+                    post {
+                        animate()
+                            .translationYBy(height.toFloat())
+                            .setDuration(0)
+                            .setListener(object: AnimatorListenerAdapter() {
+                                override fun onAnimationEnd(animation: Animator?) {
+                                    binding.layoutEditMode.root.visibility = View.GONE
+                                }
+                            })
+                    }
+                }
+                return@observe
+            }
+
             if (it) {
                 behavior.state = BottomSheetBehavior.STATE_COLLAPSED
                 adapter.enableEditMode(true)
-                binding.layoutEditMode.root.visibility = View.VISIBLE
+
+                binding.layoutEditMode.root.run {
+                    post {
+                        animate()
+                            .translationYBy(-height.toFloat())
+                            .setDuration(150)
+                            .setListener(object: AnimatorListenerAdapter() {
+                                override fun onAnimationStart(animation: Animator?) {
+                                    binding.layoutEditMode.root.visibility = View.VISIBLE
+                                }
+                            })
+                    }
+                }
             } else {
                 adapter.enableEditMode(false)
-                binding.layoutEditMode.root.visibility = View.GONE
+                binding.layoutEditMode.root.run {
+                    post {
+                        animate()
+                            .translationYBy(height.toFloat())
+                            .setDuration(150)
+                            .setListener(object: AnimatorListenerAdapter() {
+                                override fun onAnimationEnd(animation: Animator?) {
+                                    binding.layoutEditMode.root.visibility = View.GONE
+                                }
+                            })
+                    }
+                }
             }
+        }
+
+        // 편집모드 취소
+        binding.layoutEditMode.buttonCancel.setOnClickListener {
+            if (homeViewModel.isEditMode())
+                homeViewModel.isEditMode.value = false
+        }
+
+        // 선택된 슬라이드들 열기
+        binding.layoutEditMode.buttonEdit.setOnClickListener {
+            if (homeViewModel.isEditMode())
+                openResultSlides()
         }
 
         // 슬라이드 삭제
         binding.layoutEditMode.buttonDelete.setOnClickListener {
             if (homeViewModel.isEditMode()) {
-                showConfirmDialog(
-                    "포트폴리오 삭제",
-                    "정말 삭제하시겠습니까?",
-                    onOk = {
-                        deleteResultSlides()
-                    }
+                showDeleteDialog(
+                    title = "프로젝트 삭제",
+                    message = "선택한 파일을 삭제하시겠습니까?",
+                    onOk = ::deleteResultSlides
                 )
             }
         }
 
         return binding.root
     }
+
+    // 폰트
 
     // 편집모드에서 여러 파일 동시에 열기
     private fun openResultSlides() {
@@ -239,57 +308,34 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
 
     // result slide 클릭하면 편집 화면으로 이동
     private fun onItemClick(resultSlide: ResultSlide, binding: ItemResultSlideBinding) {
-        // 편집모드
-        if (homeViewModel.isEditMode()){
-            // 편집모드일때 아이템 클릭하면
-            // 선택 / 선택 해제 동작만 수행
-            
-            // 선택 해제
-            if (resultSlide in homeViewModel.selectedResultSlides.value!!) {
-                homeViewModel.selectedResultSlides.value!!.remove(resultSlide)
-                binding.imageChecked.visibility = View.GONE
-
-                // 선택된 아이템이 아무것도 없게 된다면
-                // 편집모드 해제
-                if (homeViewModel.selectedResultSlides.value.isNullOrEmpty())
-                    homeViewModel.isEditMode.value = false
-            }
-            // 선택
-            else {
-                homeViewModel.selectedResultSlides.value!!.add(resultSlide)
-                binding.imageChecked.visibility = View.VISIBLE
-            }
+        // 슬라이드가 하나도 없을 때
+        if (resultSlide.format == "empty") {
             return
         }
 
-
-        // 편집모드가 아닐땐, 그냥 파일 열기 동작 수행
-
-        val pair = if (resultSlide.format == "pdf") {
-            resultSlide to resultSlide.format
-        } else {
-            resultSlide to "image"
-        }
-
-        // slide view model 초기화
-        slideViewModel.clear()
-        slideViewModel.resultSlideWithExtension.value!!.add(pair)
-
-
-        // Slide Fragment로 이동
-        findNavController()
-            .navigate(com.instafolioo.instagramportfolio.R.id.action_homeFragment_to_slideFragment)
-    }
-
-    // result slide 롱 클릭하면 편집모드 활성화
-    private fun onItemLongClick(resultSlide: ResultSlide, binding: ItemResultSlideBinding) {
-        // 이미 편집모드라면 아무 동작 안함
+        // 편집모드가 아닐때
         if (!homeViewModel.isEditMode()) {
             homeViewModel.isEditMode.value = true
             homeViewModel.selectedResultSlides.value = mutableListOf()
             binding.imageChecked.visibility = View.VISIBLE
             homeViewModel.selectedResultSlides.value!!.add(resultSlide)
+            return
+        }
 
+        // 아이템 선택 해제
+        if (resultSlide in homeViewModel.selectedResultSlides.value!!) {
+            homeViewModel.selectedResultSlides.value!!.remove(resultSlide)
+            binding.imageChecked.visibility = View.GONE
+
+            // 선택된 아이템이 아무것도 없게 된다면
+            // 편집모드 해제
+            if (homeViewModel.selectedResultSlides.value.isNullOrEmpty())
+                homeViewModel.isEditMode.value = false
+        }
+        // 선택
+        else {
+            homeViewModel.selectedResultSlides.value!!.add(resultSlide)
+            binding.imageChecked.visibility = View.VISIBLE
         }
     }
 
@@ -464,13 +510,16 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
 
     // 파일 선택지들의 투명도 조절
     private fun setListOpacity(opacity: Int) {
-        binding.buttonDirectory.background?.setAlpha(opacity)
-        binding.divider.background?.setAlpha(opacity)
-        binding.buttonGallery.background?.setAlpha(opacity)
+        binding.buttonDirectory.background?.alpha = opacity
+        binding.divider.background?.alpha = opacity
+        binding.buttonGallery.background?.alpha = opacity
+
+        binding.divider.background?.alpha = opacity
 
         binding.imageDirectory.imageAlpha = opacity
         binding.imageGallery.imageAlpha = opacity
 
+        binding.textSheetTitle.setTextColor(binding.textSheetTitle.textColors.withAlpha(opacity))
         binding.textDirectory.setTextColor(binding.textDirectory.textColors.withAlpha(opacity))
         binding.textGallery.setTextColor(binding.textGallery.textColors.withAlpha(opacity))
     }

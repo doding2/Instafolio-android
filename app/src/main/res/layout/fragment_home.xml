@@ -17,8 +17,8 @@
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
-                android:layout_height="65dp"
-                android:outlineSpotShadowColor="@color/light_gray"
+                android:layout_height="53dp"
+                android:outlineSpotShadowColor="@color/gray"
                 app:cardElevation="20dp"
                 app:cardBackgroundColor="@color/white">
 
@@ -26,22 +26,30 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:text="내 프로젝트"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/black"/>
+                    android:text="Instafolio"
+                    android:textSize="17.32sp"
+                    android:textColor="@color/black"
+                    android:fontFamily="@font/sebang_gothic_bold"/>
             </com.google.android.material.card.MaterialCardView>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_margin="8dp"
+                android:layout_marginHorizontal="15dp"
+                android:layout_marginTop="-2dp"
                 android:clipToPadding="false"
                 android:paddingBottom="80dp"
                 app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                 app:spanCount="3" />
         </LinearLayout>
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:layout_marginTop="53dp"
+            android:src="@drawable/effect_upper_screen"/>
 
         <TextView
             android:id="@+id/text_no_result_slide"
@@ -50,9 +58,10 @@
             android:gravity="center"
             android:layout_gravity="center"
             android:text="버튼을 눌러 프로젝트를\n시작해주세요"
-            android:textColor="@color/gray"
-            android:textSize="15sp"
-            android:visibility="gone"/>
+            android:textColor="#B8B8B8"
+            android:textSize="13sp"
+            android:layout_marginTop="53dp"
+            android:layout_marginBottom="63dp"/>
 
         <View
             android:id="@+id/layout_block_screen"
@@ -70,16 +79,23 @@
             android:layout_height="match_parent">
 
             <View
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="35dp"
                 android:background="@drawable/shape_top_shadow"
                 app:layout_anchor="@+id/navigation_and_bottom_sheet"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="127dp"
+                android:background="@drawable/effect_lower_screen"
+                app:layout_anchor="@+id/navigation_and_bottom_sheet"
+                android:layout_marginBottom="63dp"/>
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/navigation_and_bottom_sheet"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:behavior_peekHeight="80dp"
+                app:behavior_peekHeight="63dp"
                 app:cardCornerRadius="0dp"
                 app:cardElevation="0dp"
                 app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
@@ -89,100 +105,116 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:background="@color/black" >
+                    android:background="@color/white" >
 
-                    <LinearLayout
-                        android:id="@+id/button_directory"
+                    <TextView
+                        android:id="@+id/text_sheet_title"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:paddingStart="25dp"
+                        android:gravity="center"
                         android:padding="15dp"
-                        android:gravity="center">
+                        android:text="파일 불러오기"
+                        android:textSize="16sp"
+                        android:textColor="@color/pretendard_text_color"
+                        android:fontFamily="@font/pretendard_bold"/>
 
-                        <ImageView
-                            android:id="@+id/image_directory"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:src="@drawable/icon_folder"
-                            app:tint="@color/white"/>
-
-                        <TextView
-                            android:id="@+id/text_directory"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginStart="10dp"
-                            android:text="드라이브에서 가져오기"
-                            android:textSize="16sp"
-                            android:textColor="@color/white"
-                            android:textStyle="bold"/>
-                    </LinearLayout>
-
-                    <com.google.android.material.divider.MaterialDivider
+                    <View
                         android:id="@+id/divider"
                         android:layout_width="match_parent"
-                        android:layout_height="0.1dp"
-                        android:background="#383838"/>
+                        android:layout_height="0.5dp"
+                        android:background="@color/light_gray"/>
 
                     <LinearLayout
-                        android:id="@+id/button_gallery"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:paddingStart="25dp"
-                        android:padding="15dp"
-                        android:gravity="center">
+                        android:orientation="horizontal">
 
-                        <ImageView
-                            android:id="@+id/image_gallery"
-                            android:layout_width="44dp"
-                            android:layout_height="44dp"
-                            android:src="@drawable/icon_image"
-                            app:tint="@color/white"/>
-
-                        <TextView
-                            android:id="@+id/text_gallery"
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:id="@+id/button_directory"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginStart="9dp"
-                            android:layout_marginEnd="16dp"
-                            android:text="갤러리에서 가져오기"
-                            android:textSize="16dp"
-                            android:textColor="@color/white"
-                            android:textStyle="bold"/>
+                            android:padding="18dp"
+                            android:orientation="horizontal"
+                            android:layout_weight="1"
+                            android:gravity="center">
+
+                            <ImageView
+                                android:id="@+id/image_directory"
+                                android:layout_width="18.5dp"
+                                android:layout_height="14.5dp"
+                                android:src="@drawable/icon_folder"
+                                app:tint="@color/black"
+                                android:layout_gravity="center"/>
+
+                            <TextView
+                                android:id="@+id/text_directory"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginStart="9dp"
+                                android:text="드라이브"
+                                android:textSize="16sp"
+                                android:textColor="@color/pretendard_text_color"
+                                android:fontFamily="@font/pretendard_extrabold"/>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/button_gallery"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:padding="18dp"
+                            android:orientation="horizontal"
+                            android:gravity="center"
+                            android:layout_weight="1">
+
+                            <ImageView
+                                android:id="@+id/image_gallery"
+                                android:layout_width="15dp"
+                                android:layout_height="15dp"
+                                android:src="@drawable/icon_image"
+                                app:tint="@color/black"
+                                android:layout_marginTop="1dp"
+                                android:layout_gravity="center"/>
+
+                            <TextView
+                                android:id="@+id/text_gallery"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginStart="9dp"
+                                android:text="갤러리"
+                                android:textSize="16sp"
+                                android:textColor="@color/pretendard_text_color"
+                                android:fontFamily="@font/pretendard_extrabold"/>
+                        </LinearLayout>
+
                     </LinearLayout>
                 </LinearLayout>
 
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/button_show_sheet"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_marginTop="9.5dp"
+                    android:layout_gravity="center_horizontal|top"
+                    app:cardCornerRadius="100dp"
+                    app:cardBackgroundColor="@color/black"
+                    app:cardElevation="0dp">
+
+                    <!-- 40 x 40 -->
+                    <ImageView
+                        android:layout_width="35dp"
+                        android:layout_height="35dp"
+                        android:src="@drawable/icon_round_plus"
+                        android:layout_gravity="center"
+                        app:tint="@color/white"/>
+                </androidx.cardview.widget.CardView>
 
                 <include layout="@layout/layout_edit_mode"
                     android:id="@+id/layout_edit_mode"
                     android:layout_width="match_parent"
-                    android:layout_height="80dp"/>
-
-                <FrameLayout
-                    android:id="@+id/button_show_sheet"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="15dp"
-                    android:layout_gravity="center_horizontal">
-
-                    <!-- 40 x 40 -->
-                    <ImageView
-                        android:layout_width="45dp"
-                        android:layout_height="45dp"
-                        android:src="@drawable/icon_show_sheet_inside"
-                        android:layout_gravity="center" />
-
-                    <!-- 44 x 44 -->
-                    <ImageView
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:src="@drawable/icon_show_sheet_outside"
-                        android:layout_gravity="center"/>
-                </FrameLayout>
-
+                    android:layout_height="63dp"
+                    android:animateLayoutChanges="true"/>
             </com.google.android.material.card.MaterialCardView>
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
     </FrameLayout>

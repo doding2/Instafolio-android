@@ -94,7 +94,6 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         binding.recyclerView.adapter = this.adapter
 
 
-
         // 인스타 파일들 재등록
         homeViewModel.resultSlides.observe(viewLifecycleOwner) {
 
@@ -176,6 +175,10 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         homeViewModel.isEditMode.observe(viewLifecycleOwner) {
             if (isEditModeInit) {
                 isEditModeInit = false
+
+                if (!homeViewModel.selectedResultSlides.value.isNullOrEmpty())
+                    return@observe
+
                 binding.layoutEditMode.root.run {
                     post {
                         animate()

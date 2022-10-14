@@ -1,10 +1,14 @@
 package com.instafolioo.instagramportfolio.view.common
 
 import android.os.Bundle
+import android.view.ViewTreeObserver
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProvider
 import com.instafolioo.instagramportfolio.R
 import com.instafolioo.instagramportfolio.databinding.ActivityMainBinding
+import com.instafolioo.instagramportfolio.view.home.HomeViewModel
+import com.instafolioo.instagramportfolio.view.home.HomeViewModelFactory
 
 
 class MainActivity : AppCompatActivity() {
@@ -12,9 +16,28 @@ class MainActivity : AppCompatActivity() {
     private var _binding: ActivityMainBinding? = null
     private val binding get() = _binding!!
 
+    private lateinit var homeViewModel: HomeViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         _binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        val factory = HomeViewModelFactory(this)
+        homeViewModel = ViewModelProvider(this, factory)[HomeViewModel::class.java]
+
+        // splash screen 동안 result slides 로딩
+        binding.layoutRoot.viewTreeObserver.addOnPreDrawListener(
+            object: ViewTreeObserver.OnPreDrawListener {
+                override fun onPreDraw(): Boolean {
+                    return if (homeViewModel.isReady) {
+                        binding.layoutRoot.viewTreeObserver.removeOnPreDrawListener(this)
+                        true
+                    } else {
+                        false
+                    }
+                }
+
+            }
+        )
     }
 
     override fun onDestroy() {

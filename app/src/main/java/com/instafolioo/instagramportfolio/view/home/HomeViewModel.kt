@@ -28,6 +28,8 @@ class HomeViewModel(context: Context): ViewModel() {
         value = mutableListOf()
     }
 
+    val isReady get() = resultSlides.value != null
+
     fun isEditMode(): Boolean {
         return isEditMode.value == true
     }

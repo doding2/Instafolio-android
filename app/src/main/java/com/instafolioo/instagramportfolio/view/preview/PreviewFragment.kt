@@ -9,7 +9,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
@@ -180,7 +179,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
 
         scroller = object: LinearSmoothScroller(requireContext()) {
             override fun getHorizontalSnapPreference(): Int {
-                return LinearSmoothScroller.SNAP_TO_END
+                return SNAP_TO_END
             }
         }
 
@@ -384,6 +383,8 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                     binding.recyclerViewCut.setPadding(padding, 0, padding, 0)
                     scroller.targetPosition = 0
                     binding.recyclerViewCut.layoutManager?.startSmoothScroll(scroller)
+                    binding.recyclerView.layoutManager?.scrollToPosition(0)
+                    previewViewModel.currentSlide.value = 1
                 }
 
                 // 로딩 끄기

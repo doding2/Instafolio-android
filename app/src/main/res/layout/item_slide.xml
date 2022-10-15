@@ -15,8 +15,9 @@
             android:visibility="gone">
 
             <FrameLayout
-                android:layout_width="82dp"
-                android:layout_height="82dp"
+                android:id="@+id/layout_border_before"
+                android:layout_width="88dp"
+                android:layout_height="88dp"
                 android:layout_gravity="center"
                 android:foreground="@drawable/border_without_right">
 
@@ -28,48 +29,49 @@
             </FrameLayout>
 
             <View
-                android:layout_width="5dp"
-                android:layout_height="2dp"
-                android:layout_marginTop="5dp"
+                android:layout_width="6dp"
+                android:layout_height="2.5dp"
+                android:layout_marginTop="1.25dp"
                 android:layout_gravity="top|end"
-                android:background="@color/purple_200"/>
+                android:background="@color/binding_border_color"/>
 
             <View
-                android:layout_width="5dp"
-                android:layout_height="2dp"
-                android:layout_marginBottom="5dp"
+                android:layout_width="6dp"
+                android:layout_height="2.5dp"
+                android:layout_marginBottom="1.25dp"
                 android:layout_gravity="bottom|end"
-                android:background="@color/purple_200"/>
+                android:background="@color/binding_border_color"/>
         </FrameLayout>
 
-        <!--    Slide Origin    -->
+        <!--    Slide Center (Origin)    -->
         <FrameLayout
+            android:id="@+id/layout_center"
             android:layout_width="90dp"
             android:layout_height="90dp">
 
             <View
                 android:id="@+id/border_connect_start_top"
-                android:layout_width="5dp"
-                android:layout_height="2dp"
-                android:layout_marginTop="5dp"
+                android:layout_width="6dp"
+                android:layout_height="2.5dp"
+                android:layout_marginTop="1.25dp"
                 android:layout_gravity="top|start"
-                android:background="@color/purple_200"
+                android:background="@color/binding_border_color"
                 android:visibility="gone"/>
 
             <View
                 android:id="@+id/border_connect_start_bottom"
-                android:layout_width="5dp"
-                android:layout_height="2dp"
-                android:layout_marginBottom="5dp"
+                android:layout_width="6dp"
+                android:layout_height="2.5dp"
+                android:layout_marginBottom="1.25dp"
                 android:layout_gravity="bottom|start"
-                android:background="@color/purple_200"
+                android:background="@color/binding_border_color"
                 android:visibility="gone"/>
 
 
             <FrameLayout
                 android:id="@+id/wrapper_border_image_slide"
-                android:layout_width="82dp"
-                android:layout_height="82dp"
+                android:layout_width="88dp"
+                android:layout_height="88dp"
                 android:layout_gravity="center">
 
                 <ImageView
@@ -81,20 +83,20 @@
 
             <View
                 android:id="@+id/border_connect_end_top"
-                android:layout_width="5dp"
-                android:layout_height="2dp"
-                android:layout_marginTop="5dp"
+                android:layout_width="6dp"
+                android:layout_height="2.5dp"
+                android:layout_marginTop="1.25dp"
                 android:layout_gravity="top|end"
-                android:background="@color/purple_200"
+                android:background="@color/binding_border_color"
                 android:visibility="gone"/>
 
             <View
                 android:id="@+id/border_connect_end_bottom"
-                android:layout_width="5dp"
-                android:layout_height="2dp"
-                android:layout_marginBottom="5dp"
+                android:layout_width="6dp"
+                android:layout_height="2.5dp"
+                android:layout_marginBottom="1.25dp"
                 android:layout_gravity="bottom|end"
-                android:background="@color/purple_200"
+                android:background="@color/binding_border_color"
                 android:visibility="gone"/>
         </FrameLayout>
 
@@ -106,22 +108,23 @@
             android:visibility="gone">
 
             <View
-                android:layout_width="5dp"
-                android:layout_height="2dp"
-                android:layout_marginTop="5dp"
+                android:layout_width="6dp"
+                android:layout_height="2.5dp"
+                android:layout_marginTop="1.25dp"
                 android:layout_gravity="top|start"
-                android:background="@color/purple_200"/>
+                android:background="@color/binding_border_color"/>
 
             <View
-                android:layout_width="5dp"
-                android:layout_height="2dp"
-                android:layout_marginBottom="5dp"
+                android:layout_width="6dp"
+                android:layout_height="2.5dp"
+                android:layout_marginBottom="1.25dp"
                 android:layout_gravity="bottom|start"
-                android:background="@color/purple_200"/>
+                android:background="@color/binding_border_color"/>
 
             <FrameLayout
-                android:layout_width="82dp"
-                android:layout_height="82dp"
+                android:id="@+id/layout_border_after"
+                android:layout_width="88dp"
+                android:layout_height="88dp"
                 android:layout_gravity="center"
                 android:foreground="@drawable/border_without_left">
 

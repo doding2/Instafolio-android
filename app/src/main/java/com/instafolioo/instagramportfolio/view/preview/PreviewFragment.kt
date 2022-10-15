@@ -321,6 +321,8 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                 binding.recyclerViewCut.setPadding(padding, 0, padding, 0)
                 scroller.targetPosition = 0
                 binding.recyclerViewCut.layoutManager?.startSmoothScroll(scroller)
+                binding.recyclerView.layoutManager?.scrollToPosition(0)
+                previewViewModel.currentSlide.value = 1
             }
             binding.layoutLoading.root.visibility = View.GONE
 

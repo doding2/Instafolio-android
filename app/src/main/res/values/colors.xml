@@ -17,4 +17,6 @@
     <color name="red">#FF0000</color>
 
     <color name="pretendard_text_color">#494949</color>
+    <color name="disabled_slide_button_color">#8F8F8F</color>
+    <color name="binding_border_color">#A5A5A5</color>
 </resources>

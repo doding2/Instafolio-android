@@ -10,7 +10,9 @@ import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -23,7 +25,6 @@ import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 import com.instafolioo.instagramportfolio.R
-import com.instafolioo.instagramportfolio.databinding.FragmentSlideBinding
 import com.instafolioo.instagramportfolio.extension.*
 import com.instafolioo.instagramportfolio.model.Slide
 import com.instafolioo.instagramportfolio.view.common.MainActivity
@@ -39,7 +40,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
         const val TAG = "SlideFragment"
     }
 
-    private var _binding: FragmentSlideBinding? = null
+    private var _binding: com.instafolioo.instagramportfolio.databinding.FragmentSlideBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var viewModel: SlideViewModel
@@ -57,7 +58,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
             }
             // pdf exception
             is NoManageStoragePermissionException -> {
-                showAlertDialog("지원하지 않는 경로로부터의 파일입니다.",
+                showAlertDialog("지원하지 않는 경로로부터의 파일입니다",
                     onDismiss = {
                         findNavController().popBackStack()
                 })
@@ -113,10 +114,15 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
             }
         }
 
-        // status bar, navigation bar가 밝은 색이 아니라는 것을 알림
-        requireActivity().window.statusBarColor = Color.BLACK
-        WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightStatusBars = false
-        WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightNavigationBars = false
+        requireActivity().window.apply {
+            statusBarColor = Color.BLACK
+            navigationBarColor = Color.BLACK
+
+            WindowInsetsControllerCompat(this, binding.root).apply {
+                isAppearanceLightStatusBars = false
+                isAppearanceLightNavigationBars = false
+            }
+        }
 
 
         // 로딩 화면 표시
@@ -124,6 +130,8 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
 
         // 리사이클러 뷰 설정
         adapter = SlideAdapter(requireContext(), arrayListOf(), ::onItemClick, viewModel)
+        adjustSlideSize()
+
         binding.recyclerViewSlide.adapter = adapter
         val layoutManager = FlexboxLayoutManager(requireContext()).apply {
             flexDirection = FlexDirection.ROW
@@ -157,7 +165,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
 
         // 이미지 사이즈 조절
         initImagesScale()
-        binding.buttonScale.setOnClickListener {
+        binding.buttonInstaSize.setOnClickListener {
             viewModel.isSlideChanged.value = true
             scaleImages()
         }
@@ -177,25 +185,25 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
                 }
             }
             else {
-                showAlertDialog("적어도 두 개의 이미지가 필요합니다.")
+                showAlertDialog("적어도 두 개의 이미지가 필요합니다")
             }
         }
 
         // 바인딩 되어있으면 버튼 배경이 생김
         viewModel.enableBinding.observe(viewLifecycleOwner) {
             if (it == true) {
-                binding.buttonBindingBackground.visibility = View.VISIBLE
+                binding.buttonBinding.setEnabledColor(true)
                 showFirstBindingToPreview()
             } else {
-                binding.buttonBindingBackground.visibility = View.GONE
+                binding.buttonBinding.setEnabledColor(false)
             }
         }
         // 확장 되어있으면 버튼 배경이 생김
         viewModel.isInstarSize.observe(viewLifecycleOwner) {
             if (it == true) {
-                binding.buttonScaleBackground.visibility = View.GONE
+                binding.buttonInstaSize.setEnabledColor(false)
             } else {
-                binding.buttonScaleBackground.visibility = View.VISIBLE
+                binding.buttonInstaSize.setEnabledColor(true)
             }
         }
 
@@ -211,6 +219,9 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
                 findNavController().navigate(R.id.action_slideFragment_to_previewFragment)
             }
         }
+
+        // 뒤로가기
+        binding.buttonBack.setOnClickListener { onBackPressed() }
 
         return binding.root
     }
@@ -275,7 +286,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
                 // 삭제시키기
                 if (resultSlide.size != loadedSlide.size) {
                     showAlertDialog(
-                        "손상된 파일이 포함되어 있습니다.",
+                        "파일을 열 수 없습니다",
                         onDismiss = {
                             homeViewModel.deleteResultSlide(resultSlide)
                             findNavController().popBackStack()
@@ -302,7 +313,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
                 adapter.replaceItems(viewModel.slides.value!!, viewModel.bindingPairs.value!!)
             } else {
                 showAlertDialog(
-                    "파일을 열 수 없습니다.",
+                    "파일을 열 수 없습니다",
                     onDismiss =  {
                         findNavController().popBackStack()
                     }
@@ -316,6 +327,40 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
         }
     }
 
+
+    // 버튼 이미지 틴트 색 바꾸기
+    private fun ImageView.setEnabledColor(enabled: Boolean) {
+        val color = if (enabled) Color.WHITE
+        else ContextCompat.getColor(requireContext(), R.color.disabled_slide_button_color)
+
+        setColorFilter(color)
+    }
+    
+    // 리사이클러 뷰의 column 개수가 4개 (또는 8개)가 되도록 아이템 슬라이드 조절
+    private fun adjustSlideSize() {
+
+        val isRotated = when (requireActivity().display?.rotation) {
+            Surface.ROTATION_90, Surface.ROTATION_270 -> true
+            else -> false
+        }
+
+        binding.recyclerViewSlide.run {
+            post {
+                val itemSize = if (isRotated) width / 8
+                else width / 4
+
+                this@SlideFragment.adapter.setSlidesSize(itemSize)
+            }
+        }
+
+    }
+
+    // dp to px
+    private val Int.dp: Int
+        get() {
+            val scale = requireContext().resources.displayMetrics.density
+            return (this * scale + 0.5f).toInt()
+        }
 
 
     // 새로운 파일을 열었을 경우
@@ -352,7 +397,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
             } else {
                 // 변환된 비트맵 이미지가 0개
                 showAlertDialog(
-                    "파일을 열 수 없습니다.",
+                    "파일을 열 수 없습니다",
                     onDismiss =  {
                         findNavController().popBackStack()
                     }
@@ -404,7 +449,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
                 showFirstBindingToPreview()
             }
             else {
-                showAlertDialog("예상치 못한 에러가 발생했습니다.")
+                showAlertDialog("예상치 못한 에러가 발생했습니다")
             }
 
         } else {
@@ -535,7 +580,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
         else {
             showMessageDialog(
                 "권한요청",
-                "파일을 열기 위해서는\n사진 및 미디어 액세스 권한이 필요합니다.",
+                "파일을 열기 위해서는\n사진 및 미디어 액세스 권한이 필요합니다",
                 onDismiss = {
                     findNavController().popBackStack()
                 }
@@ -593,8 +638,8 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
             }
 
             showConfirmDialog(
-                "저장되지 않았습니다.",
-                "정말 뒤로가시겠습니까?",
+                "저장되지 않았습니다",
+                "저장하지 않고 뒤로가시겠습니까?",
                 onOk = {
                     slides.value = null
                     findNavController().popBackStack()

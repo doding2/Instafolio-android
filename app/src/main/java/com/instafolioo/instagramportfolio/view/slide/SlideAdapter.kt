@@ -41,6 +41,8 @@ class SlideAdapter(
         fun bind(item: Slide) {
             this.mySlide = item
 
+            setSlideSize()
+
             binding.imageSlide.setImageBitmap(item.bitmap)
             // 인스타 사이즈
             if (viewModel.isInstarSize.value == true) {
@@ -98,6 +100,64 @@ class SlideAdapter(
                 return@setOnLongClickListener false
             }
         }
+
+        // 슬라이드 크기가 화면에 맞게 조절
+        fun setSlideSize() {
+            binding.apply {
+
+                layoutBefore.layoutParams.apply {
+                    width = slideSize
+                    height = slideSize
+                }
+                layoutBorderBefore.layoutParams.apply {
+                    width = slideSize - 2
+                    height = slideSize - 2
+                }
+                imageSlideBefore.layoutParams.apply {
+                    width = slideSize - 10
+                    height = slideSize - 10
+                }
+
+                layoutCenter.layoutParams.apply {
+                    width = slideSize
+                    height = slideSize
+                }
+                wrapperBorderImageSlide.layoutParams.apply {
+                    width = slideSize - 2
+                    height = slideSize - 2
+                }
+                imageSlide.layoutParams.apply {
+                    width = slideSize - 10
+                    height = slideSize - 10
+                }
+
+                layoutAfter.layoutParams.apply {
+                    width = slideSize
+                    height = slideSize
+                }
+                layoutBorderAfter.layoutParams.apply {
+                    width = slideSize - 2
+                    height = slideSize - 2
+                }
+                imageSlideAfter.layoutParams.apply {
+                    width = slideSize - 10
+                    height = slideSize - 10
+                }
+
+                layoutBefore.requestLayout()
+                layoutBorderBefore.requestLayout()
+                imageSlideBefore.requestLayout()
+
+                layoutCenter.requestLayout()
+                wrapperBorderImageSlide.requestLayout()
+                imageSlide.requestLayout()
+
+                layoutAfter.requestLayout()
+                layoutBorderAfter.requestLayout()
+                imageSlideAfter.requestLayout()
+            }
+        }
+
 
         // 아이템 드래그가 시작함
         override fun onItemSelected() {
@@ -195,6 +255,15 @@ class SlideAdapter(
     var bindingPairs = mutableListOf<Pair<Slide, Slide>>()
     val bindingFlattenSlides get() = bindingPairs.flatMap { it.toList() }
 
+    var slideSize = 80.dp
+
+    // dp to px
+    private val Int.dp: Int
+    get() {
+        val scale = context.resources.displayMetrics.density
+        return (this * scale + 0.5f).toInt()
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val binding: ItemSlideBinding = DataBindingUtil.inflate(inflater, R.layout.item_slide, parent, false)
@@ -214,6 +283,15 @@ class SlideAdapter(
     fun getSlideAt(index: Int) = items[index]
 
     fun isBindingContains(slide: Slide) = slide in bindingFlattenSlides
+
+
+    fun setSlidesSize(size: Int) {
+        slideSize = size
+
+        for ((_, holder) in viewHolders) {
+            holder.setSlideSize()
+        }
+    }
 
     fun replaceItems(items: List<Slide>, bindingParis: MutableList<Pair<Slide, Slide>>) {
         this.viewHolders.clear()
@@ -329,7 +407,9 @@ class SlideAdapter(
             for ((_, second) in bindingPairs) {
                 val secondIndex = getIndexOf(second)
                 if (toPosition == secondIndex) {
-                    toPosition2++
+                    toPosition2--
+                    if (toPosition < 0)
+                        toPosition2 = 0
                     break
                 }
             }

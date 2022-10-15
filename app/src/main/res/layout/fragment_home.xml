@@ -46,10 +46,11 @@
 
         <ImageView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="128dp"
             android:layout_gravity="top"
             android:layout_marginTop="53dp"
-            android:src="@drawable/effect_upper_screen"/>
+            android:src="@drawable/effect_upper_screen"
+            android:scaleType="fitXY"/>
 
         <TextView
             android:id="@+id/text_no_result_slide"
@@ -89,7 +90,8 @@
                 android:layout_height="127dp"
                 android:background="@drawable/effect_lower_screen"
                 app:layout_anchor="@+id/navigation_and_bottom_sheet"
-                android:layout_marginBottom="63dp"/>
+                android:layout_marginBottom="63dp"
+                android:scaleType="fitXY"/>
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/navigation_and_bottom_sheet"

@@ -1,87 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="250dp"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="272dp"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:background="@drawable/dialog_round"
     android:gravity="center">
 
     <TextView
+        android:id="@+id/text_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:layout_marginHorizontal="20dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginBottom="20dp"
-        android:text="다운받을 형식을 \n 선택해주세요."
+        android:layout_marginTop="25dp"
+        android:text="파일 다운로드"
         android:maxLines="10"
         android:includeFontPadding="false"
-        android:textSize="19sp"
-        android:textStyle="bold"
-        android:textColor="@color/black"/>
-
-    <com.google.android.material.divider.MaterialDivider
-        android:layout_width="match_parent"
-        android:layout_height="0.3dp"/>
+        android:textSize="18sp"
+        android:textColor="@color/black"
+        android:fontFamily="@font/pretendard_bold"/>
 
     <TextView
-        android:id="@+id/button_png"
+        android:id="@+id/text_message"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:gravity="center"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="@drawable/selector_dialog_button"
-        android:text="PNG"
-        android:textColor="@color/black"
-        android:textSize="17sp"/>
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="20dp"
+        android:text="다운받을 파일형식을 선택해주세요"
+        android:maxLines="10"
+        android:includeFontPadding="false"
+        android:textSize="13.5sp"
+        android:fontFamily="@font/pretendard_medium"/>
 
-    <com.google.android.material.divider.MaterialDivider
-        android:layout_width="match_parent"
-        android:layout_height="0.3dp"/>
 
-    <TextView
-        android:id="@+id/button_jpg"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:gravity="center"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="@drawable/selector_dialog_button"
-        android:text="JPG"
-        android:textColor="@color/black"
-        android:textSize="17sp"/>
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="22dp"
+        android:layout_marginBottom="28dp">
 
-    <com.google.android.material.divider.MaterialDivider
-        android:layout_width="match_parent"
-        android:layout_height="0.3dp"/>
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/button_png"
+            android:layout_width="63dp"
+            android:layout_height="29dp"
+            app:cardElevation="0dp"
+            app:cardCornerRadius="700dp"
+            app:strokeWidth="0.7dp"
+            app:strokeColor="@color/dialog_format_border_color"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true">
 
-    <TextView
-        android:id="@+id/button_pdf"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:gravity="center"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="@drawable/selector_dialog_button"
-        android:text="PDF"
-        android:textColor="@color/black"
-        android:textSize="17sp"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:background="@drawable/selector_dialog_button"
+                android:text="PNG"
+                android:textColor="#363636"
+                android:textSize="15.5sp"
+                android:fontFamily="@font/pretendard_semi_bold"/>
+        </com.google.android.material.card.MaterialCardView>
 
-    <com.google.android.material.divider.MaterialDivider
-        android:layout_width="match_parent"
-        android:layout_height="0.3dp"/>
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/button_pdf"
+            android:layout_width="63dp"
+            android:layout_height="29dp"
+            app:cardElevation="0dp"
+            app:cardCornerRadius="700dp"
+            app:strokeWidth="0.7dp"
+            app:strokeColor="@color/dialog_format_border_color"
+            android:layout_centerInParent="true">
 
-    <TextView
-        android:id="@+id/button_instagram"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:gravity="center"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="@drawable/selector_dialog_button_round"
-        android:text="Instagram"
-        android:textColor="@color/black"
-        android:textSize="17sp"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:background="@drawable/selector_dialog_button"
+                android:text="JPG"
+                android:textColor="#363636"
+                android:textSize="15.5sp"
+                android:fontFamily="@font/pretendard_semi_bold"/>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/button_jpg"
+            android:layout_width="63dp"
+            android:layout_height="29dp"
+            app:cardElevation="0dp"
+            app:cardCornerRadius="700dp"
+            app:strokeWidth="0.7dp"
+            app:strokeColor="@color/dialog_format_border_color"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:background="@drawable/selector_dialog_button"
+                android:text="PDF"
+                android:textColor="#363636"
+                android:textSize="15.5sp"
+                android:fontFamily="@font/pretendard_semi_bold"/>
+        </com.google.android.material.card.MaterialCardView>
+    </RelativeLayout>
 </LinearLayout>

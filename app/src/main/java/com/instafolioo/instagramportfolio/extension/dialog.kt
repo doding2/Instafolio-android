@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import com.google.android.material.card.MaterialCardView
 import com.instafolioo.instagramportfolio.R
 
 
@@ -32,26 +33,28 @@ fun Context.showSelectFormatDialog(onItemSelected: (String) -> Unit) {
         window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
     }
 
-    val pngButton = dialog.findViewById<TextView>(R.id.button_png)
+    val pngButton = dialog.findViewById<MaterialCardView>(R.id.button_png)
     pngButton.setOnClickListener {
         onItemSelected("png")
         dialog.dismiss()
     }
-    val jpgButton = dialog.findViewById<TextView>(R.id.button_jpg)
+    val jpgButton = dialog.findViewById<MaterialCardView>(R.id.button_jpg)
     jpgButton.setOnClickListener {
         onItemSelected("jpg")
         dialog.dismiss()
     }
-    val pdfButton = dialog.findViewById<TextView>(R.id.button_pdf)
+    val pdfButton = dialog.findViewById<MaterialCardView>(R.id.button_pdf)
     pdfButton.setOnClickListener {
         onItemSelected("pdf")
         dialog.dismiss()
     }
-    val instagramButton = dialog.findViewById<TextView>(R.id.button_instagram)
-    instagramButton.setOnClickListener {
-        onItemSelected("instagram")
-        dialog.dismiss()
-    }
+
+    // 인스타그램 버튼은 일단 제외외
+//   val instagramButton = dialog.findViewById<TextView>(R.id.button_instagram)
+//    instagramButton.setOnClickListener {
+//        onItemSelected("instagram")
+//        dialog.dismiss()
+//    }
 
 
     dialog.show()

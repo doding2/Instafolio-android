@@ -29,18 +29,18 @@
             </FrameLayout>
 
             <View
-                android:layout_width="6dp"
+                android:layout_width="2dp"
                 android:layout_height="2.5dp"
                 android:layout_marginTop="2dp"
                 android:layout_gravity="top|end"
-                android:background="@color/binding_border_color"/>
+                android:background="@color/boreder_binding_color"/>
 
             <View
-                android:layout_width="6dp"
+                android:layout_width="2dp"
                 android:layout_height="2.5dp"
                 android:layout_marginBottom="2dp"
                 android:layout_gravity="bottom|end"
-                android:background="@color/binding_border_color"/>
+                android:background="@color/boreder_binding_color"/>
         </FrameLayout>
 
         <!--    Slide Center (Origin)    -->
@@ -51,20 +51,20 @@
 
             <View
                 android:id="@+id/border_connect_start_top"
-                android:layout_width="6dp"
+                android:layout_width="2dp"
                 android:layout_height="2.5dp"
                 android:layout_marginTop="2dp"
                 android:layout_gravity="top|start"
-                android:background="@color/binding_border_color"
+                android:background="@color/boreder_binding_color"
                 android:visibility="gone"/>
 
             <View
                 android:id="@+id/border_connect_start_bottom"
-                android:layout_width="6dp"
+                android:layout_width="2dp"
                 android:layout_height="2.5dp"
                 android:layout_marginBottom="2dp"
                 android:layout_gravity="bottom|start"
-                android:background="@color/binding_border_color"
+                android:background="@color/boreder_binding_color"
                 android:visibility="gone"/>
 
 
@@ -83,20 +83,20 @@
 
             <View
                 android:id="@+id/border_connect_end_top"
-                android:layout_width="6dp"
+                android:layout_width="2dp"
                 android:layout_height="2.5dp"
                 android:layout_marginTop="2dp"
                 android:layout_gravity="top|end"
-                android:background="@color/binding_border_color"
+                android:background="@color/boreder_binding_color"
                 android:visibility="gone"/>
 
             <View
                 android:id="@+id/border_connect_end_bottom"
-                android:layout_width="6dp"
+                android:layout_width="2dp"
                 android:layout_height="2.5dp"
                 android:layout_marginBottom="2dp"
                 android:layout_gravity="bottom|end"
-                android:background="@color/binding_border_color"
+                android:background="@color/boreder_binding_color"
                 android:visibility="gone"/>
         </FrameLayout>
 
@@ -108,18 +108,18 @@
             android:visibility="gone">
 
             <View
-                android:layout_width="6dp"
+                android:layout_width="2dp"
                 android:layout_height="2.5dp"
                 android:layout_marginTop="2dp"
                 android:layout_gravity="top|start"
-                android:background="@color/binding_border_color"/>
+                android:background="@color/boreder_binding_color"/>
 
             <View
-                android:layout_width="6dp"
+                android:layout_width="2dp"
                 android:layout_height="2.5dp"
                 android:layout_marginBottom="2dp"
                 android:layout_gravity="bottom|start"
-                android:background="@color/binding_border_color"/>
+                android:background="@color/boreder_binding_color"/>
 
             <FrameLayout
                 android:id="@+id/layout_border_after"

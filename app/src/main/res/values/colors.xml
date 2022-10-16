@@ -16,7 +16,8 @@
     <color name="less_transparent_black">#bf000000</color>
     <color name="red">#FF0000</color>
 
-    <color name="pretendard_text_color">#494949</color>
-    <color name="disabled_slide_button_color">#8F8F8F</color>
-    <color name="binding_border_color">#A5A5A5</color>
+    <color name="dialog_format_border_color">#CDCDCD</color>
+    <color name="text_pretendard_color">#494949</color>
+    <color name="button_disabled_slide_color">#8F8F8F</color>
+    <color name="boreder_binding_color">#A5A5A5</color>
 </resources>

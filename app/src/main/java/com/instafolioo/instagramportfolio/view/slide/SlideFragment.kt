@@ -20,10 +20,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
-import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
-import com.google.android.flexbox.JustifyContent
 import com.instafolioo.instagramportfolio.R
 import com.instafolioo.instagramportfolio.extension.*
 import com.instafolioo.instagramportfolio.model.Slide
@@ -134,9 +132,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
 
         binding.recyclerViewSlide.adapter = adapter
         val layoutManager = FlexboxLayoutManager(requireContext()).apply {
-            flexDirection = FlexDirection.ROW
             flexWrap = FlexWrap.WRAP
-            justifyContent = JustifyContent.CENTER
         }
         binding.recyclerViewSlide.layoutManager = layoutManager
 
@@ -200,10 +196,10 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
         }
         // 확장 되어있으면 버튼 배경이 생김
         viewModel.isInstarSize.observe(viewLifecycleOwner) {
-            if (it == true) {
-                binding.buttonInstaSize.setEnabledColor(true)
-            } else {
-                binding.buttonInstaSize.setEnabledColor(false)
+            binding.apply {
+                imageInstaSizeUpper.setEnabledColor(it)
+                imageInstaSize11.setEnabledColor(it)
+                imageInstaSizeLower.setEnabledColor(it)
             }
         }
 
@@ -331,7 +327,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
     // 버튼 이미지 틴트 색 바꾸기
     private fun ImageView.setEnabledColor(enabled: Boolean) {
         val color = if (enabled) Color.WHITE
-        else ContextCompat.getColor(requireContext(), R.color.disabled_slide_button_color)
+        else ContextCompat.getColor(requireContext(), R.color.button_disabled_slide_color)
 
         setColorFilter(color)
     }

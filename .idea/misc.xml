@@ -31,6 +31,7 @@
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/drawable/icon_forward_arrow.xml" value="0.1515" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/drawable/icon_image.xml" value="0.1515" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/drawable/icon_insta_size.xml" value="0.1515" />
+        <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/drawable/icon_lower_subtract.xml" value="0.1515" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/drawable/icon_person.xml" value="0.1515" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/drawable/icon_round_arrow_down.xml" value="0.1515" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/drawable/icon_selected.xml" value="0.1515" />
@@ -43,13 +44,15 @@
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/font/fontstyle.xml" value="0.2784615384615385" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/font/pretendard_style.xml" value="0.2784615384615385" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/layout/activity_main.xml" value="0.16909722222222223" />
+        <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/layout/dialog_alert.xml" value="0.16909722222222223" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/layout/dialog_confirm.xml" value="0.16909722222222223" />
+        <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/layout/dialog_message.xml" value="0.16909722222222223" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/layout/dialog_select_format.xml" value="0.25364583333333335" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/layout/fragment_home.xml" value="0.16735395189003435" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/layout/fragment_instagram_log_in.xml" value="0.25364583333333335" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/layout/fragment_instagram_upload.xml" value="0.25364583333333335" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/layout/fragment_preview.xml" value="0.25364583333333335" />
-        <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/layout/fragment_slide.xml" value="0.136" />
+        <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/layout/fragment_slide.xml" value="0.4" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/layout/item_cut_insta_size.xml" value="0.72" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/layout/item_cut_insta_size_binding.xml" value="0.25364583333333335" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/layout/item_cut_origin.xml" value="0.25364583333333335" />

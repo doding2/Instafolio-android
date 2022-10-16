@@ -117,7 +117,7 @@
                         android:padding="15dp"
                         android:text="파일 불러오기"
                         android:textSize="16sp"
-                        android:textColor="@color/pretendard_text_color"
+                        android:textColor="@color/text_pretendard_color"
                         android:fontFamily="@font/pretendard_bold"/>
 
                     <View
@@ -156,7 +156,7 @@
                                 android:layout_marginStart="9dp"
                                 android:text="드라이브"
                                 android:textSize="16sp"
-                                android:textColor="@color/pretendard_text_color"
+                                android:textColor="@color/text_pretendard_color"
                                 android:fontFamily="@font/pretendard_extrabold"/>
                         </LinearLayout>
 
@@ -186,7 +186,7 @@
                                 android:layout_marginStart="9dp"
                                 android:text="갤러리"
                                 android:textSize="16sp"
-                                android:textColor="@color/pretendard_text_color"
+                                android:textColor="@color/text_pretendard_color"
                                 android:fontFamily="@font/pretendard_extrabold"/>
                         </LinearLayout>
 

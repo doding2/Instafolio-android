@@ -110,15 +110,40 @@
                     android:layout_height="59dp"
                     android:orientation="horizontal">
 
-                    <ImageView
+                    <LinearLayout
                         android:id="@+id/button_insta_size"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:padding="10dp"
-                        android:layout_marginStart="10.5dp"
-                        android:src="@drawable/icon_insta_size"
-                        app:tint="@color/disabled_slide_button_color"/>
+                        android:layout_marginStart="7dp"
+                        android:orientation="vertical"
+                        app:tint="@color/button_disabled_slide_color"
+                        android:gravity="center">
+
+                        <ImageView
+                            android:id="@+id/image_insta_size_upper"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/icon_insta_size_upper"
+                            app:tint="@color/button_disabled_slide_color"/>
+
+                        <ImageView
+                            android:id="@+id/image_insta_size_1_1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/icon_insta_size_1_1"
+                            android:layout_marginEnd="0.4dp"
+                            android:layout_marginVertical="2dp"
+                            app:tint="@color/button_disabled_slide_color"/>
+
+                        <ImageView
+                            android:id="@+id/image_insta_size_lower"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/icon_insta_size_lower"
+                            app:tint="@color/button_disabled_slide_color"/>
+                    </LinearLayout>
 
                     <ImageView
                         android:id="@+id/button_binding"
@@ -128,7 +153,7 @@
                         android:padding="10dp"
                         android:layout_gravity="center"
                         android:src="@drawable/icon_binding"
-                        app:tint="@color/disabled_slide_button_color"/>
+                        app:tint="@color/button_disabled_slide_color"/>
 
                     <View
                         android:layout_width="0dp"
@@ -141,9 +166,9 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:padding="10dp"
-                        android:layout_marginEnd="10.5dp"
+                        android:layout_marginEnd="7dp"
                         android:src="@drawable/icon_tooltip"
-                        app:tint="@color/disabled_slide_button_color"/>
+                        app:tint="@color/button_disabled_slide_color"/>
                 </LinearLayout>
 
                 <FrameLayout

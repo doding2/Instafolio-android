@@ -18,6 +18,7 @@ import java.util.*
 class SlideAdapter(
     private val context: Context,
     val items: MutableList<Slide>,
+    private val recyclerView: RecyclerView,
     private val clickListener: (Slide) -> Unit,
     private val viewModel: SlideViewModel,
 ): RecyclerView.Adapter<SlideAdapter.ViewHolder>(), ItemTouchHelperCallback.OnItemMoveListener {
@@ -104,18 +105,20 @@ class SlideAdapter(
         // 슬라이드 크기가 화면에 맞게 조절
         fun setSlideSize() {
             binding.apply {
+                val twoPx = dpToPx(2)
+                val sixPx = dpToPx(6)
 
                 layoutBefore.layoutParams.apply {
                     width = slideSize
                     height = slideSize
                 }
                 layoutBorderBefore.layoutParams.apply {
-                    width = slideSize - 2
-                    height = slideSize - 2
+                    width = slideSize - twoPx
+                    height = slideSize - twoPx
                 }
                 imageSlideBefore.layoutParams.apply {
-                    width = slideSize - 10
-                    height = slideSize - 10
+                    width = slideSize - sixPx
+                    height = slideSize - sixPx
                 }
 
                 layoutCenter.layoutParams.apply {
@@ -123,12 +126,12 @@ class SlideAdapter(
                     height = slideSize
                 }
                 wrapperBorderImageSlide.layoutParams.apply {
-                    width = slideSize - 2
-                    height = slideSize - 2
+                    width = slideSize - twoPx
+                    height = slideSize - twoPx
                 }
                 imageSlide.layoutParams.apply {
-                    width = slideSize - 10
-                    height = slideSize - 10
+                    width = slideSize - sixPx
+                    height = slideSize - sixPx
                 }
 
                 layoutAfter.layoutParams.apply {
@@ -136,12 +139,12 @@ class SlideAdapter(
                     height = slideSize
                 }
                 layoutBorderAfter.layoutParams.apply {
-                    width = slideSize - 2
-                    height = slideSize - 2
+                    width = slideSize - twoPx
+                    height = slideSize - twoPx
                 }
                 imageSlideAfter.layoutParams.apply {
-                    width = slideSize - 10
-                    height = slideSize - 10
+                    width = slideSize - sixPx
+                    height = slideSize - sixPx
                 }
 
                 layoutBefore.requestLayout()
@@ -177,7 +180,15 @@ class SlideAdapter(
 
                         items.remove(nextSlide)
                         viewHolders.remove(nextSlide)
-                        notifyItemRemoved(nextSlideIndex)
+
+                        recyclerView.run {
+                            val animator = itemAnimator
+                            recyclerView.itemAnimator = null
+                            notifyItemRemoved(nextSlideIndex)
+                            postDelayed({
+                                itemAnimator = animator
+                            }, 50)
+                        }
 
                         isFirst = true
                         bindedSlide = nextSlide
@@ -194,7 +205,15 @@ class SlideAdapter(
 
                         items.remove(prevSlide)
                         viewHolders.remove(prevSlide)
-                        notifyItemRemoved(prevSlideIndex)
+
+                        recyclerView.run {
+                            val animator = itemAnimator
+                            recyclerView.itemAnimator = null
+                            notifyItemRemoved(prevSlideIndex)
+                            postDelayed({
+                                itemAnimator = animator
+                            }, 50)
+                        }
 
                         isFirst = false
                         bindedSlide = prevSlide
@@ -255,13 +274,12 @@ class SlideAdapter(
     var bindingPairs = mutableListOf<Pair<Slide, Slide>>()
     val bindingFlattenSlides get() = bindingPairs.flatMap { it.toList() }
 
-    var slideSize = 80.dp
+    var slideSize = dpToPx(80)
 
     // dp to px
-    private val Int.dp: Int
-    get() {
+    private fun dpToPx(dp: Int): Int {
         val scale = context.resources.displayMetrics.density
-        return (this * scale + 0.5f).toInt()
+        return (dp * scale + 0.5f).toInt()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

@@ -23,22 +23,22 @@
 
                 <ImageView
                     android:id="@+id/image_slide_before"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
+                    android:layout_width="84dp"
+                    android:layout_height="84dp"
                     android:layout_gravity="center"/>
             </FrameLayout>
 
             <View
                 android:layout_width="6dp"
                 android:layout_height="2.5dp"
-                android:layout_marginTop="1.25dp"
+                android:layout_marginTop="2dp"
                 android:layout_gravity="top|end"
                 android:background="@color/binding_border_color"/>
 
             <View
                 android:layout_width="6dp"
                 android:layout_height="2.5dp"
-                android:layout_marginBottom="1.25dp"
+                android:layout_marginBottom="2dp"
                 android:layout_gravity="bottom|end"
                 android:background="@color/binding_border_color"/>
         </FrameLayout>
@@ -53,7 +53,7 @@
                 android:id="@+id/border_connect_start_top"
                 android:layout_width="6dp"
                 android:layout_height="2.5dp"
-                android:layout_marginTop="1.25dp"
+                android:layout_marginTop="2dp"
                 android:layout_gravity="top|start"
                 android:background="@color/binding_border_color"
                 android:visibility="gone"/>
@@ -62,7 +62,7 @@
                 android:id="@+id/border_connect_start_bottom"
                 android:layout_width="6dp"
                 android:layout_height="2.5dp"
-                android:layout_marginBottom="1.25dp"
+                android:layout_marginBottom="2dp"
                 android:layout_gravity="bottom|start"
                 android:background="@color/binding_border_color"
                 android:visibility="gone"/>
@@ -76,8 +76,8 @@
 
                 <ImageView
                     android:id="@+id/image_slide"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
+                    android:layout_width="84dp"
+                    android:layout_height="84dp"
                     android:layout_gravity="center"/>
             </FrameLayout>
 
@@ -85,7 +85,7 @@
                 android:id="@+id/border_connect_end_top"
                 android:layout_width="6dp"
                 android:layout_height="2.5dp"
-                android:layout_marginTop="1.25dp"
+                android:layout_marginTop="2dp"
                 android:layout_gravity="top|end"
                 android:background="@color/binding_border_color"
                 android:visibility="gone"/>
@@ -94,7 +94,7 @@
                 android:id="@+id/border_connect_end_bottom"
                 android:layout_width="6dp"
                 android:layout_height="2.5dp"
-                android:layout_marginBottom="1.25dp"
+                android:layout_marginBottom="2dp"
                 android:layout_gravity="bottom|end"
                 android:background="@color/binding_border_color"
                 android:visibility="gone"/>
@@ -110,14 +110,14 @@
             <View
                 android:layout_width="6dp"
                 android:layout_height="2.5dp"
-                android:layout_marginTop="1.25dp"
+                android:layout_marginTop="2dp"
                 android:layout_gravity="top|start"
                 android:background="@color/binding_border_color"/>
 
             <View
                 android:layout_width="6dp"
                 android:layout_height="2.5dp"
-                android:layout_marginBottom="1.25dp"
+                android:layout_marginBottom="2dp"
                 android:layout_gravity="bottom|start"
                 android:background="@color/binding_border_color"/>
 
@@ -130,8 +130,8 @@
 
                 <ImageView
                     android:id="@+id/image_slide_after"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
+                    android:layout_width="84dp"
+                    android:layout_height="84dp"
                     android:layout_gravity="center"/>
             </FrameLayout>
         </FrameLayout>

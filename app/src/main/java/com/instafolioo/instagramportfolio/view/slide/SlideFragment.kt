@@ -129,7 +129,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
         binding.layoutLoading.root.visibility = View.VISIBLE
 
         // 리사이클러 뷰 설정
-        adapter = SlideAdapter(requireContext(), arrayListOf(), ::onItemClick, viewModel)
+        adapter = SlideAdapter(requireContext(), arrayListOf(), binding.recyclerViewSlide, ::onItemClick, viewModel)
         adjustSlideSize()
 
         binding.recyclerViewSlide.adapter = adapter
@@ -201,9 +201,9 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
         // 확장 되어있으면 버튼 배경이 생김
         viewModel.isInstarSize.observe(viewLifecycleOwner) {
             if (it == true) {
-                binding.buttonInstaSize.setEnabledColor(false)
-            } else {
                 binding.buttonInstaSize.setEnabledColor(true)
+            } else {
+                binding.buttonInstaSize.setEnabledColor(false)
             }
         }
 
@@ -420,11 +420,22 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
             viewModel.isSlideChanged.value = true
 
             var firstIdx = adapter.getIndexOf(slide)
-            if (firstIdx >= adapter.itemCount - 1) {
-                firstIdx--
-            }
             val secondIdx = firstIdx + 1
+            
+            // 클릭한 아이템이 마지막 아이템일 때
+            if (firstIdx >= adapter.itemCount - 1) {
+                val firstSlide = adapter.getSlideAt(firstIdx)
+                
+                // 바인딩 되어있는 놈이면 바인딩 취소
+                if (adapter.isBindingContains(firstSlide)) {
+                    adapter.cancelBinding(firstSlide)
+                    showFirstBindingToPreview()
+                }
+                
+                return
+            }
 
+            
             val firstSlide = adapter.getSlideAt(firstIdx)
             val secondSlide = adapter.getSlideAt(secondIdx)
 
@@ -443,10 +454,9 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
                 adapter.cancelBinding(firstSlide)
                 showFirstBindingToPreview()
             }
-            // 두번째 꺼를 클릭한 것도 그냥 취소
+            // 클릭한 놈의 다음 놈이 바인딩 되어있다면 그냥 패스
             else if (adapter.isBindingContains(secondSlide)) {
-                adapter.cancelBinding(secondSlide)
-                showFirstBindingToPreview()
+                return
             }
             else {
                 showAlertDialog("예상치 못한 에러가 발생했습니다")

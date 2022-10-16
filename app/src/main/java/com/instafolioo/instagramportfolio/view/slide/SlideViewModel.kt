@@ -32,7 +32,7 @@ class SlideViewModel: ViewModel() {
     }
 
     val isInstarSize = MutableLiveData<Boolean>().apply {
-        value = true
+        value = false
     }
 
     val enableBinding = MutableLiveData<Boolean>().apply {
@@ -50,7 +50,7 @@ class SlideViewModel: ViewModel() {
         slides.value = mutableListOf()
         bindingPairs.value = mutableListOf()
         bindingFlattenSlides.value = listOf()
-        isInstarSize.value = true
+        isInstarSize.value = false
         enableBinding.value = false
         isSlideChanged.value = false
     }

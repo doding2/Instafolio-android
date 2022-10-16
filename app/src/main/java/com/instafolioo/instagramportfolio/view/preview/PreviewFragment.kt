@@ -80,7 +80,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
         binding.viewModel = previewViewModel
         binding.lifecycleOwner = this
 
-        requireActivity().window.apply {
+        activity?.window?.apply {
             statusBarColor = Color.BLACK
             navigationBarColor = Color.BLACK
 
@@ -721,13 +721,13 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
             val scanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
             val contentUri = Uri.fromFile(file)
             scanIntent.data = contentUri
-            requireActivity(). sendBroadcast(scanIntent)
+            activity?.sendBroadcast(scanIntent)
         } else {
             val intent = Intent(
                 Intent.ACTION_MEDIA_MOUNTED,
                 Uri.fromFile(file)
             )
-            requireActivity().sendBroadcast(intent)
+            activity?.sendBroadcast(intent)
         }
     }
 

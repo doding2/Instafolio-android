@@ -3,13 +3,14 @@ package com.instafolioo.instagramportfolio.view.preview
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
-import android.widget.ImageView
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.instafolioo.instagramportfolio.R
-import com.instafolioo.instagramportfolio.databinding.*
+import com.instafolioo.instagramportfolio.databinding.ItemCutInstaSizeBinding
+import com.instafolioo.instagramportfolio.databinding.ItemCutInstaSizeBindingBinding
+import com.instafolioo.instagramportfolio.databinding.ItemCutOriginalBinding
+import com.instafolioo.instagramportfolio.databinding.ItemCutOriginalBindingBinding
 import com.instafolioo.instagramportfolio.model.PreviewSlide
 import com.instafolioo.instagramportfolio.model.PreviewSlide.Companion.INSTAR_SIZE
 import com.instafolioo.instagramportfolio.model.PreviewSlide.Companion.INSTAR_SIZE_BINDING
@@ -82,9 +83,7 @@ class PreviewSlideCutAdapter(
     override fun getItemCount(): Int = items.size
 
     fun getItemWidth() = viewHolders.values.firstOrNull()?.root?.getMarginedWidth()
-        ?: throw IllegalStateException(
-            "오리지널, 인스타 사이즈, 오리지널 바인딩, 인스타 사이즈 바인딩 이외의 타입은 존재하지 않습니다."
-        )
+        ?: 0
 
     private fun View.getMarginedWidth(): Int {
         val params = layoutParams as RecyclerView.LayoutParams

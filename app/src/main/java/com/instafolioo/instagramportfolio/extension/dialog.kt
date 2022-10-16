@@ -19,8 +19,8 @@ fun Fragment.showAlertDialog(message: String, onOk: () -> Unit = { }, onDismiss:
 fun Fragment.showMessageDialog(title: String, message: String, onOk: () -> Unit = { }, onDismiss: () -> Unit = { }) {
     requireContext().showMessageDialog(title, message, onOk, onDismiss)
 }
-fun Fragment.showConfirmDialog(title: String, message: String, onOk: () -> Unit = { }, onCancel: () -> Unit = { }, onDismiss: () -> Unit = { }) {
-    requireContext().showConfirmDialog(title, message, onOk, onCancel, onDismiss)
+fun Fragment.showConfirmDialog(title: String, message: String, onOk: () -> Unit = { }, onCancel: () -> Unit = { }, onDismiss: () -> Unit = { }): Dialog {
+    return requireContext().showConfirmDialog(title, message, onOk, onCancel, onDismiss)
 }
 fun Fragment.showDeleteDialog(title: String, message: String, onOk: () -> Unit = { }, onCancel: () -> Unit = { }, onDismiss: () -> Unit = { }) {
     requireContext().showDeleteDialog(title, message, onOk, onCancel, onDismiss)
@@ -153,7 +153,7 @@ fun Context.showConfirmDialog(
     onOk: () -> Unit = { },
     onCancel: () -> Unit =  { },
     onDismiss: () -> Unit = { }
-) {
+): Dialog {
     val dialog = Dialog(this).apply {
         setContentView(R.layout.dialog_confirm)
         window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
@@ -182,4 +182,6 @@ fun Context.showConfirmDialog(
     }
 
     dialog.show()
+
+    return dialog
 }

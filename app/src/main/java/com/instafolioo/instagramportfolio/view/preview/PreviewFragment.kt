@@ -3,6 +3,7 @@ package com.instafolioo.instagramportfolio.view.preview
 import android.Manifest
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
+import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -67,6 +68,8 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
     private lateinit var scroller: LinearSmoothScroller
     private var cutAreaIsScrolling = false
     private var previewAreaIsScrolling = false
+
+    private var showingDialog: Dialog? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -302,6 +305,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
 
 
                 // 홈 화면으로 돌아가기
+                showingDialog?.dismiss()
 
                 showMessageDialog(
                     title = "저장에 성공했습니다",
@@ -735,7 +739,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
     override fun onBackPressed() {
         // 저장중
         if (!previewViewModel.savingSlides.value.isNullOrEmpty()) {
-            showConfirmDialog(
+            showingDialog = showConfirmDialog(
                 title = "저장되지 않았습니다",
                 message = "저장하지 않고 뒤로가시겠습니까?",
                 onOk = {
@@ -744,7 +748,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
             )
         }
         else if (!previewViewModel.cutPositions.value.isNullOrEmpty()) {
-            showConfirmDialog(
+            showingDialog = showConfirmDialog(
                 title = "저장되지 않았습니다",
                 message = "저장하지 않고 뒤로가시겠습니까?",
                 onOk = {

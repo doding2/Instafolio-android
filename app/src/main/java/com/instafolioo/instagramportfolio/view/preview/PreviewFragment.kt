@@ -215,7 +215,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                 .setDuration(duration1)
                 .setListener(object: AnimatorListenerAdapter() {
                     override fun onAnimationEnd(animation: Animator?) {
-                        _binding?.layoutLoading?.root?.visibility = visibility
+                        _binding?.layoutLoading?.root?.setVisibility(visibility)
                     }
                 })
         }
@@ -228,7 +228,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                 .setDuration(duration1)
                 .setListener(object: AnimatorListenerAdapter() {
                     override fun onAnimationEnd(animation: Animator?) {
-                        _binding?.recyclerView?.visibility = visibilityR
+                        _binding?.recyclerView?.setVisibility(visibilityR)
                     }
                 })
         }
@@ -239,7 +239,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
             .setDuration(duration1)
             .setListener(object: AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator?) {
-                    _binding?.recyclerViewCut?.alpha = alphaR
+                    _binding?.recyclerViewCut?.setAlpha(alphaR)
                 }
             })
 
@@ -249,7 +249,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
             .setDuration(duration1)
             .setListener(object: AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator?) {
-                    _binding?.textIndicator?.alpha = alphaR
+                    _binding?.textIndicator?.setAlpha(alphaR)
                 }
             })
     }

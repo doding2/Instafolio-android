@@ -341,7 +341,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
                 .setDuration(duration1)
                 .setListener(object: AnimatorListenerAdapter() {
                     override fun onAnimationEnd(animation: Animator?) {
-                        _binding?.layoutLoading?.root?.visibility = visibility
+                        _binding?.layoutLoading?.root?.setVisibility(visibility)
                     }
                 })
         }

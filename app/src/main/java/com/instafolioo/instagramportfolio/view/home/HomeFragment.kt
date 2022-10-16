@@ -18,7 +18,6 @@ import android.view.animation.Animation
 import android.widget.FrameLayout
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.core.view.ViewCompat.animate
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -99,7 +98,6 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
 
         // 인스타 파일들 재등록
         homeViewModel.resultSlides.observe(viewLifecycleOwner) {
-
             binding.textNoResultSlide.visibility =
                 if (it.isEmpty()) View.VISIBLE else View.GONE
 
@@ -282,8 +280,10 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
             .navigate(com.instafolioo.instagramportfolio.R.id.action_homeFragment_to_slideFragment)
 
         // 이동후에는 편집모드 해제
-        homeViewModel.isEditMode.value = false
-        homeViewModel.selectedResultSlides.value = mutableListOf()
+        binding.root.postDelayed({
+            homeViewModel.isEditMode.value = false
+            homeViewModel.selectedResultSlides.value = mutableListOf()
+        }, 200)
     }
 
 

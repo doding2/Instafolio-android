@@ -202,27 +202,56 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
     }
 
     // 로딩창 활성화/비활성화
-    private fun enableLoading(enabled: Boolean, duration: Long = 200L) {
-        binding.layoutLoading.root.apply {
-            val alpha = if (enabled) 1f else 0f
-            val alphaR = if (enabled) 0f else 1f
-            val duration1 = if (enabled) 0L else duration
-            val visibility = if (enabled) View.VISIBLE else View.GONE
-            val visibilityR = if (enabled) View.GONE else View.VISIBLE
+    private fun enableLoading(enabled: Boolean, duration: Long = 300L, isSaving: Boolean = false) {
+        val alpha = if (enabled) 1f else 0f
+        val alphaR = if (enabled) 0f else 1f
+        val duration1 = if (enabled) 0L else duration
+        val visibility = if (enabled) View.VISIBLE else View.GONE
+        val visibilityR = if (enabled) View.GONE else View.VISIBLE
 
+        binding.layoutLoading.root.apply {
             animate()
                 .alpha(alpha)
                 .setDuration(duration1)
                 .setListener(object: AnimatorListenerAdapter() {
                     override fun onAnimationEnd(animation: Animator?) {
-                        binding.recyclerViewCut.alpha = alphaR
-                        binding.textIndicator.alpha = alphaR
-
-                        binding.recyclerView.visibility = visibilityR
                         binding.layoutLoading.root.visibility = visibility
                     }
                 })
         }
+
+        if (isSaving) return
+
+        binding.recyclerView.apply {
+            animate()
+                .alpha(alphaR)
+                .setDuration(duration1)
+                .setListener(object: AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator?) {
+                        binding.recyclerView.visibility = visibilityR
+                    }
+                })
+        }
+
+        binding.recyclerViewCut
+            .animate()
+            .alpha(alphaR)
+            .setDuration(duration1)
+            .setListener(object: AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator?) {
+                    binding.recyclerViewCut.alpha = alphaR
+                }
+            })
+
+        binding.textIndicator
+            .animate()
+            .alpha(alphaR)
+            .setDuration(duration1)
+            .setListener(object: AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator?) {
+                    binding.textIndicator.alpha = alphaR
+                }
+            })
     }
 
     private fun onCutItemClick(previewSlide: PreviewSlide, position: Int) {
@@ -242,7 +271,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
     private fun showDialog() {
         showSelectFormatDialog { format ->
 
-            enableLoading(true)
+            enableLoading(enabled = true, isSaving = true)
             val time = getTimeStamp()
 
             lifecycleScope.launch(Dispatchers.Main) {

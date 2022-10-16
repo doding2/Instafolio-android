@@ -326,7 +326,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
     }
 
     // 로딩창 활성화/비활성화
-    private fun enableLoading(enabled: Boolean, duration: Long = 200L) {
+    private fun enableLoading(enabled: Boolean, duration: Long = 300L) {
         binding.layoutLoading.root.apply {
             val alpha = if (enabled) 1f else 0f
             val duration1 = if (enabled) 0L else duration

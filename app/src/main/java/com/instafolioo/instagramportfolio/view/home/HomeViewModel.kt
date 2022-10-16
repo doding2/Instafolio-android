@@ -4,10 +4,10 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.instafolioo.instagramportfolio.database.resultslide.ResultSlideDatabase
 import com.instafolioo.instagramportfolio.database.resultslide.ResultSlideRepository
 import com.instafolioo.instagramportfolio.model.ResultSlide
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -34,6 +34,10 @@ class HomeViewModel(context: Context): ViewModel() {
         return isEditMode.value == true
     }
 
+    suspend fun loadAllResultSlides() {
+
+    }
+
     suspend fun addResultSlide(resultSlide: ResultSlide): Long {
         var id = 0L
 
@@ -49,14 +53,14 @@ class HomeViewModel(context: Context): ViewModel() {
     }
 
     fun deleteResultSlideOf(id: Long) {
-        CoroutineScope(Dispatchers.Main).launch {
+        viewModelScope.launch(Dispatchers.Main) {
             val resultSlide = repository.get(id)
             repository.delete(resultSlide)
         }
     }
 
     fun deleteResultSlide(resultSlide: ResultSlide) {
-        CoroutineScope(Dispatchers.Main).launch {
+        viewModelScope.launch(Dispatchers.Main) {
             repository.delete(resultSlide)
         }
     }

@@ -12,7 +12,11 @@
         tools:layout="@layout/fragment_home">
         <action
             android:id="@+id/action_homeFragment_to_slideFragment"
-            app:destination="@id/slideFragment" />
+            app:destination="@id/slideFragment"
+            app:enterAnim="@anim/translate_enter_offset_100"
+            app:exitAnim="@anim/scale_exit"
+            app:popEnterAnim="@anim/scale_enter"
+            app:popExitAnim="@anim/translate_exit" />
     </fragment>
     <fragment
         android:id="@+id/slideFragment"
@@ -21,7 +25,11 @@
         tools:layout="@layout/fragment_slide" >
         <action
             android:id="@+id/action_slideFragment_to_previewFragment"
-            app:destination="@id/previewFragment" />
+            app:destination="@id/previewFragment"
+            app:enterAnim="@anim/translate_enter"
+            app:exitAnim="@anim/do_nothing"
+            app:popEnterAnim="@anim/do_nothing"
+            app:popExitAnim="@anim/translate_exit" />
     </fragment>
     <fragment
         android:id="@+id/previewFragment"
@@ -31,7 +39,11 @@
         <action
             android:id="@+id/action_previewFragment_to_homeFragment"
             app:destination="@id/homeFragment"
+            app:enterAnim="@anim/scale_enter"
+            app:exitAnim="@anim/translate_exit"
+            app:popEnterAnim="@anim/do_nothing"
+            app:popExitAnim="@anim/do_nothing"
             app:popUpTo="@id/homeFragment"
-            app:popUpToInclusive="true"/>
+            app:popUpToInclusive="true" />
     </fragment>
 </navigation>

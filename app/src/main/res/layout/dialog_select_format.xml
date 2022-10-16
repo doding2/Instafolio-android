@@ -65,7 +65,7 @@
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/button_pdf"
+            android:id="@+id/button_jpg"
             android:layout_width="63dp"
             android:layout_height="29dp"
             app:cardElevation="0dp"
@@ -86,7 +86,7 @@
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/button_jpg"
+            android:id="@+id/button_pdf"
             android:layout_width="63dp"
             android:layout_height="29dp"
             app:cardElevation="0dp"

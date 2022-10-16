@@ -1,6 +1,8 @@
 package com.instafolioo.instagramportfolio.view.preview
 
 import android.Manifest
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -78,10 +80,16 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
         binding.viewModel = previewViewModel
         binding.lifecycleOwner = this
 
-        // status bar, navigation bar가 밝은 색이 아니라는 것을 알림
-        requireActivity().window.statusBarColor = Color.BLACK
-        WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightStatusBars = false
-        WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightNavigationBars = false
+        requireActivity().window.apply {
+            statusBarColor = Color.BLACK
+            navigationBarColor = Color.BLACK
+
+            WindowInsetsControllerCompat(this, binding.root).apply {
+                isAppearanceLightStatusBars = false
+                isAppearanceLightNavigationBars = false
+            }
+        }
+
 
         // 리사이클러뷰에 어답터 추가
         slideAdapter = PreviewSlideAdapter(previewViewModel.previewSlides.value!!)
@@ -112,12 +120,6 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                 if (currentPosition != position) {
                     currentPosition = position
                     previewViewModel.currentSlide.value = position + 1
-
-                    binding.textCut.text =
-                        if (previewViewModel.isAlreadyCut)
-                            "분할해제"
-                        else
-                            "분할"
                 }
             }
 
@@ -159,12 +161,6 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                     currentPosition = position
                     previewViewModel.currentSlide.value = position + 1
                     binding.recyclerView.scrollToPosition(position)
-
-                    binding.textCut.text =
-                        if (previewViewModel.isAlreadyCut)
-                            "분할해제"
-                        else
-                            "분할"
                 }
             }
 
@@ -183,8 +179,6 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
             }
         }
 
-
-
         // Slide들을 PreviewSlide로 변환
         processSlidesIntoPreviewSlides()
 
@@ -201,24 +195,34 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
         }
 
 
-        // 분할 버튼 클릭
-        binding.buttonCut.setOnClickListener {
-            previewViewModel.apply {
-                if (isAlreadyCut) {
-                    removeCutPosition()
-                    cutAdapter.paste(previewViewModel.currentSlide.value!! - 1)
-                    binding.textCut.text = "분할"
-                }
-                else if (previewSlides.value!!.size != currentSlide.value){
-                    addCutPosition()
-                    cutAdapter.cut(previewViewModel.currentSlide.value!! - 1)
-                    binding.textCut.text = "분할해제"
-                }
-            }
-        }
-
+        // 뒤로가기
+        binding.buttonBack.setOnClickListener { onBackPressed() }
 
         return binding.root
+    }
+
+    // 로딩창 활성화/비활성화
+    private fun enableLoading(enabled: Boolean, duration: Long = 200L) {
+        binding.layoutLoading.root.apply {
+            val alpha = if (enabled) 1f else 0f
+            val alphaR = if (enabled) 0f else 1f
+            val duration1 = if (enabled) 0L else duration
+            val visibility = if (enabled) View.VISIBLE else View.GONE
+            val visibilityR = if (enabled) View.GONE else View.VISIBLE
+
+            animate()
+                .alpha(alpha)
+                .setDuration(duration1)
+                .setListener(object: AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator?) {
+                        binding.recyclerViewCut.alpha = alphaR
+                        binding.textIndicator.alpha = alphaR
+
+                        binding.recyclerView.visibility = visibilityR
+                        binding.layoutLoading.root.visibility = visibility
+                    }
+                })
+        }
     }
 
     private fun onCutItemClick(previewSlide: PreviewSlide, position: Int) {
@@ -238,21 +242,26 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
     private fun showDialog() {
         showSelectFormatDialog { format ->
 
-            binding.layoutLoading.root.visibility = View.VISIBLE
+            enableLoading(true)
+            val time = getTimeStamp()
+
             lifecycleScope.launch(Dispatchers.Main) {
                 when(format) {
                     // 이미지로 저장
                     "png", "jpg" -> {
-                        saveImageWithCutting(format)
+//                        saveImageWithCutting(format)
+                        saveSlidesAsImage(format, time, previewViewModel.previewSlides.value!!, slideViewModel.slides.value!!)
                     }
                     // pdf로 저장
                     "pdf" -> {
-                        savePdfWithCutting()
+//                        savePdfWithCutting()
+                        saveSlidesAsPdf(time, previewViewModel.previewSlides.value!!, slideViewModel.slides.value!!)
                     }
                     // 인스타그램으로 전달
                     "instagram" -> {
                         // 일단 저장 후
-                        saveImageWithCutting("jpg")
+//                        saveImageWithCutting("jpg")
+                        saveSlidesAsImage("jpg", time, previewViewModel.previewSlides.value!!, slideViewModel.slides.value!!)
                         // 인스타그램에 전달
                         openInstagram()
 
@@ -264,7 +273,10 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
 
 
                 // 홈 화면으로 돌아가기
-                showAlertDialog("저장에 성공했습니다.",
+
+                showMessageDialog(
+                    title = "저장에 성공했습니다",
+                    message = "저장한 파일위치로 이동합니다",
                     onDismiss = {
                         previewViewModel.savingSlides.value?.clear()
                         findNavController().navigate(R.id.action_previewFragment_to_homeFragment)
@@ -284,7 +296,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
         }
         // 아니면 빠꾸
         else {
-            showMessageDialog("권한요청", "다운로드하기 위해서는\n사진 및 미디어 액세스 권한이 필요합니다.")
+            showMessageDialog("권한요청", "다운로드하기 위해서는\n사진 및 미디어 액세스 권한이 필요합니다")
         }
     }
 
@@ -308,8 +320,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
 
     // 슬라이드를 프리뷰 슬라이드로 변환
     private fun processSlidesIntoPreviewSlides() {
-        binding.textIndicator.visibility = View.GONE
-        binding.layoutLoading.root.visibility = View.VISIBLE
+        enableLoading(true)
 
         // 이미 해놓은거 있으면 패스
         if (slideAdapter.itemCount > 0) {
@@ -323,12 +334,14 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                 binding.recyclerViewCut.layoutManager?.startSmoothScroll(scroller)
                 binding.recyclerView.layoutManager?.scrollToPosition(0)
                 previewViewModel.currentSlide.value = 1
+
+                // 로딩 끄기
+                enableLoading(false, 0L)
             }
-            binding.layoutLoading.root.visibility = View.GONE
 
             // 현재 페이지 표시
             previewViewModel.slidesSize.value = previewViewModel.previewSlides.value?.size
-            binding.textIndicator.visibility = View.VISIBLE
+
             return
         }
 
@@ -387,14 +400,13 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                     binding.recyclerViewCut.layoutManager?.startSmoothScroll(scroller)
                     binding.recyclerView.layoutManager?.scrollToPosition(0)
                     previewViewModel.currentSlide.value = 1
-                }
 
-                // 로딩 끄기
-                binding.layoutLoading.root.visibility = View.GONE
+                    // 로딩 끄기
+                    enableLoading(false)
+                }
 
                 // 현재 페이지 표시
                 previewViewModel.slidesSize.value = previewViewModel.previewSlides.value?.size
-                binding.textIndicator.visibility = View.VISIBLE
             }
         }
     }
@@ -695,8 +707,8 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
         // 저장중
         if (!previewViewModel.savingSlides.value.isNullOrEmpty()) {
             showConfirmDialog(
-                "아직 저장중입니다.",
-                "저장을 중지하시겠습니까?",
+                title = "저장되지 않았습니다",
+                message = "저장하지 않고 뒤로가시겠습니까?",
                 onOk = {
                     findNavController().popBackStack()
                 }
@@ -704,8 +716,8 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
         }
         else if (!previewViewModel.cutPositions.value.isNullOrEmpty()) {
             showConfirmDialog(
-                "저장되지 않았습니다.",
-                "정말 뒤로가시겠습니까?",
+                title = "저장되지 않았습니다",
+                message = "저장하지 않고 뒤로가시겠습니까?",
                 onOk = {
                     findNavController().popBackStack()
                 }

@@ -36,12 +36,12 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
                     android:layout_gravity="center"
-                    android:text="Instafolio"
-                    android:textSize="17.32sp"
-                    android:textColor="@color/white"
                     android:fontFamily="@font/sebang_gothic_bold"
-                    android:layout_centerInParent="true"/>
+                    android:text="Instafolio"
+                    android:textColor="@color/white"
+                    android:textSize="17.32sp" />
 
                 <ImageView
                     android:id="@+id/button_navigate_preview"

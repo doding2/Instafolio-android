@@ -18,6 +18,7 @@ import android.view.animation.Animation
 import android.widget.FrameLayout
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.core.view.ViewCompat.animate
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -79,12 +80,14 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
             }
         }
 
+        requireActivity().window.apply {
+            statusBarColor = Color.WHITE
+            navigationBarColor = Color.WHITE
 
-        // status bar, navigation bar가 밝은 색이라는 것을 알림
-        requireActivity().window.statusBarColor = Color.WHITE
-        WindowInsetsControllerCompat(requireActivity().window, binding.root).apply {
-            isAppearanceLightStatusBars = true
-            isAppearanceLightNavigationBars = true
+            WindowInsetsControllerCompat(this, binding.root).apply {
+                isAppearanceLightStatusBars = true
+                isAppearanceLightNavigationBars = true
+            }
         }
 
 

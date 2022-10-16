@@ -1,6 +1,8 @@
 package com.instafolioo.instagramportfolio.view.slide
 
 import android.Manifest
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.Uri
@@ -124,7 +126,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
 
 
         // 로딩 화면 표시
-        binding.layoutLoading.root.visibility = View.VISIBLE
+        enableLoading(true)
 
         // 리사이클러 뷰 설정
         adapter = SlideAdapter(requireContext(), arrayListOf(), binding.recyclerViewSlide, ::onItemClick, viewModel)
@@ -239,7 +241,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
                 }
 
                 // 로딩 화면 끄기
-                binding.layoutLoading.root.visibility = View.GONE
+                enableLoading(false, 0L)
                 return@launch
             }
 
@@ -319,10 +321,27 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
             viewModel.bindingPairs.value = adapter.bindingPairs
 
             // 로딩 끄기
-            binding.layoutLoading.root.visibility = View.GONE
+            enableLoading(false)
         }
     }
 
+    // 로딩창 활성화/비활성화
+    private fun enableLoading(enabled: Boolean, duration: Long = 200L) {
+        binding.layoutLoading.root.apply {
+            val alpha = if (enabled) 1f else 0f
+            val duration1 = if (enabled) 0L else duration
+            val visibility = if(enabled) View.VISIBLE else View.GONE
+
+            animate()
+                .alpha(alpha)
+                .setDuration(duration1)
+                .setListener(object: AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator?) {
+                        _binding?.layoutLoading?.root?.visibility = visibility
+                    }
+                })
+        }
+    }
 
     // 버튼 이미지 틴트 색 바꾸기
     private fun ImageView.setEnabledColor(enabled: Boolean) {
@@ -372,7 +391,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
                 adapter.bindingPairs = viewModel.bindingPairs.value!!
 
                 // 로딩 화면 끄기
-                binding.layoutLoading.root.visibility = View.GONE
+                enableLoading(false, 0L)
                 return@launch
             }
 
@@ -403,7 +422,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
             viewModel.bindingPairs.value = adapter.bindingPairs
 
             // 로딩 화면 끄기
-            binding.layoutLoading.root.visibility = View.GONE
+            enableLoading(false)
         }
     }
 

@@ -255,26 +255,30 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
 
                 // 백그라운드 스레드에서 처리
                 val waitingSlides = async(Dispatchers.IO) {
-                    val imageBitmaps = resultSlide.getFileAsImages(requireContext())
-                    val slides = imageBitmaps.map { Slide(it) }
+                    try {
+                        val imageBitmaps = resultSlide.getFileAsImages(requireContext())
+                        val slides = imageBitmaps.map { Slide(it) }
 
-                    // 인스타 사이즈 상태 불러오기
-                    val isInstarSize = resultSlide.getInstarSizeState(requireContext())
+                        // 인스타 사이즈 상태 불러오기
+                        val isInstarSize = resultSlide.getInstarSizeState(requireContext())
 
-                    // 바인딩 페어 정보 불러오기
-                    val bindingIndices = resultSlide.getBindingIndicesState(requireContext())
-                    val bindingPairs = bindingIndices.map { slides[it.first] to slides[it.second] }.toMutableList()
+                        // 바인딩 페어 정보 불러오기
+                        val bindingIndices = resultSlide.getBindingIndicesState(requireContext())
+                        val bindingPairs = bindingIndices.map { slides[it.first] to slides[it.second] }.toMutableList()
 
-                    // 뷰 모델에 정보 저장
-                    withContext(Dispatchers.Main) {
-                        if (!isInstarSize) {
-                            viewModel.isInstarSize.value = isInstarSize
-                            initImagesScale()
+                        // 뷰 모델에 정보 저장
+                        withContext(Dispatchers.Main) {
+                            if (!isInstarSize) {
+                                viewModel.isInstarSize.value = isInstarSize
+                                initImagesScale()
+                            }
+                            viewModel.bindingPairs.value?.addAll(bindingPairs)
                         }
-                        viewModel.bindingPairs.value?.addAll(bindingPairs)
-                    }
 
-                    return@async slides
+                        return@async slides
+                    } catch (e: Exception) {
+                        throw CancellationException()
+                    }
                 }
 
                 // 이미지 불러오는걸 기다림

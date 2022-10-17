@@ -124,9 +124,6 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
         }
 
         requireActivity().window.apply {
-//            statusBarColor = Color.BLACK
-//            navigationBarColor = Color.BLACK
-
             WindowInsetsControllerCompat(this, binding.root).apply {
                 isAppearanceLightStatusBars = false
                 isAppearanceLightNavigationBars = false

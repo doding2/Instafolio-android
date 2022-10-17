@@ -29,12 +29,30 @@ class PreviewViewModel: ViewModel() {
         value = mutableListOf()
     }
 
+
+    private var isAdFinishedValue = MutableLiveData<Boolean>()
+    var isAdFinished: Boolean
+        get() = isAdFinishedValue.value ?: false
+        set(value) {
+            isAdFinishedValue.value = value
+        }
+
+
+    private val isDownloadFinishedValue = MutableLiveData<Boolean>()
+    var isDownloadFinished: Boolean
+        get() = isAdFinishedValue.value ?: false
+        set(value) {
+            isAdFinishedValue.value = value
+        }
+
     fun clear() {
         previewSlides.value?.clear()
         currentSlide.value = 1
         slidesSize.value = 0
         savingSlides.value = mutableListOf()
         cutPositions.value?.clear()
+        isAdFinishedValue.value = false
+        isDownloadFinishedValue.value = false
     }
 
     // 분할

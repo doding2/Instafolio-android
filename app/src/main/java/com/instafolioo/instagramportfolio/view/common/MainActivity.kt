@@ -6,6 +6,7 @@ import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.gms.ads.MobileAds
 import com.instafolioo.instagramportfolio.R
 import com.instafolioo.instagramportfolio.databinding.ActivityMainBinding
 import com.instafolioo.instagramportfolio.view.home.HomeViewModel
@@ -28,6 +29,8 @@ class MainActivity : AppCompatActivity() {
         window.setFlags(
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+
+        MobileAds.initialize(this)
 
         // splash screen 동안 result slides 로딩
         binding.layoutRoot.viewTreeObserver.addOnPreDrawListener(

@@ -3,5 +3,8 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
-    <!--  fragment_home.xml  -->
+    <!--  test  -->
+    <string name="test_admob_id_rewarded_ad">ca-app-pub-3940256099942544/5224354917</string>
+    <string name="admob_id_rewarded_ad">ca-app-pub-7852302700024355/4518830635</string>
+
 </resources>

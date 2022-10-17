@@ -76,15 +76,11 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
             // 그 외는 그냥 정방향으으로 처리함
             else -> {
                 binding.layoutRoot.setPadding(0, getStatusBarHeight(), 0, getNaviBarHeight())
-                // 리사이클러뷰 한 줄에 아이템 3개씩 오도록 조정
                 binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
             }
         }
 
         requireActivity().window.apply {
-//            statusBarColor = Color.WHITE
-//            navigationBarColor = Color.WHITE
-
             WindowInsetsControllerCompat(this, binding.root).apply {
                 isAppearanceLightStatusBars = true
                 isAppearanceLightNavigationBars = true

@@ -10,6 +10,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
@@ -26,6 +27,10 @@ import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.LinearSnapHelper
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.rewarded.RewardedAd
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import com.instafolioo.instagramportfolio.R
 import com.instafolioo.instagramportfolio.databinding.FragmentPreviewBinding
 import com.instafolioo.instagramportfolio.extension.*
@@ -71,6 +76,11 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
 
     private var showingDialog: Dialog? = null
 
+
+    // 광고
+    private var mRewardedAd: RewardedAd? = null
+
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -99,21 +109,17 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
         }
 
         activity?.window?.apply {
-//            statusBarColor = Color.BLACK
-//            navigationBarColor = Color.BLACK
-
             WindowInsetsControllerCompat(this, binding.root).apply {
                 isAppearanceLightStatusBars = false
                 isAppearanceLightNavigationBars = false
             }
         }
 
+        loadAd()
 
-        // 리사이클러뷰에 어답터 추가
         slideAdapter = PreviewSlideAdapter(previewViewModel.previewSlides.value!!)
         binding.recyclerView.adapter = slideAdapter
 
-        // Recycler view를 Pager로 설정
         val snapHelper = PagerSnapHelper()
         snapHelper.attachToRecyclerView(binding.recyclerView)
 
@@ -158,7 +164,6 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
         })
 
 
-        // 분할 화면 설정
         cutAdapter = PreviewSlideCutAdapter(previewViewModel.previewSlides.value!!, previewViewModel.cutPositions, ::onCutItemClick)
         binding.recyclerViewCut.adapter = cutAdapter
 
@@ -197,26 +202,39 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
             }
         }
 
-        // Slide들을 PreviewSlide로 변환
         processSlidesIntoPreviewSlides()
 
-        // 다운로드 버튼
         binding.buttonDownload.setOnClickListener {
-            // write external storage 퍼미션 체크
             val isGranted = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
             if (isGranted == PackageManager.PERMISSION_GRANTED) {
                 showDialog()
             } else {
-                // write storage 퍼미션 요청
                 permissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             }
         }
 
 
-        // 뒤로가기
         binding.buttonBack.setOnClickListener { onBackPressed() }
 
         return binding.root
+    }
+
+    // 광고 로딩
+    private fun loadAd() {
+        val adRequest = AdRequest.Builder().build()
+
+        val callback = object: RewardedAdLoadCallback() {
+            override fun onAdFailedToLoad(adError: LoadAdError) {
+                Log.d(TAG, "광고 로딩 실패: $adError")
+                mRewardedAd = null
+            }
+            override fun onAdLoaded(rewardedAd: RewardedAd) {
+                Log.d(TAG, "광고 로딩 성공")
+                mRewardedAd = rewardedAd
+            }
+        }
+
+        RewardedAd.load(requireActivity(), resources.getString(R.string.test_admob_id_rewarded_ad), adRequest, callback)
     }
 
     // 로딩창 활성화/비활성화
@@ -300,49 +318,68 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
         showSelectFormatDialog { format ->
 
             enableLoading(enabled = true, isSaving = true)
+            if (!previewViewModel.isAdFinished) {
+                mRewardedAd?.show(requireActivity()) {
+                    previewViewModel.run {
+                        if (isDownloadFinished)
+                            showDoneDialog()
+
+                        previewViewModel.isAdFinished = true
+                    }
+                }
+                Log.d(TAG, "광고 show: ${mRewardedAd != null}")
+            }
+
             val time = getTimeStamp()
 
             lifecycleScope.launch(Dispatchers.Main) {
-                when(format) {
+                when (format) {
                     // 이미지로 저장
                     "png", "jpg" -> {
 //                        saveImageWithCutting(format)
-                        saveSlidesAsImage(format, time, previewViewModel.previewSlides.value!!, slideViewModel.slides.value!!)
+                        saveSlidesAsImage(
+                            format,
+                            time,
+                            previewViewModel.previewSlides.value!!,
+                            slideViewModel.slides.value!!
+                        )
                     }
                     // pdf로 저장
                     "pdf" -> {
 //                        savePdfWithCutting()
-                        saveSlidesAsPdf(time, previewViewModel.previewSlides.value!!, slideViewModel.slides.value!!)
-                    }
-                    // 인스타그램으로 전달
-                    "instagram" -> {
-                        // 일단 저장 후
-//                        saveImageWithCutting("jpg")
-                        saveSlidesAsImage("jpg", time, previewViewModel.previewSlides.value!!, slideViewModel.slides.value!!)
-                        // 인스타그램에 전달
-                        openInstagram()
-
-                        previewViewModel.savingSlides.value?.clear()
-                        findNavController().navigate(R.id.action_previewFragment_to_homeFragment)
+                        saveSlidesAsPdf(
+                            time,
+                            previewViewModel.previewSlides.value!!,
+                            slideViewModel.slides.value!!
+                        )
                     }
                     else -> throw IllegalStateException("존재하지 않는 선택지 입니다")
                 }
 
+                previewViewModel.run {
+                    if (isAdFinished)
+                        showDoneDialog()
 
-                // 홈 화면으로 돌아가기
-                showingDialog?.dismiss()
+                    isDownloadFinished = true
+                }
 
-                showMessageDialog(
-                    title = "저장에 성공했습니다",
-                    message = "저장한 파일위치로 이동합니다",
-                    onDismiss = {
-                        previewViewModel.savingSlides.value?.clear()
-                        findNavController().navigate(R.id.action_previewFragment_to_homeFragment)
-                    }
-                )
             }
         }
     }
+
+    private fun showDoneDialog() {
+        showingDialog?.dismiss()
+
+        showMessageDialog(
+            title = "저장에 성공했습니다",
+            message = "저장한 파일위치로 이동합니다",
+            onDismiss = {
+                previewViewModel.savingSlides.value?.clear()
+                findNavController().navigate(R.id.action_previewFragment_to_homeFragment)
+            }
+        )
+    }
+
 
     // 퍼미션 런처
     private val permissionLauncher = registerForActivityResult(

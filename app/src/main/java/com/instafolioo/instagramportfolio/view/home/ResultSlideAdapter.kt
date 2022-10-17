@@ -62,10 +62,6 @@ class ResultSlideAdapter(
             // 썸네일 지정
             binding.imageThumbnail.setImageBitmap(item.thumbnail)
 
-            // 경계선 제거
-            binding.cardView.strokeWidth =
-                if (item.format == "empty") 1 else 0
-
             // 편집모드
             if (isEditMode.value == true) {
                 // 얘가 선택됐다면 체크 활성화

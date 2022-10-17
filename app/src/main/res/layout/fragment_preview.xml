@@ -56,58 +56,81 @@
                     <LinearLayout
                         android:id="@+id/text_indicator"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:layout_gravity="center"
                         android:orientation="horizontal"
-                        android:alpha="0">
+                        android:alpha="0"
+                        android:layout_marginStart="4dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="center"
                             android:text="미리보기"
-                            android:textSize="17sp"
+                            android:textSize="17.3sp"
                             android:textColor="@color/white"
                             android:fontFamily="@font/pretendard_bold"/>
 
-                        <TextView
+                        <LinearLayout
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text=" ("
-                            android:textSize="16sp"
-                            android:textColor="@color/white"
-                            android:fontFamily="@font/pretendard_semi_bold"/>
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal"
+                            android:gravity="center"
+                            android:layout_marginBottom="2.2dp">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@{String.valueOf(viewModel.currentSlide)}"
-                            android:textSize="16sp"
-                            android:textColor="@color/white"
-                            android:fontFamily="@font/pretendard_semi_bold"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text=" "
+                                android:textSize="24sp"
+                                android:textColor="@color/white"
+                                android:fontFamily="@font/pretendard_semi_bold"/>
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="/"
-                            android:textSize="16sp"
-                            android:textColor="@color/white"
-                            android:fontFamily="@font/pretendard_semi_bold"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="("
+                                android:textSize="16sp"
+                                android:textColor="@color/white"
+                                android:fontFamily="@font/pretendard_semi_bold"/>
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@{String.valueOf(viewModel.slidesSize)}"
-                            android:textSize="16sp"
-                            android:textColor="@color/white"
-                            android:fontFamily="@font/pretendard_semi_bold"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="0.5dp"
+                                android:text="@{String.valueOf(viewModel.currentSlide)}"
+                                android:textSize="16sp"
+                                android:textColor="@color/white"
+                                android:fontFamily="@font/pretendard_semi_bold"
+                                android:letterSpacing="0.1"/>
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text=")"
-                            android:textSize="16sp"
-                            android:textColor="@color/white"
-                            android:fontFamily="@font/pretendard_semi_bold"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="0.5dp"
+                                android:text="/"
+                                android:textSize="16sp"
+                                android:textColor="@color/white"
+                                android:textStyle="bold"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="0.5dp"
+                                android:text="@{String.valueOf(viewModel.slidesSize)}"
+                                android:textSize="16sp"
+                                android:textColor="@color/white"
+                                android:fontFamily="@font/pretendard_semi_bold"
+                                android:letterSpacing="0.1"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text=")"
+                                android:textSize="16sp"
+                                android:textColor="@color/white"
+                                android:fontFamily="@font/pretendard_semi_bold"/>
+                        </LinearLayout>
                     </LinearLayout>
 
                     <View
@@ -144,14 +167,16 @@
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentBottom="true"
                 android:layout_marginTop="10dp"
-                android:layout_marginBottom="80dp"
+                android:layout_marginBottom="100.22dp"
                 android:orientation="vertical">
 
                 <ImageView
-                    android:layout_width="7dp"
-                    android:layout_height="6dp"
+                    android:id="@+id/image_current_page_indicator"
+                    android:layout_width="10dp"
+                    android:layout_height="6.43dp"
                     android:layout_gravity="center"
-                    android:layout_margin="8dp"
+                    android:layout_marginBottom="13.21dp"
+                    android:layout_marginTop="8dp"
                     android:src="@drawable/icon_down_triangle"
                     app:tint="@color/white" />
 

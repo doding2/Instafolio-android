@@ -18,8 +18,8 @@
         android:paddingStart="30dp" >
 
         <ImageView
-            android:layout_width="13.6dp"
-            android:layout_height="13.6dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:src="@drawable/icon_cancel"/>
     </FrameLayout>
@@ -31,8 +31,8 @@
         android:layout_weight="1" >
 
         <ImageView
-            android:layout_width="16.16dp"
-            android:layout_height="16.4dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:src="@drawable/icon_edit"/>
     </FrameLayout>
@@ -45,8 +45,8 @@
         android:paddingEnd="30dp" >
 
         <ImageView
-            android:layout_width="11.1dp"
-            android:layout_height="16.1dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:src="@drawable/icon_delete"/>
     </FrameLayout>

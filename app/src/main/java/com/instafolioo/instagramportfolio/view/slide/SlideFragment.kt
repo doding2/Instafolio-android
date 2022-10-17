@@ -58,10 +58,13 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
             }
             // pdf exception
             is NoManageStoragePermissionException -> {
-                showAlertDialog("지원하지 않는 경로로부터의 파일입니다",
+                showMessageDialog(
+                    title = "지원하지 않는 경로의 파일입니다",
+                    message = "이전 페이지로 가시겠습니까?",
                     onDismiss = {
                         findNavController().popBackStack()
-                })
+                    }
+                )
             }
             else -> {
                 showMessageDialog(
@@ -89,6 +92,8 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
         when (requireActivity().display?.rotation) {
             // 폰이 왼쪽으로 누움
             Surface.ROTATION_90 -> {
+                binding.layoutRoot.setPadding(0, getStatusBarHeight(), getNaviBarHeight(), 0)
+
                 // 뷰가 화면에 너무 크게 차지하지 않게 조절
                 binding.layoutRoot.post {
                     val params = binding.layoutPreviewBackground.layoutParams
@@ -98,6 +103,8 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
             }
             // 폰이 오른쪽으로 누움
             Surface.ROTATION_270 -> {
+                binding.layoutRoot.setPadding(getNaviBarHeight(), getStatusBarHeight(), 0, 0)
+
                 // 뷰가 화면에 너무 크게 차지하지 않게 조절
                 binding.layoutRoot.post {
                     val params = binding.layoutPreviewBackground.layoutParams
@@ -107,6 +114,8 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
             }
             // 그 외는 그냥 정방향으으로 처리함
             else -> {
+                binding.layoutRoot.setPadding(0, getStatusBarHeight(), 0, getNaviBarHeight())
+
                 // 정상 상태
                 val params = binding.layoutPreviewBackground.layoutParams
                 params.width = ViewGroup.LayoutParams.MATCH_PARENT
@@ -115,8 +124,8 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
         }
 
         requireActivity().window.apply {
-            statusBarColor = Color.BLACK
-            navigationBarColor = Color.BLACK
+//            statusBarColor = Color.BLACK
+//            navigationBarColor = Color.BLACK
 
             WindowInsetsControllerCompat(this, binding.root).apply {
                 isAppearanceLightStatusBars = false
@@ -183,7 +192,10 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
                 }
             }
             else {
-                showAlertDialog("적어도 두 개의 이미지가 필요합니다")
+                showMessageDialog(
+                    title = "병합을 할 수 없습니다",
+                    message= "적어도 두 개의 이미지가 필요합니다"
+                )
             }
         }
 

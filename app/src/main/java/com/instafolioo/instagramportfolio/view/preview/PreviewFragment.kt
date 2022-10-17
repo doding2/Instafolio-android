@@ -7,11 +7,11 @@ import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
@@ -83,9 +83,24 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
         binding.viewModel = previewViewModel
         binding.lifecycleOwner = this
 
+        when (requireActivity().display?.rotation) {
+            // 폰이 왼쪽으로 누움
+            Surface.ROTATION_90 -> {
+                binding.layoutRoot.setPadding(0, getStatusBarHeight(), getNaviBarHeight(), 0)
+            }
+            // 폰이 오른쪽으로 누움
+            Surface.ROTATION_270 -> {
+                binding.layoutRoot.setPadding(getNaviBarHeight(), getStatusBarHeight(), 0, 0)
+            }
+            // 그 외는 그냥 정방향으으로 처리함
+            else -> {
+                binding.layoutRoot.setPadding(0, getStatusBarHeight(), 0, getNaviBarHeight())
+            }
+        }
+
         activity?.window?.apply {
-            statusBarColor = Color.BLACK
-            navigationBarColor = Color.BLACK
+//            statusBarColor = Color.BLACK
+//            navigationBarColor = Color.BLACK
 
             WindowInsetsControllerCompat(this, binding.root).apply {
                 isAppearanceLightStatusBars = false
@@ -253,6 +268,16 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
             .setListener(object: AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator?) {
                     _binding?.textIndicator?.setAlpha(alphaR)
+                }
+            })
+
+        binding.imageCurrentPageIndicator
+            .animate()
+            .alpha(alphaR)
+            .setDuration(duration1)
+            .setListener(object: AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator?) {
+                    _binding?.imageCurrentPageIndicator?.setAlpha(alphaR)
                 }
             })
     }

@@ -2,6 +2,7 @@ package com.instafolioo.instagramportfolio.view.common
 
 import android.os.Bundle
 import android.view.ViewTreeObserver
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -23,6 +24,10 @@ class MainActivity : AppCompatActivity() {
         _binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         val factory = HomeViewModelFactory(this)
         homeViewModel = ViewModelProvider(this, factory)[HomeViewModel::class.java]
+
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
 
         // splash screen 동안 result slides 로딩
         binding.layoutRoot.viewTreeObserver.addOnPreDrawListener(

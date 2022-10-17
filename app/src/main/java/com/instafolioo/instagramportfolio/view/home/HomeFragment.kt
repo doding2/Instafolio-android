@@ -4,7 +4,6 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.app.Activity.RESULT_OK
 import android.content.Intent
-import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -66,22 +65,25 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         when (requireActivity().display?.rotation) {
             // 폰이 왼쪽으로 누움
             Surface.ROTATION_90 -> {
+                binding.layoutRoot.setPadding(0, getStatusBarHeight(), getNaviBarHeight(), 0)
                 binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 6)
             }
             // 폰이 오른쪽으로 누움
             Surface.ROTATION_270 -> {
+                binding.layoutRoot.setPadding(getNaviBarHeight(), getStatusBarHeight(), 0, 0)
                 binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 6)
             }
             // 그 외는 그냥 정방향으으로 처리함
             else -> {
+                binding.layoutRoot.setPadding(0, getStatusBarHeight(), 0, getNaviBarHeight())
                 // 리사이클러뷰 한 줄에 아이템 3개씩 오도록 조정
                 binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
             }
         }
 
         requireActivity().window.apply {
-            statusBarColor = Color.WHITE
-            navigationBarColor = Color.WHITE
+//            statusBarColor = Color.WHITE
+//            navigationBarColor = Color.WHITE
 
             WindowInsetsControllerCompat(this, binding.root).apply {
                 isAppearanceLightStatusBars = true
@@ -430,7 +432,7 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         }
 
         if (uriWithExtension.isEmpty()) {
-            showAlertDialog("지원하지 않는 파일입니다")
+            showAlertDialog("지원하지 않는 형식의 파일입니다")
             return
         }
 

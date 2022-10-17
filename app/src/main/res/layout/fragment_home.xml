@@ -116,7 +116,7 @@
                         android:gravity="center"
                         android:padding="15dp"
                         android:text="파일 불러오기"
-                        android:textSize="16sp"
+                        android:textSize="16.6sp"
                         android:textColor="@color/text_pretendard_color"
                         android:fontFamily="@font/pretendard_bold"/>
 
@@ -142,10 +142,10 @@
 
                             <ImageView
                                 android:id="@+id/image_directory"
-                                android:layout_width="18.5dp"
-                                android:layout_height="14.5dp"
+                                android:layout_width="17dp"
+                                android:layout_height="13dp"
                                 android:src="@drawable/icon_folder"
-                                app:tint="@color/black"
+                                app:tint="@color/text_pretendard_color"
                                 android:layout_gravity="center"/>
 
                             <TextView
@@ -171,11 +171,10 @@
 
                             <ImageView
                                 android:id="@+id/image_gallery"
-                                android:layout_width="15dp"
-                                android:layout_height="15dp"
+                                android:layout_width="13.5dp"
+                                android:layout_height="13.5dp"
                                 android:src="@drawable/icon_image"
-                                app:tint="@color/black"
-                                android:layout_marginTop="1dp"
+                                app:tint="@color/text_pretendard_color"
                                 android:layout_gravity="center"/>
 
                             <TextView

@@ -10,7 +10,6 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
@@ -49,6 +48,7 @@ import kotlinx.coroutines.*
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.coroutines.suspendCoroutine
 import kotlin.math.round
 
 
@@ -75,11 +75,6 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
     private var previewAreaIsScrolling = false
 
     private var showingDialog: Dialog? = null
-
-
-    // 광고
-    private var mRewardedAd: RewardedAd? = null
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -115,8 +110,6 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
             }
         }
 
-        loadAd()
-
         slideAdapter = PreviewSlideAdapter(previewViewModel.previewSlides.value!!)
         binding.recyclerView.adapter = slideAdapter
 
@@ -131,19 +124,21 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
 
                 if (cutAreaIsScrolling) return
 
-                val view = snapHelper.findSnapView(recyclerView.layoutManager ?: return)!!
-                val position = recyclerView.layoutManager!!.getPosition(view)
+                val view = snapHelper.findSnapView(recyclerView.layoutManager ?: return)
+                view?.let {
+                    val position = recyclerView.layoutManager!!.getPosition(it)
 
-                _binding?.root?.post {
-                    val screenWidth = binding.root.width
-                    val cutItemWidth = cutAdapter.getItemWidth()
-                    val ddx = round(dx * cutItemWidth.toFloat() / screenWidth.toFloat()).toInt()
-                    binding.recyclerViewCut.scrollBy(ddx, 0)
-                }
+                    _binding?.root?.post {
+                        val screenWidth = binding.root.width
+                        val cutItemWidth = cutAdapter.getItemWidth()
+                        val ddx = round(dx * cutItemWidth.toFloat() / screenWidth.toFloat()).toInt()
+                        binding.recyclerViewCut.scrollBy(ddx, 0)
+                    }
 
-                if (currentPosition != position) {
-                    currentPosition = position
-                    previewViewModel.currentSlide.value = position + 1
+                    if (currentPosition != position) {
+                        currentPosition = position
+                        previewViewModel.currentSlide.value = position + 1
+                    }
                 }
             }
 
@@ -177,13 +172,16 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
 
                 if (previewAreaIsScrolling) return
 
-                val view = snapHelper2.findSnapView(recyclerView.layoutManager ?: return)!!
-                val position = recyclerView.layoutManager!!.getPosition(view)
+                val view = snapHelper2.findSnapView(recyclerView.layoutManager ?: return)
 
-                if (currentPosition != position) {
-                    currentPosition = position
-                    previewViewModel.currentSlide.value = position + 1
-                    binding.recyclerView.scrollToPosition(position)
+                view?.let {
+                    val position = recyclerView.layoutManager!!.getPosition(it)
+
+                    if (currentPosition != position) {
+                        currentPosition = position
+                        previewViewModel.currentSlide.value = position + 1
+                        binding.recyclerView.scrollToPosition(position)
+                    }
                 }
             }
 
@@ -219,18 +217,17 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
         return binding.root
     }
 
+
     // 광고 로딩
-    private fun loadAd() {
+    private suspend fun loadAdWithCallback() = suspendCoroutine { continuation  ->
         val adRequest = AdRequest.Builder().build()
 
         val callback = object: RewardedAdLoadCallback() {
             override fun onAdFailedToLoad(adError: LoadAdError) {
-                Log.d(TAG, "광고 로딩 실패: $adError")
-                mRewardedAd = null
+                continuation.resumeWith(Result.success(null))
             }
             override fun onAdLoaded(rewardedAd: RewardedAd) {
-                Log.d(TAG, "광고 로딩 성공")
-                mRewardedAd = rewardedAd
+                continuation.resumeWith(Result.success(rewardedAd))
             }
         }
 
@@ -318,17 +315,15 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
         showSelectFormatDialog { format ->
 
             enableLoading(enabled = true, isSaving = true)
-            if (!previewViewModel.isAdFinished) {
-                mRewardedAd?.show(requireActivity()) {
-                    previewViewModel.run {
-                        if (isDownloadFinished)
-                            showDoneDialog()
+            previewViewModel.run {
+                if (isAdFinished) return@run
 
-                        previewViewModel.isAdFinished = true
-                    }
+                mRewardedAd?.show(requireActivity()) {
+                    if (isDownloadFinished) showDoneDialog()
+                    isAdFinished = true
                 }
-                Log.d(TAG, "광고 show: ${mRewardedAd != null}")
             }
+
 
             val time = getTimeStamp()
 
@@ -374,7 +369,10 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
             title = "저장에 성공했습니다",
             message = "저장한 파일위치로 이동합니다",
             onDismiss = {
-                previewViewModel.savingSlides.value?.clear()
+                previewViewModel.run {
+                    clear()
+                    clearAd()
+                }
                 findNavController().navigate(R.id.action_previewFragment_to_homeFragment)
             }
         )
@@ -416,75 +414,99 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
     // 슬라이드를 프리뷰 슬라이드로 변환
     private fun processSlidesIntoPreviewSlides() {
         enableLoading(true)
+        
+        lifecycleScope.launch(Dispatchers.Main) {
 
-        // 이미 해놓은거 있으면 패스
-        if (slideAdapter.itemCount > 0) {
-            binding.recyclerViewCut.post {
-                cutWidth = binding.recyclerViewCut.width
-                val itemWidth = cutAdapter.getItemWidth()
-                val padding = (cutWidth - itemWidth) / 2
+            // 광고 로딩
+            var adDeferred: Deferred<RewardedAd?>? = null
 
-                binding.recyclerViewCut.setPadding(padding, 0, padding, 0)
-                scroller.targetPosition = 0
-                binding.recyclerViewCut.layoutManager?.startSmoothScroll(scroller)
-                binding.recyclerView.layoutManager?.scrollToPosition(0)
-                previewViewModel.currentSlide.value = 1
+            if (previewViewModel.mRewardedAd == null) {
+                adDeferred = async(Dispatchers.Main) {
+                    loadAdWithCallback().also {
+                        previewViewModel.isAdFinished = (it == null)
+                    }
+                }
+            }
 
-                // 로딩 끄기
+            // 이미 해놓은거 있으면 패스
+            if (slideAdapter.itemCount > 0) {
+                val postDeferred = async(Dispatchers.Main) {
+                    binding.recyclerViewCut.post {
+                        cutWidth = binding.recyclerViewCut.width
+                        val itemWidth = cutAdapter.getItemWidth()
+                        val padding = (cutWidth - itemWidth) / 2
+
+                        binding.recyclerViewCut.setPadding(padding, 0, padding, 0)
+                        scroller.targetPosition = 0
+                        binding.recyclerViewCut.layoutManager?.startSmoothScroll(scroller)
+                        binding.recyclerView.layoutManager?.scrollToPosition(0)
+                        previewViewModel.currentSlide.value = 1
+                    }
+                }
+
+                postDeferred.await()
+                if (previewViewModel.mRewardedAd == null)
+                    previewViewModel.mRewardedAd = adDeferred?.await()
+
+                previewViewModel.slidesSize.value = previewViewModel.previewSlides.value?.size
                 enableLoading(false, 0L)
+                return@launch
             }
 
-            // 현재 페이지 표시
-            previewViewModel.slidesSize.value = previewViewModel.previewSlides.value?.size
 
-            return
-        }
+            val previewSlideListDeferred = async {
+                val previewSlideList = arrayListOf<PreviewSlide>()
 
-        lifecycleScope.launch(Dispatchers.IO) {
-            val previewSlideList = arrayListOf<PreviewSlide>()
+                withContext(Dispatchers.IO) {
+                    slideViewModel.slides.value?.forEach {
+                        var previewSlide: PreviewSlide? = null
 
-            slideViewModel.slides.value?.forEach {
-                var previewSlide: PreviewSlide? = null
-
-                // 바인딩 되어있는 놈
-                if (it in slideViewModel.bindingFlattenSlides.value!!) {
-                    for ((first, second) in slideViewModel.bindingPairs.value!!) {
-                        if (it.bitmap == first.bitmap) {
-                            // 첫번째 놈
-                            // 인스타 사이즈냐 아니냐에 따라서도 달라짐
-                            previewSlide = if (slideViewModel.isInstarSize.value == true) {
-                                PreviewSlide(first.bitmap, second.bitmap, viewType=INSTAR_SIZE_BINDING)
-                            } else {
-                                // 오리지널 바인딩은
-                                // 프리뷰에 보여지는 예시와 실제 결과가 같게 하기 위해
-                                // 그냥 미리 합쳐버림
-                                PreviewSlide(bindSlide(first.bitmap, second.bitmap), viewType=ORIGINAL_BINDING)
+                        // 바인딩 되어있는 놈
+                        if (it in slideViewModel.bindingFlattenSlides.value!!) {
+                            for ((first, second) in slideViewModel.bindingPairs.value!!) {
+                                if (it.bitmap == first.bitmap) {
+                                    // 첫번째 놈
+                                    // 인스타 사이즈냐 아니냐에 따라서도 달라짐
+                                    previewSlide = if (slideViewModel.isInstarSize.value == true) {
+                                        PreviewSlide(first.bitmap, second.bitmap, viewType=INSTAR_SIZE_BINDING)
+                                    } else {
+                                        // 오리지널 바인딩은
+                                        // 프리뷰에 보여지는 예시와 실제 결과가 같게 하기 위해
+                                        // 그냥 미리 합쳐버림
+                                        PreviewSlide(bindSlide(first.bitmap, second.bitmap), viewType=ORIGINAL_BINDING)
+                                    }
+                                    break
+                                }
+                                // 두번째 놈이면, 얘는 이 전에 이미 등록 했으니 패스
                             }
-                            break
                         }
-                        // 두번째 놈이면, 얘는 이 전에 이미 등록 했으니 패스
-                    }
-                }
-                // 바인딩 안 되어 있는 놈
-                else {
-                    previewSlide = if (slideViewModel.isInstarSize.value == true) {
-                        PreviewSlide(it.bitmap, viewType=INSTAR_SIZE)
-                    } else {
-                        PreviewSlide(it.bitmap, viewType=ORIGINAL)
+                        // 바인딩 안 되어 있는 놈
+                        else {
+                            previewSlide = if (slideViewModel.isInstarSize.value == true) {
+                                PreviewSlide(it.bitmap, viewType=INSTAR_SIZE)
+                            } else {
+                                PreviewSlide(it.bitmap, viewType=ORIGINAL)
+                            }
+                        }
+
+                        // 프리뷰 슬라이드 목록에 추가
+                        if (previewSlide != null) {
+                            previewSlideList.add(previewSlide)
+                        }
                     }
                 }
 
-                // 프리뷰 슬라이드 목록에 추가
-                if (previewSlide != null) {
-                    previewSlideList.add(previewSlide)
-                }
+                previewSlideList
             }
 
-            withContext(Dispatchers.Main) {
-                // 리사이클러 뷰에 반영
-                slideAdapter.replaceItems(previewSlideList)
-                cutAdapter.replaceItems(previewSlideList)
 
+            val previewSlideList = previewSlideListDeferred.await()
+
+            // 리사이클러 뷰에 반영
+            slideAdapter.replaceItems(previewSlideList)
+            cutAdapter.replaceItems(previewSlideList)
+
+            val postDeferred = async(Dispatchers.Main) {
                 binding.recyclerViewCut.post {
                     cutWidth = binding.recyclerViewCut.width
                     val itemWidth = cutAdapter.getItemWidth()
@@ -495,14 +517,15 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                     binding.recyclerViewCut.layoutManager?.startSmoothScroll(scroller)
                     binding.recyclerView.layoutManager?.scrollToPosition(0)
                     previewViewModel.currentSlide.value = 1
-
-                    // 로딩 끄기
-                    enableLoading(false)
                 }
-
-                // 현재 페이지 표시
-                previewViewModel.slidesSize.value = previewViewModel.previewSlides.value?.size
             }
+
+            postDeferred.await()
+            if (previewViewModel.mRewardedAd == null)
+                previewViewModel.mRewardedAd = adDeferred?.await()
+
+            previewViewModel.slidesSize.value = previewViewModel.previewSlides.value?.size
+            enableLoading(false)
         }
     }
 

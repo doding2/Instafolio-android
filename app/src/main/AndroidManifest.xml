@@ -23,7 +23,7 @@
         <!--    release: ca-app-pub-7852302700024355~4518830635     -->
          <meta-data
              android:name="com.google.android.gms.ads.APPLICATION_ID"
-             android:value="ca-app-pub-7852302700024355~4518830635"/>
+             android:value="ca-app-pub-3940256099942544~3347511713"/>
          <provider
              android:authorities="${applicationId}.provider"
              android:name="androidx.core.content.FileProvider"

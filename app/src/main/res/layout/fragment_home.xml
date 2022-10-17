@@ -173,6 +173,7 @@
                                 android:id="@+id/image_gallery"
                                 android:layout_width="13.5dp"
                                 android:layout_height="13.5dp"
+                                android:layout_marginTop="0.9dp"
                                 android:src="@drawable/icon_image"
                                 app:tint="@color/text_pretendard_color"
                                 android:layout_gravity="center"/>

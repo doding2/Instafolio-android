@@ -207,6 +207,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
         }
         // 확장 되어있으면 버튼 배경이 생김
         viewModel.isInstarSize.observe(viewLifecycleOwner) {
+
             binding.apply {
                 imageInstaSizeUpper.setEnabledColor(it)
                 imageInstaSize11.setEnabledColor(it)
@@ -277,7 +278,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
 
                         // 뷰 모델에 정보 저장
                         withContext(Dispatchers.Main) {
-                            if (!isInstarSize) {
+                            if (isInstarSize) {
                                 viewModel.isInstarSize.value = isInstarSize
                                 initImagesScale()
                             }

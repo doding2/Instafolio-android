@@ -2,6 +2,7 @@ package com.instafolioo.instagramportfolio.view.preview
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.android.gms.ads.rewarded.RewardedAd
 import com.instafolioo.instagramportfolio.model.PreviewSlide
 import com.instafolioo.instagramportfolio.model.ResultSlide
 
@@ -30,20 +31,35 @@ class PreviewViewModel: ViewModel() {
     }
 
 
-    private var isAdFinishedValue = MutableLiveData<Boolean>()
+    private var isAdFinishedData = MutableLiveData<Boolean>()
     var isAdFinished: Boolean
-        get() = isAdFinishedValue.value ?: false
+        get() = isAdFinishedData.value ?: false
         set(value) {
-            isAdFinishedValue.value = value
+            isAdFinishedData.value = value
         }
 
-
-    private val isDownloadFinishedValue = MutableLiveData<Boolean>()
+    private val isDownloadFinishedData = MutableLiveData<Boolean>()
     var isDownloadFinished: Boolean
-        get() = isAdFinishedValue.value ?: false
+        get() = isDownloadFinishedData.value ?: false
         set(value) {
-            isAdFinishedValue.value = value
+            isDownloadFinishedData.value = value
         }
+
+
+    // 광고
+    private val mRewardedAdData = MutableLiveData<RewardedAd?>()
+    var mRewardedAd: RewardedAd?
+        get() = mRewardedAdData.value
+        set(value) {
+            mRewardedAdData.value = value
+        }
+
+
+    fun clearAd() {
+        isAdFinished = false
+        isDownloadFinished = false
+        mRewardedAd = null
+    }
 
     fun clear() {
         previewSlides.value?.clear()
@@ -51,9 +67,10 @@ class PreviewViewModel: ViewModel() {
         slidesSize.value = 0
         savingSlides.value = mutableListOf()
         cutPositions.value?.clear()
-        isAdFinishedValue.value = false
-        isDownloadFinishedValue.value = false
+        isAdFinished = false
+        isDownloadFinished = false
     }
+
 
     // 분할
     val isAlreadyCut get() = cutPositions.value!!.contains(currentSlide.value!! - 1)

@@ -20,7 +20,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:strokeColor="#E9E9E9"
-            app:strokeWidth="0.8dp">
+            app:strokeWidth="0.4dp">
 
             <ImageView
                 android:id="@+id/image_thumbnail"

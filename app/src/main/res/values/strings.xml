@@ -7,4 +7,9 @@
     <string name="test_admob_id_rewarded_ad">ca-app-pub-3940256099942544/5224354917</string>
     <string name="admob_id_rewarded_ad">ca-app-pub-7852302700024355/2557645571</string>
 
+    <string name="tooltip_text_1">과거 작업물 재편집 &amp; 삭제</string>
+    <string name="tooltip_text_2">인스타그램 이미지 규격 간편 맞춤</string>
+    <string name="tooltip_text_3">두 장의 이미지를 간편하게 병합</string>
+    <string name="tooltip_text_4">이미지를 길게 터치하여 순서 변경</string>
+    <string name="tooltip_text_5">다양한 형식의 파일로 추출하여 저장</string>
 </resources>

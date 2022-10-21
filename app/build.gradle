@@ -44,6 +44,9 @@ android {
 }
 
 dependencies {
+    // recyclerview scroll indicator
+    implementation "ru.tinkoff.scrollingpagerindicator:scrollingpagerindicator:1.2.4"
+
     // Ads
     implementation 'com.google.android.gms:play-services-ads:21.3.0'
 

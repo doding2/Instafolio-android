@@ -231,6 +231,11 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
         // 뒤로가기
         binding.buttonBack.setOnClickListener { onBackPressed() }
 
+        // 툴팁
+        binding.buttonTooltip.setOnClickListener {
+            findNavController().navigate(R.id.action_slideFragment_to_tooltipFragment)
+        }
+
         return binding.root
     }
 

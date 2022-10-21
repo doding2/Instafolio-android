@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        tools:context=".view.tooltip.TooltipFragment">
+
+        <RelativeLayout
+            android:id="@+id/layout_root"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/button_cancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="17dp"
+                android:paddingStart="5dp"
+                android:paddingTop="3dp"
+                android:paddingEnd="9dp"
+                android:paddingBottom="11dp"
+                android:src="@drawable/icon_cancel_gray" />
+
+            <TextView
+                android:id="@+id/text_tooltip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/button_cancel"
+                android:layout_centerHorizontal="true"
+                android:fontFamily="@font/pretendard_extrabold"
+                android:gravity="center"
+                android:text="tooltips"
+                android:textColor="@color/black"
+                android:textSize="21sp"
+                android:layout_marginTop="29dp"/>
+
+            <ru.tinkoff.scrollingpagerindicator.ScrollingPagerIndicator
+                android:id="@+id/scroll_indicator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/text_tooltip"
+                android:layout_centerHorizontal="true"
+                app:spi_dotColor="#CACACA"
+                app:spi_dotSelectedColor="@color/black"
+                app:spi_dotSelectedSize="5.5dp"
+                app:spi_dotSize="5.5dp"
+                app:spi_dotSpacing="7.5dp" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/scroll_indicator"
+                android:layout_centerHorizontal="true"
+                android:layout_alignParentBottom="true"
+                android:clipToPadding="false"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+        </RelativeLayout>
+    </FrameLayout>
+</layout>

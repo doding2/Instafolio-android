@@ -22,14 +22,13 @@
                 app:cardElevation="20dp"
                 app:cardBackgroundColor="@color/white">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="Instafolio"
-                    android:textSize="17.32sp"
-                    android:textColor="@color/black"
-                    android:fontFamily="@font/sebang_gothic_bold"/>
+                <ImageView
+                    android:layout_width="97.5dp"
+                    android:layout_height="12.89dp"
+                    android:src="@drawable/logo_black"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="18.3dp"
+                    android:scaleType="centerCrop"/>
             </com.google.android.material.card.MaterialCardView>
 
             <androidx.recyclerview.widget.RecyclerView

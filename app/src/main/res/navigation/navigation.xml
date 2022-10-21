@@ -30,6 +30,13 @@
             app:exitAnim="@anim/do_nothing"
             app:popEnterAnim="@anim/do_nothing"
             app:popExitAnim="@anim/translate_exit" />
+        <action
+            android:id="@+id/action_slideFragment_to_tooltipFragment"
+            app:destination="@id/tooltipFragment"
+            app:enterAnim="@anim/translate_up_enter"
+            app:exitAnim="@anim/do_nothing"
+            app:popEnterAnim="@anim/do_nothing"
+            app:popExitAnim="@anim/translate_down_exit" />
     </fragment>
     <fragment
         android:id="@+id/previewFragment"
@@ -46,4 +53,9 @@
             app:popUpTo="@id/homeFragment"
             app:popUpToInclusive="true" />
     </fragment>
+    <fragment
+        android:id="@+id/tooltipFragment"
+        android:name="com.instafolioo.instagramportfolio.view.tooltip.TooltipFragment"
+        android:label="TooltipFragment"
+        tools:layout="@layout/fragment_tooltip" />
 </navigation>

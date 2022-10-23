@@ -1,10 +1,12 @@
 package com.instafolioo.instagramportfolio.view.home
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.instafolioo.instagramportfolio.R
 import com.instafolioo.instagramportfolio.database.resultslide.ResultSlideDatabase
 import com.instafolioo.instagramportfolio.database.resultslide.ResultSlideRepository
 import com.instafolioo.instagramportfolio.model.ResultSlide
@@ -28,7 +30,26 @@ class HomeViewModel(context: Context): ViewModel() {
         value = mutableListOf()
     }
 
-    val isReady get() = resultSlides.value != null
+    // 툴팁 관련
+    private var isFirstExecutionData = MutableLiveData<Boolean>().apply {
+        val pref = context.getSharedPreferences(context.getString(R.string.pref_settings), Context.MODE_PRIVATE)
+        value = pref.getBoolean("isFirstExecution", true)
+
+        if (value == true) {
+            with (pref.edit()) {
+                putBoolean("isFirstExecution", false)
+                apply()
+            }
+        }
+    }
+    var isFirstExecution
+        get() = isFirstExecutionData.value ?: true
+        set(value) {
+            isFirstExecutionData.value = value
+        }
+
+
+    val isReady get() = (resultSlides.value != null)
 
     fun isEditMode(): Boolean {
         return isEditMode.value == true

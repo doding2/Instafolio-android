@@ -17,6 +17,13 @@
             app:exitAnim="@anim/scale_exit"
             app:popEnterAnim="@anim/scale_enter"
             app:popExitAnim="@anim/translate_exit" />
+        <action
+            android:id="@+id/action_homeFragment_to_tooltipFragment"
+            app:destination="@id/tooltipFragment"
+            app:enterAnim="@anim/translate_up_enter"
+            app:exitAnim="@anim/do_nothing"
+            app:popEnterAnim="@anim/do_nothing"
+            app:popExitAnim="@anim/translate_down_exit" />
     </fragment>
     <fragment
         android:id="@+id/slideFragment"

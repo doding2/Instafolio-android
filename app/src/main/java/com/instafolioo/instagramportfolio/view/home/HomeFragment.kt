@@ -24,6 +24,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.instafolioo.instagramportfolio.R
 import com.instafolioo.instagramportfolio.databinding.FragmentHomeBinding
 import com.instafolioo.instagramportfolio.databinding.ItemResultSlideBinding
 import com.instafolioo.instagramportfolio.extension.*
@@ -100,6 +101,10 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
 
         // 인스타 파일들 재등록
         homeViewModel.resultSlides.observe(viewLifecycleOwner) {
+            if (it != null) {
+                showTooltip()
+            }
+
             binding.textNoResultSlide.visibility =
                 if (it.isEmpty()) View.VISIBLE else View.GONE
 
@@ -272,7 +277,14 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         return binding.root
     }
 
-    // 폰트
+    // 앱 처음 실행이면 툴팁 보이기
+    private fun showTooltip() {
+        if (!homeViewModel.isFirstExecution) return
+
+        homeViewModel.isFirstExecution = false
+        analyticsViewModel.logEventTooltip()
+        findNavController().navigate(R.id.action_homeFragment_to_tooltipFragment)
+    }
 
     // 편집모드에서 여러 파일 동시에 열기
     private fun openResultSlides() {
@@ -295,7 +307,7 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
 
         // Slide Fragment로 이동
         findNavController()
-            .navigate(com.instafolioo.instagramportfolio.R.id.action_homeFragment_to_slideFragment)
+            .navigate(R.id.action_homeFragment_to_slideFragment)
 
         // 이동후에는 편집모드 해제
         binding.root.postDelayed({
@@ -489,7 +501,7 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
 
         // Slide Fragment로 이동
         findNavController()
-            .navigate(com.instafolioo.instagramportfolio.R.id.action_homeFragment_to_slideFragment)
+            .navigate(R.id.action_homeFragment_to_slideFragment)
     }
 
     // 인텐트를 가지고 파일 uri 리스트로 변환

@@ -312,7 +312,7 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         // 이동후에는 편집모드 해제
         binding.root.postDelayed({
             homeViewModel.isEditMode.value = false
-            homeViewModel.selectedResultSlides.value = mutableListOf()
+            homeViewModel.selectedResultSlides.value?.clear()
         }, 200)
     }
 
@@ -337,7 +337,7 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
             isEditMode.value = false
 
             // 선택된 놈들 초기화
-            selectedResultSlides.value = mutableListOf()
+            selectedResultSlides.value?.clear()
         }
     }
 
@@ -354,9 +354,11 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
             analyticsViewModel.logEventSelectResultSlide(resultSlide)
 
             homeViewModel.isEditMode.value = true
-            homeViewModel.selectedResultSlides.value = mutableListOf()
+            homeViewModel.selectedResultSlides.value?.clear()
             binding.imageChecked.visibility = View.VISIBLE
             homeViewModel.selectedResultSlides.value!!.add(resultSlide)
+
+            enableEditButton()
             return
         }
 
@@ -366,6 +368,8 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
 
             homeViewModel.selectedResultSlides.value!!.remove(resultSlide)
             binding.imageChecked.visibility = View.GONE
+
+            enableEditButton()
 
             // 선택된 아이템이 아무것도 없게 된다면
             // 편집모드 해제
@@ -378,6 +382,43 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
 
             homeViewModel.selectedResultSlides.value!!.add(resultSlide)
             binding.imageChecked.visibility = View.VISIBLE
+
+            enableEditButton()
+        }
+    }
+
+    // 선택된 슬라이드가 2개 이상이면 편집 버튼 안 보이게
+    private fun enableEditButton() {
+        binding.layoutEditMode.also {
+            if (homeViewModel.selectedResultSlides.value!!.size <= 1) {
+                it.buttonEdit.apply {
+                    isEnabled = true
+
+                    animate()
+                        .alpha(1f)
+                        .setDuration(150)
+                        .setListener(object: AnimatorListenerAdapter() {
+                            override fun onAnimationStart(animation: Animator?) {
+                                visibility = View.VISIBLE
+                            }
+                        })
+                }
+                return
+            }
+
+            it.buttonEdit.apply {
+                isEnabled = false
+
+                animate()
+                    .alpha(0f)
+                    .setDuration(150)
+                    .setListener(object: AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animation: Animator?) {
+                            this@apply.visibility = View.GONE
+                        }
+                    })
+            }
+            Log.d("Fragment", "gone")
         }
     }
 

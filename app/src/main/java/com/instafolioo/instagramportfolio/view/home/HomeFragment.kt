@@ -29,6 +29,8 @@ import com.instafolioo.instagramportfolio.databinding.ItemResultSlideBinding
 import com.instafolioo.instagramportfolio.extension.*
 import com.instafolioo.instagramportfolio.model.ResultSlide
 import com.instafolioo.instagramportfolio.model.getEmptyResultSlides
+import com.instafolioo.instagramportfolio.view.common.FirebaseAnalyticsViewModel
+import com.instafolioo.instagramportfolio.view.common.FirebaseAnalyticsViewModelFactory
 import com.instafolioo.instagramportfolio.view.common.MainActivity
 import com.instafolioo.instagramportfolio.view.slide.SlideViewModel
 
@@ -49,8 +51,8 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
     // bottom sheet 동작 설정
     private lateinit var behavior: BottomSheetBehavior<FrameLayout>
 
-    // 선택된 bitmap들을 SlideFragment로 전달하기 위한 뷰 모델
     private lateinit var slideViewModel: SlideViewModel
+    private lateinit var analyticsViewModel: FirebaseAnalyticsViewModel
 
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreateView(
@@ -61,6 +63,8 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         val factory = HomeViewModelFactory(requireActivity())
         homeViewModel = ViewModelProvider(requireActivity(), factory)[HomeViewModel::class.java]
         slideViewModel= ViewModelProvider(requireActivity())[SlideViewModel::class.java]
+        val analyticsFactory = FirebaseAnalyticsViewModelFactory(requireActivity())
+        analyticsViewModel = ViewModelProvider(requireActivity(), analyticsFactory)[FirebaseAnalyticsViewModel::class.java]
 
         when (requireActivity().display?.rotation) {
             // 폰이 왼쪽으로 누움
@@ -228,14 +232,24 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
 
         // 편집모드 취소
         binding.layoutEditMode.buttonCancel.setOnClickListener {
-            if (homeViewModel.isEditMode())
+            if (homeViewModel.isEditMode()) {
+                homeViewModel.selectedResultSlides.value?.let {
+                    analyticsViewModel.logEventCancelResultSlides(it)
+                }
+
                 homeViewModel.isEditMode.value = false
+            }
         }
 
         // 선택된 슬라이드들 열기
         binding.layoutEditMode.buttonEdit.setOnClickListener {
-            if (homeViewModel.isEditMode())
+            if (homeViewModel.isEditMode()) {
+                homeViewModel.selectedResultSlides.value?.let {
+                    analyticsViewModel.logEventEditResultSlides(it)
+                }
+
                 openResultSlides()
+            }
         }
 
         // 슬라이드 삭제
@@ -244,7 +258,13 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
                 showDeleteDialog(
                     title = "프로젝트 삭제",
                     message = "선택한 파일을 삭제하시겠습니까?",
-                    onOk = ::deleteResultSlides
+                    onOk = {
+                        homeViewModel.selectedResultSlides.value?.let {
+                            analyticsViewModel.logEventDeleteResultSlides(it)
+                        }
+
+                        deleteResultSlides()
+                    }
                 )
             }
         }
@@ -319,6 +339,8 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
 
         // 편집모드가 아닐때
         if (!homeViewModel.isEditMode()) {
+            analyticsViewModel.logEventSelectResultSlide(resultSlide)
+
             homeViewModel.isEditMode.value = true
             homeViewModel.selectedResultSlides.value = mutableListOf()
             binding.imageChecked.visibility = View.VISIBLE
@@ -328,6 +350,8 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
 
         // 아이템 선택 해제
         if (resultSlide in homeViewModel.selectedResultSlides.value!!) {
+            analyticsViewModel.logEventUnselectResultSlide(resultSlide)
+
             homeViewModel.selectedResultSlides.value!!.remove(resultSlide)
             binding.imageChecked.visibility = View.GONE
 
@@ -338,6 +362,8 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         }
         // 선택
         else {
+            analyticsViewModel.logEventSelectResultSlide(resultSlide)
+
             homeViewModel.selectedResultSlides.value!!.add(resultSlide)
             binding.imageChecked.visibility = View.VISIBLE
         }
@@ -347,6 +373,10 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
     // sourceOfFiles bottom sheet이 확장되어 있으면 축소시킴
     override fun onBackPressed() {
         if (homeViewModel.isEditMode()) {
+            homeViewModel.selectedResultSlides.value?.let {
+                analyticsViewModel.logEventCancelResultSlides(it)
+            }
+
             homeViewModel.isEditMode.value = false
         }
         else if (behavior.state == BottomSheetBehavior.STATE_EXPANDED) {
@@ -413,19 +443,39 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         // 이미지와 pdf만 분별하여 넣을 리스트 (확장자별로 분류도 시킬 예정)
         val uriWithExtension = ArrayList<Pair<Uri, String>>()
 
+        var imageUriCount = 0L
+        var pdfUriCount = 0L
+        val format = StringBuffer()
+
         // 만약을 대비해 이미지와 pdf만 존재하도록 필터링
         for (uri in uriList) {
             val fileName: String? = getFileName(uri)
+            val formatted = fileName?.substringAfterLast(".")
+            formatted?.let {
+                if (format.contains(it)) return@let
+
+                if (imageUriCount != 0L || pdfUriCount != 0L)
+                    format.append("_")
+
+                format.append(formatted)
+            }
 
             // 이 uri가 이미지
             if (checkIsImage(uri)) {
                 uriWithExtension.add(uri to "image")
+                imageUriCount++
             }
             // 이 uri가 pdf
             else if (fileName != null && fileName.extension == "pdf") {
                 uriWithExtension.add(uri to "pdf")
+                pdfUriCount++
             }
         }
+
+        if (imageUriCount > 0)
+            analyticsViewModel.logEventLoadFromGallery(imageUriCount, format.toString())
+        if (pdfUriCount > 0)
+            analyticsViewModel.logEventLoadFromDrive(pdfUriCount, format.toString())
 
         if (uriWithExtension.isEmpty()) {
             showAlertDialog("지원하지 않는 형식의 파일입니다")

@@ -9,6 +9,7 @@ import android.widget.RelativeLayout
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
@@ -17,6 +18,8 @@ import com.instafolioo.instagramportfolio.R
 import com.instafolioo.instagramportfolio.databinding.FragmentTooltipBinding
 import com.instafolioo.instagramportfolio.extension.getNaviBarHeight
 import com.instafolioo.instagramportfolio.extension.getStatusBarHeight
+import com.instafolioo.instagramportfolio.view.common.FirebaseAnalyticsViewModel
+import com.instafolioo.instagramportfolio.view.common.FirebaseAnalyticsViewModelFactory
 import com.instafolioo.instagramportfolio.view.common.MainActivity
 
 class TooltipFragment : Fragment(), MainActivity.OnBackPressedListener {
@@ -26,11 +29,16 @@ class TooltipFragment : Fragment(), MainActivity.OnBackPressedListener {
 
     private lateinit var tooltipTexts: ArrayList<String>
 
+
+    private lateinit var analyticsViewModel: FirebaseAnalyticsViewModel
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = DataBindingUtil.inflate(inflater, R.layout.fragment_tooltip, container, false)
+        val analyticsFactory = FirebaseAnalyticsViewModelFactory(requireActivity())
+        analyticsViewModel = ViewModelProvider(requireActivity(), analyticsFactory)[FirebaseAnalyticsViewModel::class.java]
 
         setRootPadding()
         setTooltipAdapter()
@@ -150,6 +158,7 @@ class TooltipFragment : Fragment(), MainActivity.OnBackPressedListener {
     }
 
     override fun onBackPressed() {
+        analyticsViewModel.logEventBackFromTooltip()
         findNavController().popBackStack()
     }
 

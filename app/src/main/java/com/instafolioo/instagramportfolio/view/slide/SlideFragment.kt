@@ -27,6 +27,8 @@ import com.google.android.flexbox.FlexboxLayoutManager
 import com.instafolioo.instagramportfolio.R
 import com.instafolioo.instagramportfolio.extension.*
 import com.instafolioo.instagramportfolio.model.Slide
+import com.instafolioo.instagramportfolio.view.common.FirebaseAnalyticsViewModel
+import com.instafolioo.instagramportfolio.view.common.FirebaseAnalyticsViewModelFactory
 import com.instafolioo.instagramportfolio.view.common.MainActivity
 import com.instafolioo.instagramportfolio.view.home.HomeViewModel
 import com.instafolioo.instagramportfolio.view.home.HomeViewModelFactory
@@ -48,6 +50,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
 
     private lateinit var homeViewModel: HomeViewModel
     private lateinit var previewViewModel: PreviewViewModel
+    private lateinit var analyticsViewModel: FirebaseAnalyticsViewModel
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         when (throwable) {
@@ -87,6 +90,8 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
         val factory = HomeViewModelFactory(requireActivity())
         homeViewModel = ViewModelProvider(requireActivity(), factory)[HomeViewModel::class.java]
         previewViewModel = ViewModelProvider(requireActivity())[PreviewViewModel::class.java]
+        val analyticsFactory = FirebaseAnalyticsViewModelFactory(requireActivity())
+        analyticsViewModel = ViewModelProvider(requireActivity(), analyticsFactory)[FirebaseAnalyticsViewModel::class.java]
 
         // 뷰를 status bar와 navigation bar의 위치에서 떨어진 원래 위치로 복구(회전 방향에 따라 달라짐)
         when (requireActivity().display?.rotation) {
@@ -172,6 +177,8 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
         binding.buttonInstaSize.setOnClickListener {
             viewModel.isSlideChanged.value = true
             scaleImages()
+
+            analyticsViewModel.logEventInstaSize(viewModel.isInstarSize.value!!)
         }
 
         // 이미지 두 개를 하나로 묶기 활성화 버튼
@@ -180,6 +187,8 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
             if (adapter.itemCount > 1) {
                 initBinding()
                 viewModel.enableBinding.value = viewModel.enableBinding.value != true
+
+                analyticsViewModel.logEventBinding(viewModel.enableBinding.value!!)
 
                 // 바인딩 상태가 풀렸을 때, 바인딩된 슬라이드가 존재하지 않는다면
                 // 그냥 싱글 프리뷰 화면 보이기
@@ -224,6 +233,8 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
                 viewModel.bindingPairs.value = adapter.bindingPairs
                 viewModel.bindingFlattenSlides.value = adapter.bindingFlattenSlides
                 previewViewModel.clear()
+
+                analyticsViewModel.logEventNextFromEditScreen()
                 findNavController().navigate(R.id.action_slideFragment_to_previewFragment)
             }
         }
@@ -233,6 +244,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
 
         // 툴팁
         binding.buttonTooltip.setOnClickListener {
+            analyticsViewModel.logEventTooltip()
             findNavController().navigate(R.id.action_slideFragment_to_tooltipFragment)
         }
 
@@ -677,6 +689,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
                 && isSlideChanged.value == false
             ) {
                 slides.value = null
+                analyticsViewModel.logEventBackFromEditScreen()
                 findNavController().popBackStack()
                 return
             }
@@ -686,6 +699,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
                 "저장하지 않고 뒤로가시겠습니까?",
                 onOk = {
                     slides.value = null
+                    analyticsViewModel.logEventBackFromEditScreen()
                     findNavController().popBackStack()
                 }
             )

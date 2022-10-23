@@ -19,16 +19,20 @@ class MainActivity : AppCompatActivity() {
     private val binding get() = _binding!!
 
     private lateinit var homeViewModel: HomeViewModel
+    private lateinit var analyticsViewModel: FirebaseAnalyticsViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         _binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         val factory = HomeViewModelFactory(this)
         homeViewModel = ViewModelProvider(this, factory)[HomeViewModel::class.java]
+        val analyticsFactory = FirebaseAnalyticsViewModelFactory(this)
+        analyticsViewModel = ViewModelProvider(this, analyticsFactory)[FirebaseAnalyticsViewModel::class.java]
 
         window.setFlags(
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+        )
 
         MobileAds.initialize(this)
 

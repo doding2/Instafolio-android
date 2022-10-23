@@ -40,6 +40,8 @@ import com.instafolioo.instagramportfolio.model.PreviewSlide.Companion.ORIGINAL
 import com.instafolioo.instagramportfolio.model.PreviewSlide.Companion.ORIGINAL_BINDING
 import com.instafolioo.instagramportfolio.model.ResultSlide
 import com.instafolioo.instagramportfolio.model.Slide
+import com.instafolioo.instagramportfolio.view.common.FirebaseAnalyticsViewModel
+import com.instafolioo.instagramportfolio.view.common.FirebaseAnalyticsViewModelFactory
 import com.instafolioo.instagramportfolio.view.common.MainActivity
 import com.instafolioo.instagramportfolio.view.home.HomeViewModel
 import com.instafolioo.instagramportfolio.view.home.HomeViewModelFactory
@@ -64,6 +66,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
     private lateinit var previewViewModel: PreviewViewModel
     private lateinit var slideViewModel: SlideViewModel
     private lateinit var homeViewModel: HomeViewModel
+    private lateinit var analyticsViewModel: FirebaseAnalyticsViewModel
 
     private lateinit var slideAdapter: PreviewSlideAdapter
     private lateinit var cutAdapter: PreviewSlideCutAdapter
@@ -83,6 +86,8 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
         _binding = DataBindingUtil.inflate(inflater, R.layout.fragment_preview, container, false)
         val homeFactory = HomeViewModelFactory(requireActivity())
         homeViewModel = ViewModelProvider(requireActivity(), homeFactory)[HomeViewModel::class.java]
+        val analyticsFactory = FirebaseAnalyticsViewModelFactory(requireActivity())
+        analyticsViewModel = ViewModelProvider(requireActivity(), analyticsFactory)[FirebaseAnalyticsViewModel::class.java]
         slideViewModel = ViewModelProvider(requireActivity())[SlideViewModel::class.java]
         previewViewModel = ViewModelProvider(requireActivity())[PreviewViewModel::class.java]
         binding.viewModel = previewViewModel
@@ -203,6 +208,8 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
         processSlidesIntoPreviewSlides()
 
         binding.buttonDownload.setOnClickListener {
+            analyticsViewModel.logEventDownloadButton()
+
             val isGranted = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
             if (isGranted == PackageManager.PERMISSION_GRANTED) {
                 showDialog()
@@ -224,6 +231,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
 
         val callback = object: RewardedAdLoadCallback() {
             override fun onAdFailedToLoad(adError: LoadAdError) {
+                analyticsViewModel.logEventError(adError.message)
                 continuation.resumeWith(Result.success(null))
             }
             override fun onAdLoaded(rewardedAd: RewardedAd) {
@@ -318,7 +326,11 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
             previewViewModel.run {
                 if (isAdFinished) return@run
 
+                analyticsViewModel.logShowAd()
+
                 mRewardedAd?.show(requireActivity()) {
+                    analyticsViewModel.logDismissAd()
+
                     if (isDownloadFinished) showDoneDialog()
                     isAdFinished = true
                 }
@@ -338,6 +350,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                             previewViewModel.previewSlides.value!!,
                             slideViewModel.slides.value!!
                         )
+                        analyticsViewModel.logEventDownloadStart(previewViewModel.previewSlides.value!!.size.toLong(), format)
                     }
                     // pdf로 저장
                     "pdf" -> {
@@ -347,6 +360,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                             previewViewModel.previewSlides.value!!,
                             slideViewModel.slides.value!!
                         )
+                        analyticsViewModel.logEventDownloadStart(previewViewModel.previewSlides.value!!.size.toLong(), format)
                     }
                     else -> throw IllegalStateException("존재하지 않는 선택지 입니다")
                 }
@@ -365,6 +379,8 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
     private fun showDoneDialog() {
         showingDialog?.dismiss()
 
+        analyticsViewModel.logEventDownloadCompleted()
+
         showMessageDialog(
             title = "저장에 성공했습니다",
             message = "저장한 파일위치로 이동합니다",
@@ -373,6 +389,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                     clear()
                     clearAd()
                 }
+                analyticsViewModel.logEventBackToHome()
                 findNavController().navigate(R.id.action_previewFragment_to_homeFragment)
             }
         )
@@ -828,6 +845,8 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                 title = "저장되지 않았습니다",
                 message = "저장하지 않고 뒤로가시겠습니까?",
                 onOk = {
+                    analyticsViewModel.logEventCancelDownloading()
+                    analyticsViewModel.logEventBackFromPreviewScreen()
                     findNavController().popBackStack()
                 }
             )
@@ -837,12 +856,14 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                 title = "저장되지 않았습니다",
                 message = "저장하지 않고 뒤로가시겠습니까?",
                 onOk = {
+                    analyticsViewModel.logEventBackFromPreviewScreen()
                     findNavController().popBackStack()
                 }
             )
         }
         // 저장중이 아님
         else {
+            analyticsViewModel.logEventBackFromPreviewScreen()
             findNavController().popBackStack()
         }
     }
@@ -858,6 +879,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                 homeViewModel.deleteResultSlide(it)
                 it.deleteCache(requireContext())
             }
+            analyticsViewModel.logEventCancelDownloading()
         }
         previewViewModel.savingSlides.value?.clear()
     }

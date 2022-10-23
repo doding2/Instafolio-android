@@ -34,10 +34,6 @@ class HomeViewModel(context: Context): ViewModel() {
         return isEditMode.value == true
     }
 
-    suspend fun loadAllResultSlides() {
-
-    }
-
     suspend fun addResultSlide(resultSlide: ResultSlide): Long {
         var id = 0L
 

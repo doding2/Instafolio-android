@@ -150,7 +150,7 @@ class FirebaseAnalyticsViewModel(context: Context) : ViewModel() {
         analytics?.logEvent("cancel_downloading", null)
     }
 
-    fun logShowAd() {
+    fun logEventShowAd() {
         analytics?.logEvent("show_ad", null)
     }
 

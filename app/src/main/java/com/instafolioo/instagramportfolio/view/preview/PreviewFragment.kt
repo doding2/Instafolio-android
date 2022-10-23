@@ -326,7 +326,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
             previewViewModel.run {
                 if (isAdFinished) return@run
 
-                analyticsViewModel.logShowAd()
+                analyticsViewModel.logEventShowAd()
 
                 mRewardedAd?.show(requireActivity()) {
                     analyticsViewModel.logDismissAd()
@@ -334,6 +334,10 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                     if (isDownloadFinished) showDoneDialog()
                     isAdFinished = true
                 }
+                    ?: run {
+                        isAdFinished = true
+                        analyticsViewModel.logEventError("Ad is not loaded until user start to download project")
+                    }
             }
 
 
@@ -387,7 +391,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
             onDismiss = {
                 previewViewModel.run {
                     clear()
-                    clearAd()
+                    loadAd()
                 }
                 analyticsViewModel.logEventBackToHome()
                 findNavController().navigate(R.id.action_previewFragment_to_homeFragment)
@@ -434,17 +438,6 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
         
         lifecycleScope.launch(Dispatchers.Main) {
 
-            // 광고 로딩
-            var adDeferred: Deferred<RewardedAd?>? = null
-
-            if (previewViewModel.mRewardedAd == null) {
-                adDeferred = async(Dispatchers.Main) {
-                    loadAdWithCallback().also {
-                        previewViewModel.isAdFinished = (it == null)
-                    }
-                }
-            }
-
             // 이미 해놓은거 있으면 패스
             if (slideAdapter.itemCount > 0) {
                 val postDeferred = async(Dispatchers.Main) {
@@ -462,9 +455,6 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                 }
 
                 postDeferred.await()
-                if (previewViewModel.mRewardedAd == null)
-                    previewViewModel.mRewardedAd = adDeferred?.await()
-
                 previewViewModel.slidesSize.value = previewViewModel.previewSlides.value?.size
                 enableLoading(false, 0L)
                 return@launch
@@ -538,9 +528,6 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
             }
 
             postDeferred.await()
-            if (previewViewModel.mRewardedAd == null)
-                previewViewModel.mRewardedAd = adDeferred?.await()
-
             previewViewModel.slidesSize.value = previewViewModel.previewSlides.value?.size
             enableLoading(false)
         }

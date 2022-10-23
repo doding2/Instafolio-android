@@ -11,6 +11,7 @@ import com.instafolioo.instagramportfolio.R
 import com.instafolioo.instagramportfolio.databinding.ActivityMainBinding
 import com.instafolioo.instagramportfolio.view.home.HomeViewModel
 import com.instafolioo.instagramportfolio.view.home.HomeViewModelFactory
+import com.instafolioo.instagramportfolio.view.preview.PreviewViewModel
 
 
 class MainActivity : AppCompatActivity() {
@@ -19,6 +20,7 @@ class MainActivity : AppCompatActivity() {
     private val binding get() = _binding!!
 
     private lateinit var homeViewModel: HomeViewModel
+    private lateinit var previewViewModel: PreviewViewModel
     private lateinit var analyticsViewModel: FirebaseAnalyticsViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,6 +28,7 @@ class MainActivity : AppCompatActivity() {
         _binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         val factory = HomeViewModelFactory(this)
         homeViewModel = ViewModelProvider(this, factory)[HomeViewModel::class.java]
+        previewViewModel = ViewModelProvider(this)[PreviewViewModel::class.java]
         val analyticsFactory = FirebaseAnalyticsViewModelFactory(this)
         analyticsViewModel = ViewModelProvider(this, analyticsFactory)[FirebaseAnalyticsViewModel::class.java]
 
@@ -35,6 +38,7 @@ class MainActivity : AppCompatActivity() {
         )
 
         MobileAds.initialize(this)
+        previewViewModel.loadAd()
 
         // splash screen 동안 result slides 로딩
         binding.layoutRoot.viewTreeObserver.addOnPreDrawListener(

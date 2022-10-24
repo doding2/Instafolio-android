@@ -370,7 +370,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                 }
 
                 previewViewModel.run {
-                    if (isAdFinished)
+                    if (isAdFinished || mRewardedAd == null)
                         showDoneDialog()
 
                     isDownloadFinished = true

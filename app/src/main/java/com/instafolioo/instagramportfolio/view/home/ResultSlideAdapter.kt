@@ -50,7 +50,7 @@ class ResultSlideAdapter(
     }
 
     // 편집모드 UI 보이도록 활성화
-    fun enableEditMode(enabled: Boolean) {
+    fun disableEditMode() {
         for ((_, holder) in viewHolders) {
             holder.binding.imageChecked.visibility = View.GONE
         }
@@ -65,10 +65,12 @@ class ResultSlideAdapter(
             // 편집모드
             if (isEditMode.value == true) {
                 // 얘가 선택됐다면 체크 활성화
-                if (item in selectedItems.value!!){
-                    binding.imageChecked.visibility = View.VISIBLE}
-                else{}
+                if (item in selectedItems.value!!) {
+                    binding.imageChecked.visibility = View.VISIBLE
+                }
+                else {
                     binding.imageChecked.visibility = View.GONE
+                }
             }
             else {
                 binding.imageChecked.visibility = View.GONE

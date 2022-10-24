@@ -177,54 +177,51 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
             behavior.state = BottomSheetBehavior.STATE_COLLAPSED
         }
 
+
+        // 편집모드
+        enableEditButton()
         var isEditModeInit = true
-
-        // 편집모드 변동 관찰
+        var initialLocation = 0f
         homeViewModel.isEditMode.observe(viewLifecycleOwner) {
-            if (isEditModeInit) {
-                isEditModeInit = false
+            binding.layoutEditMode.root.run {
+                post {
+                    val collapsed = binding.layoutRoot.height.toFloat()
+                    val expanded = initialLocation
 
-                if (!homeViewModel.selectedResultSlides.value.isNullOrEmpty())
-                    return@observe
+                    if (isEditModeInit) {
+                        isEditModeInit = false
 
-                binding.layoutEditMode.root.run {
-                    post {
+                        if (initialLocation == 0f)
+                            initialLocation = binding.layoutEditMode.root.y
+                        if (!homeViewModel.selectedResultSlides.value.isNullOrEmpty())
+                            return@post
+
                         animate()
-                            .translationYBy(height.toFloat())
+                            .y(collapsed)
                             .setDuration(0)
                             .setListener(object: AnimatorListenerAdapter() {
                                 override fun onAnimationEnd(animation: Animator?) {
                                     binding.layoutEditMode.root.visibility = View.GONE
                                 }
                             })
+                        return@post
                     }
-                }
-                return@observe
-            }
 
-            if (it) {
-                behavior.state = BottomSheetBehavior.STATE_COLLAPSED
-                adapter.enableEditMode(true)
-
-                binding.layoutEditMode.root.run {
-                    post {
+                    if (it) {
+                        behavior.state = BottomSheetBehavior.STATE_COLLAPSED
                         animate()
-                            .translationYBy(-height.toFloat())
-                            .setDuration(150)
+                            .y(expanded)
+                            .setDuration(200)
                             .setListener(object: AnimatorListenerAdapter() {
                                 override fun onAnimationStart(animation: Animator?) {
                                     binding.layoutEditMode.root.visibility = View.VISIBLE
                                 }
                             })
-                    }
-                }
-            } else {
-                adapter.enableEditMode(false)
-                binding.layoutEditMode.root.run {
-                    post {
+                    } else {
+                        adapter.disableEditMode()
                         animate()
-                            .translationYBy(height.toFloat())
-                            .setDuration(150)
+                            .y(collapsed)
+                            .setDuration(200)
                             .setListener(object: AnimatorListenerAdapter() {
                                 override fun onAnimationEnd(animation: Animator?) {
                                     binding.layoutEditMode.root.visibility = View.GONE
@@ -389,24 +386,20 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
 
     // 선택된 슬라이드가 2개 이상이면 편집 버튼 안 보이게
     private fun enableEditButton() {
-        binding.layoutEditMode.also {
+        binding.layoutEditMode.buttonEdit.apply {
             if (homeViewModel.selectedResultSlides.value!!.size <= 1) {
-                it.buttonEdit.apply {
-                    isEnabled = true
+                isEnabled = true
 
-                    animate()
-                        .alpha(1f)
-                        .setDuration(150)
-                        .setListener(object: AnimatorListenerAdapter() {
-                            override fun onAnimationStart(animation: Animator?) {
-                                visibility = View.VISIBLE
-                            }
-                        })
-                }
-                return
+                animate()
+                    .alpha(1f)
+                    .setDuration(150)
+                    .setListener(object: AnimatorListenerAdapter() {
+                        override fun onAnimationStart(animation: Animator?) {
+                            visibility = View.VISIBLE
+                        }
+                    })
             }
-
-            it.buttonEdit.apply {
+            else {
                 isEnabled = false
 
                 animate()
@@ -418,7 +411,6 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
                         }
                     })
             }
-            Log.d("Fragment", "gone")
         }
     }
 

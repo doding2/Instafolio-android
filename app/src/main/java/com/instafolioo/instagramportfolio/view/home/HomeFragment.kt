@@ -1,9 +1,11 @@
 package com.instafolioo.instagramportfolio.view.home
 
+import android.Manifest
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.app.Activity.RESULT_OK
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -17,6 +19,7 @@ import android.view.animation.Animation
 import android.widget.FrameLayout
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -103,6 +106,7 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         homeViewModel.resultSlides.observe(viewLifecycleOwner) {
             if (it != null) {
                 showTooltip()
+                checkInternetPermission()
             }
 
             binding.textNoResultSlide.visibility =
@@ -272,6 +276,31 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         }
 
         return binding.root
+    }
+
+    // 퍼미션 런처
+    private val permissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (!isGranted) {
+            showMessageDialog(
+                title = "권한요청",
+                message = "인터넷 권한을 수락해주세요",
+                onDismiss = requireActivity()::finish
+            )
+        }
+    }
+
+    private fun checkInternetPermission() {
+        val pi = requireActivity().packageManager.getPackageInfo(requireActivity().packageName, 0)
+        val versionCode = pi.longVersionCode
+
+        if (versionCode < 4) {
+            val isGranted = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.INTERNET)
+            if (isGranted != PackageManager.PERMISSION_GRANTED) {
+                permissionLauncher.launch(Manifest.permission.INTERNET)
+            }
+        }
     }
 
     // 앱 처음 실행이면 툴팁 보이기

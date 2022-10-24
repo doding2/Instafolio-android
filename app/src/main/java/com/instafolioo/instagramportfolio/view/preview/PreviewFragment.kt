@@ -655,7 +655,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                 val inExternalStorage = async {
                     val externalFile = saveBitmapsAsImageInExternalStorage(
                         bitmaps,
-                        "포트폴리오 $title",
+                        "프로젝트 $title",
                         format,
                         previewViewModel.savingSlides
                     )
@@ -794,7 +794,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
                 val inExternalStorage = async {
                     val externalFile = saveBitmapsAsPdfInExternalStorage(
                         bitmaps,
-                        name = "포트폴리오 $title",
+                        name = "프로젝트 $title",
                         isSavingSlide = previewViewModel.savingSlides
                     )
 

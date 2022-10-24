@@ -195,9 +195,9 @@ fun saveBitmapsAsPdfInExternalStorage(
     isSavingSlide: MutableLiveData<MutableList<ResultSlide>>
 ): File {
     val externalStorage = if (innerDirectory == null) {
-        getExternalStorageDirWithoutInner("인스타그램 포트폴리오")
+        getExternalStorageDirWithoutInner("인스타폴리오")
     } else {
-        getExternalStorageDir("인스타그램 포트폴리오", innerDirectory)
+        getExternalStorageDir("인스타폴리오", innerDirectory)
     }
 
     val document = Document()
@@ -257,7 +257,7 @@ fun saveBitmapsAsImageInExternalStorage(
         saveBitmapInExternalStorage(bitmap, innerDirectory, "image $index", extension)
     }
 
-    return getExternalStorageDir("인스타그램 포트폴리오", innerDirectory)
+    return getExternalStorageDir("인스타폴리오", innerDirectory)
 }
 
 // 비트맵들을 이미지로 외부저장소에 저장
@@ -267,7 +267,7 @@ fun saveBitmapInExternalStorage(
     name: String,
     extension: String
 ): File {
-    val externalStorage = getExternalStorageDir("인스타그램 포트폴리오", innerDirectory)
+    val externalStorage = getExternalStorageDir("인스타폴리오", innerDirectory)
 
     var out: FileOutputStream
     var fileName = name

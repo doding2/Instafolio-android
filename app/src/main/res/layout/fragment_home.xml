@@ -193,22 +193,13 @@
                     </LinearLayout>
                 </LinearLayout>
 
-                <FrameLayout
+                <ImageView
                     android:id="@+id/button_show_sheet"
-                    android:layout_width="53dp"
-                    android:layout_height="53dp"
-                    android:layout_marginTop="5dp"
-                    android:layout_gravity="center_horizontal|top"
-                    android:background="@drawable/icon_circle">
-
-                    <!-- 40 x 40 -->
-                    <ImageView
-                        android:layout_width="35dp"
-                        android:layout_height="35dp"
-                        android:src="@drawable/icon_round_plus"
-                        android:layout_gravity="center"
-                        app:tint="@color/white"/>
-                </FrameLayout>
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_marginTop="9.5dp"
+                    android:src="@drawable/icon_show_sheet"
+                    android:layout_gravity="center_horizontal|top"/>
             </androidx.cardview.widget.CardView>
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

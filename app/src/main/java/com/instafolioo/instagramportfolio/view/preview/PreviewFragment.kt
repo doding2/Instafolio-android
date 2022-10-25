@@ -7,6 +7,7 @@ import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -93,27 +94,7 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
         binding.viewModel = previewViewModel
         binding.lifecycleOwner = this
 
-        when (requireActivity().display?.rotation) {
-            // 폰이 왼쪽으로 누움
-            Surface.ROTATION_90 -> {
-                binding.layoutRoot.setPadding(0, getStatusBarHeight(), getNaviBarHeight(), 0)
-            }
-            // 폰이 오른쪽으로 누움
-            Surface.ROTATION_270 -> {
-                binding.layoutRoot.setPadding(getNaviBarHeight(), getStatusBarHeight(), 0, 0)
-            }
-            // 그 외는 그냥 정방향으으로 처리함
-            else -> {
-                binding.layoutRoot.setPadding(0, getStatusBarHeight(), 0, getNaviBarHeight())
-            }
-        }
-
-        activity?.window?.apply {
-            WindowInsetsControllerCompat(this, binding.root).apply {
-                isAppearanceLightStatusBars = false
-                isAppearanceLightNavigationBars = false
-            }
-        }
+        setRootPadding()
 
         slideAdapter = PreviewSlideAdapter(previewViewModel.previewSlides.value!!)
         binding.recyclerView.adapter = slideAdapter
@@ -224,6 +205,36 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
         return binding.root
     }
 
+    private fun setRootPadding() {
+        activity?.window?.apply {
+            statusBarColor = Color.BLACK
+            navigationBarColor = Color.BLACK
+            WindowInsetsControllerCompat(this, binding.root).apply {
+                isAppearanceLightStatusBars = false
+                isAppearanceLightNavigationBars = false
+            }
+        }
+
+        if(Build.VERSION.SDK_INT < 24) {
+            binding.layoutRoot.setPadding(0, getStatusBarHeight(), 0, getNaviBarHeight())
+            return
+        }
+
+        when (requireActivity().display?.rotation) {
+            // 폰이 왼쪽으로 누움
+            Surface.ROTATION_90 -> {
+                binding.layoutRoot.setPadding(0, getStatusBarHeight(), getNaviBarHeight(), 0)
+            }
+            // 폰이 오른쪽으로 누움
+            Surface.ROTATION_270 -> {
+                binding.layoutRoot.setPadding(getNaviBarHeight(), getStatusBarHeight(), 0, 0)
+            }
+            // 그 외는 그냥 정방향으으로 처리함
+            else -> {
+                binding.layoutRoot.setPadding(0, getStatusBarHeight(), 0, getNaviBarHeight())
+            }
+        }
+    }
 
     // 광고 로딩
     private suspend fun loadAdWithCallback() = suspendCoroutine { continuation  ->

@@ -6,6 +6,7 @@ import android.animation.AnimatorListenerAdapter
 import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -70,31 +71,7 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         val analyticsFactory = FirebaseAnalyticsViewModelFactory(requireActivity())
         analyticsViewModel = ViewModelProvider(requireActivity(), analyticsFactory)[FirebaseAnalyticsViewModel::class.java]
 
-        when (requireActivity().display?.rotation) {
-            // 폰이 왼쪽으로 누움
-            Surface.ROTATION_90 -> {
-                binding.layoutRoot.setPadding(0, getStatusBarHeight(), getNaviBarHeight(), 0)
-                binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 6)
-            }
-            // 폰이 오른쪽으로 누움
-            Surface.ROTATION_270 -> {
-                binding.layoutRoot.setPadding(getNaviBarHeight(), getStatusBarHeight(), 0, 0)
-                binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 6)
-            }
-            // 그 외는 그냥 정방향으으로 처리함
-            else -> {
-                binding.layoutRoot.setPadding(0, getStatusBarHeight(), 0, getNaviBarHeight())
-                binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
-            }
-        }
-
-        requireActivity().window.apply {
-            WindowInsetsControllerCompat(this, binding.root).apply {
-                isAppearanceLightStatusBars = true
-                isAppearanceLightNavigationBars = true
-            }
-        }
-
+        setRootPadding()
 
         // 리사이클러 뷰 설정
         adapter = ResultSlideAdapter(arrayListOf(), ::onItemClick,
@@ -278,6 +255,41 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         return binding.root
     }
 
+    private fun setRootPadding() {
+        requireActivity().window.apply {
+            statusBarColor = Color.WHITE
+            navigationBarColor = Color.WHITE
+            WindowInsetsControllerCompat(this, binding.root).apply {
+                isAppearanceLightStatusBars = true
+                isAppearanceLightNavigationBars = true
+            }
+        }
+
+        if(Build.VERSION.SDK_INT < 24) {
+            binding.layoutRoot.setPadding(0, getStatusBarHeight(), 0, getNaviBarHeight())
+            binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
+            return
+        }
+
+        when (requireActivity().display?.rotation) {
+            // 폰이 왼쪽으로 누움
+            Surface.ROTATION_90 -> {
+                binding.layoutRoot.setPadding(0, getStatusBarHeight(), getNaviBarHeight(), 0)
+                binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 6)
+            }
+            // 폰이 오른쪽으로 누움
+            Surface.ROTATION_270 -> {
+                binding.layoutRoot.setPadding(getNaviBarHeight(), getStatusBarHeight(), 0, 0)
+                binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 6)
+            }
+            // 그 외는 그냥 정방향으으로 처리함
+            else -> {
+                binding.layoutRoot.setPadding(0, getStatusBarHeight(), 0, getNaviBarHeight())
+                binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
+            }
+        }
+    }
+
     // 퍼미션 런처
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -293,7 +305,9 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
 
     private fun checkInternetPermission() {
         val pi = requireActivity().packageManager.getPackageInfo(requireActivity().packageName, 0)
-        val versionCode = pi.longVersionCode
+        val versionCode = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) pi.longVersionCode else pi.versionCode.toLong()
+
+        pi.versionCode
 
         if (versionCode < 4) {
             val isGranted = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.INTERNET)

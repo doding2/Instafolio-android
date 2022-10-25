@@ -3,6 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/drawable/border_selected.xml" value="0.1515" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/drawable/border_without_left.xml" value="0.1515" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/drawable/border_without_right.xml" value="0.1515" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/drawable/dialog_button_round_gray.xml" value="0.1515" />
@@ -40,6 +41,7 @@
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/drawable/icon_person.xml" value="0.1515" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/drawable/icon_preview_text.xml" value="0.1515" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/drawable/icon_round_arrow_down.xml" value="0.1515" />
+        <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/drawable/icon_round_plus.xml" value="0.1515" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/drawable/icon_selected.xml" value="0.1515" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/drawable/icon_tooltip.xml" value="0.1515" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/drawable/indicator_circular.xml" value="0.1515" />
@@ -57,7 +59,7 @@
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/layout/dialog_confirm.xml" value="0.16909722222222223" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/layout/dialog_message.xml" value="0.16909722222222223" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/layout/dialog_select_format.xml" value="0.25364583333333335" />
-        <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/layout/fragment_home.xml" value="0.264" />
+        <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/layout/fragment_home.xml" value="0.2" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/layout/fragment_instagram_log_in.xml" value="0.25364583333333335" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/layout/fragment_instagram_upload.xml" value="0.25364583333333335" />
         <entry key="..\:/Users/drago/AndroidStudioProjects/instafolio/app/src/main/res/layout/fragment_preview.xml" value="0.2" />

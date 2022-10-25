@@ -6,6 +6,7 @@ import android.animation.AnimatorListenerAdapter
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -93,48 +94,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
         val analyticsFactory = FirebaseAnalyticsViewModelFactory(requireActivity())
         analyticsViewModel = ViewModelProvider(requireActivity(), analyticsFactory)[FirebaseAnalyticsViewModel::class.java]
 
-        // 뷰를 status bar와 navigation bar의 위치에서 떨어진 원래 위치로 복구(회전 방향에 따라 달라짐)
-        when (requireActivity().display?.rotation) {
-            // 폰이 왼쪽으로 누움
-            Surface.ROTATION_90 -> {
-                binding.layoutRoot.setPadding(0, getStatusBarHeight(), getNaviBarHeight(), 0)
-
-                // 뷰가 화면에 너무 크게 차지하지 않게 조절
-                binding.layoutRoot.post {
-                    val params = binding.layoutPreviewBackground.layoutParams
-                    params.width = (binding.layoutRoot.height / 3.0).toInt()
-                    binding.layoutPreviewBackground.layoutParams = params
-                }
-            }
-            // 폰이 오른쪽으로 누움
-            Surface.ROTATION_270 -> {
-                binding.layoutRoot.setPadding(getNaviBarHeight(), getStatusBarHeight(), 0, 0)
-
-                // 뷰가 화면에 너무 크게 차지하지 않게 조절
-                binding.layoutRoot.post {
-                    val params = binding.layoutPreviewBackground.layoutParams
-                    params.width = (binding.layoutRoot.height / 3.0).toInt()
-                    binding.layoutPreviewBackground.layoutParams = params
-                }
-            }
-            // 그 외는 그냥 정방향으으로 처리함
-            else -> {
-                binding.layoutRoot.setPadding(0, getStatusBarHeight(), 0, getNaviBarHeight())
-
-                // 정상 상태
-                val params = binding.layoutPreviewBackground.layoutParams
-                params.width = ViewGroup.LayoutParams.MATCH_PARENT
-                binding.layoutPreviewBackground.layoutParams = params
-            }
-        }
-
-        requireActivity().window.apply {
-            WindowInsetsControllerCompat(this, binding.root).apply {
-                isAppearanceLightStatusBars = false
-                isAppearanceLightNavigationBars = false
-            }
-        }
-
+        setRootPadding()
 
         // 로딩 화면 표시
         enableLoading(true)
@@ -249,6 +209,59 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
         }
 
         return binding.root
+    }
+
+    private fun setRootPadding() {
+        requireActivity().window.apply {
+            statusBarColor = Color.BLACK
+            navigationBarColor = Color.BLACK
+            WindowInsetsControllerCompat(this, binding.root).apply {
+                isAppearanceLightStatusBars = false
+                isAppearanceLightNavigationBars = false
+            }
+        }
+
+        if(Build.VERSION.SDK_INT < 24) {
+            binding.layoutRoot.setPadding(0, getStatusBarHeight(), 0, getNaviBarHeight())
+            val params = binding.layoutPreviewBackground.layoutParams
+            params.width = ViewGroup.LayoutParams.MATCH_PARENT
+            binding.layoutPreviewBackground.layoutParams = params
+            return
+        }
+
+        when (requireActivity().display?.rotation) {
+            // 폰이 왼쪽으로 누움
+            Surface.ROTATION_90 -> {
+                binding.layoutRoot.setPadding(0, getStatusBarHeight(), getNaviBarHeight(), 0)
+
+                // 뷰가 화면에 너무 크게 차지하지 않게 조절
+                binding.layoutRoot.post {
+                    val params = binding.layoutPreviewBackground.layoutParams
+                    params.width = (binding.layoutRoot.height / 3.0).toInt()
+                    binding.layoutPreviewBackground.layoutParams = params
+                }
+            }
+            // 폰이 오른쪽으로 누움
+            Surface.ROTATION_270 -> {
+                binding.layoutRoot.setPadding(getNaviBarHeight(), getStatusBarHeight(), 0, 0)
+
+                // 뷰가 화면에 너무 크게 차지하지 않게 조절
+                binding.layoutRoot.post {
+                    val params = binding.layoutPreviewBackground.layoutParams
+                    params.width = (binding.layoutRoot.height / 3.0).toInt()
+                    binding.layoutPreviewBackground.layoutParams = params
+                }
+            }
+            // 그 외는 그냥 정방향으으로 처리함
+            else -> {
+                binding.layoutRoot.setPadding(0, getStatusBarHeight(), 0, getNaviBarHeight())
+
+                // 정상 상태
+                val params = binding.layoutPreviewBackground.layoutParams
+                params.width = ViewGroup.LayoutParams.MATCH_PARENT
+                binding.layoutPreviewBackground.layoutParams = params
+            }
+        }
     }
 
     // 기존 파일을 편집할 경우

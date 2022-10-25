@@ -93,7 +93,7 @@
                 android:layout_marginBottom="63dp"
                 android:scaleType="fitXY"/>
 
-            <com.google.android.material.card.MaterialCardView
+            <androidx.cardview.widget.CardView
                 android:id="@+id/navigation_and_bottom_sheet"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -193,15 +193,13 @@
                     </LinearLayout>
                 </LinearLayout>
 
-                <androidx.cardview.widget.CardView
+                <FrameLayout
                     android:id="@+id/button_show_sheet"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:layout_marginTop="9.5dp"
+                    android:layout_width="53dp"
+                    android:layout_height="53dp"
+                    android:layout_marginTop="5dp"
                     android:layout_gravity="center_horizontal|top"
-                    app:cardCornerRadius="100dp"
-                    app:cardBackgroundColor="@color/black"
-                    app:cardElevation="0dp">
+                    android:background="@drawable/icon_circle">
 
                     <!-- 40 x 40 -->
                     <ImageView
@@ -210,8 +208,8 @@
                         android:src="@drawable/icon_round_plus"
                         android:layout_gravity="center"
                         app:tint="@color/white"/>
-                </androidx.cardview.widget.CardView>
-            </com.google.android.material.card.MaterialCardView>
+                </FrameLayout>
+            </androidx.cardview.widget.CardView>
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
         <!--    Edit Mode Bottom Sheet    -->

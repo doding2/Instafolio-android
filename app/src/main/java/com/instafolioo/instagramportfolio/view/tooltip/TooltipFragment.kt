@@ -1,5 +1,7 @@
 package com.instafolioo.instagramportfolio.view.tooltip
 
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Surface
@@ -56,10 +58,20 @@ class TooltipFragment : Fragment(), MainActivity.OnBackPressedListener {
 
     private fun setRootPadding() {
         activity?.window?.apply {
+            statusBarColor = Color.WHITE
+            navigationBarColor = Color.WHITE
             WindowInsetsControllerCompat(this, binding.root).apply {
                 isAppearanceLightStatusBars = true
                 isAppearanceLightNavigationBars = true
             }
+        }
+
+        if(Build.VERSION.SDK_INT < 24) {
+            binding.layoutRoot.setPadding(0, getStatusBarHeight(), 0, getNaviBarHeight())
+            binding.textTooltip.layoutParams = (binding.textTooltip.layoutParams as RelativeLayout.LayoutParams).apply {
+                topMargin = dpToPx(29)
+            }
+            return
         }
 
         when (requireActivity().display?.rotation) {

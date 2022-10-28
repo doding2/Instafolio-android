@@ -8,11 +8,11 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -222,7 +222,6 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
         }
 
         if(Build.VERSION.SDK_INT < 24) {
-            binding.layoutRoot.setPadding(0, getStatusBarHeight(), 0, getNaviBarHeight())
             val params = binding.layoutPreviewBackground.layoutParams
             params.width = ViewGroup.LayoutParams.MATCH_PARENT
             binding.layoutPreviewBackground.layoutParams = params
@@ -274,9 +273,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
                 adapter.replaceItems(viewModel.slides.value!!, viewModel.bindingPairs.value!!)
                 adapter.bindingPairs = viewModel.bindingPairs.value!!
 
-                Log.d(TAG, "${adapter.items.size}")
-
-                if (viewModel.enableBinding.value == true) {
+                if (viewModel.enableBinding.value == true || adapter.items[0] in adapter.bindingFlattenSlides) {
                     showFirstBindingToPreview()
                 }
 
@@ -363,6 +360,10 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
             }
 
             viewModel.bindingPairs.value = adapter.bindingPairs
+
+            if (adapter.items[0] in adapter.bindingFlattenSlides) {
+                showFirstBindingToPreview()
+            }
 
             // 로딩 끄기
             enableLoading(false)
@@ -501,11 +502,7 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
             // 두 슬라이드가 바인딩 안 되어있다면, 등록
             if (!adapter.isBindingContains(firstSlide) && !adapter.isBindingContains(secondSlide)) {
                 adapter.registerBinding(firstSlide, secondSlide)
-
-                binding.imagePreview.visibility = View.GONE
-                binding.layoutBinding.visibility = View.VISIBLE
-                binding.imageBindingPreviewFirst.setImageBitmap(firstSlide.bitmap)
-                binding.imageBindingPreviewSecond.setImageBitmap(secondSlide.bitmap)
+                setPreviewWith(firstSlide.bitmap, secondSlide.bitmap)
             }
             // 그 외는 모두 취소
             // 처음 꺼를 클릭한 거니까 그냥 취소
@@ -524,13 +521,9 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
         } else {
             // 만약 클릭한 이 슬라이드가 바인딩 된 놈일 때
             if (adapter.isBindingContains(slide)) {
-                binding.imagePreview.visibility = View.GONE
-                binding.layoutBinding.visibility = View.VISIBLE
-
                 for ((first, second) in adapter.bindingPairs) {
                     if (first == slide || second == slide) {
-                        binding.imageBindingPreviewFirst.setImageBitmap(first.bitmap)
-                        binding.imageBindingPreviewSecond.setImageBitmap(second.bitmap)
+                        setPreviewWith(first.bitmap, second.bitmap)
                         break
                     }
                 }
@@ -540,6 +533,63 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
                 binding.imagePreview.visibility = View.VISIBLE
                 binding.layoutBinding.visibility = View.GONE
                 binding.imagePreview.setImageBitmap(slide.bitmap)
+            }
+        }
+    }
+
+    // 프리뷰 화면을 바인딩된 이미지로 세팅
+    private fun setPreviewWith(firstImage: Bitmap, secondImage: Bitmap) {
+        binding.run {
+            imagePreview.visibility = View.GONE
+            layoutBinding.visibility = View.VISIBLE
+
+            val firstParams = (imageBindingPreviewFirst.layoutParams as FrameLayout.LayoutParams).apply {
+                width = FrameLayout.LayoutParams.MATCH_PARENT
+                height = FrameLayout.LayoutParams.MATCH_PARENT
+            }
+            firstParams.height = FrameLayout.LayoutParams.WRAP_CONTENT
+            imageBindingPreviewFirst.layoutParams = firstParams
+            val secondParams = (imageBindingPreviewSecond.layoutParams as FrameLayout.LayoutParams).apply {
+                width = FrameLayout.LayoutParams.MATCH_PARENT
+                height = FrameLayout.LayoutParams.MATCH_PARENT
+            }
+            imageBindingPreviewSecond.layoutParams = secondParams
+
+            imageBindingPreviewFirst.setImageBitmap(firstImage)
+            imageBindingPreviewSecond.setImageBitmap(secondImage)
+
+            // 이미지 크기 비율이 2:1일때 UI 조정
+            val firstRatio = firstImage.width.toDouble() / firstImage.height.toDouble()
+            val secondRatio = secondImage.width.toDouble() / secondImage.height.toDouble()
+            if (firstRatio < 2.0 && secondRatio < 2.0) {
+                return
+            }
+            imageBindingPreviewFirst.alpha = 0F
+            imageBindingPreviewSecond.alpha = 0F
+
+            firstParams.apply {
+                width = FrameLayout.LayoutParams.WRAP_CONTENT
+                height = FrameLayout.LayoutParams.WRAP_CONTENT
+            }
+            secondParams.apply {
+                width = FrameLayout.LayoutParams.WRAP_CONTENT
+                height = FrameLayout.LayoutParams.WRAP_CONTENT
+            }
+            imageBindingPreviewFirst.layoutParams = firstParams
+            imageBindingPreviewSecond.layoutParams = secondParams
+
+            imageBindingPreviewFirst.post {
+                val height = minOf(imageBindingPreviewFirst.height, imageBindingPreviewSecond.height)
+                val firstParams = imageBindingPreviewFirst.layoutParams as FrameLayout.LayoutParams
+                firstParams.height = height
+                imageBindingPreviewFirst.layoutParams = firstParams
+
+                val secondParams = imageBindingPreviewSecond.layoutParams as FrameLayout.LayoutParams
+                secondParams.height = height
+                imageBindingPreviewSecond.layoutParams = secondParams
+
+                binding.imageBindingPreviewFirst.alpha = 255F
+                binding.imageBindingPreviewSecond.alpha = 255F
             }
         }
     }
@@ -558,11 +608,10 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
 
     // 가장 위에 존재하는 바인딩을 프리뷰에 띄우기
     private fun showFirstBindingToPreview() {
-
-        binding.imagePreview.visibility = View.GONE
-        binding.layoutBinding.visibility = View.VISIBLE
-
         if (adapter.items.isEmpty()) return
+
+        val firstImage: Bitmap
+        val secondImage: Bitmap
 
         // 등록된 바인딩 페어가 없으면
         // 1, 2번 놈 바인딩 된 샘플 이미지 보이기
@@ -570,15 +619,16 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
             binding.imageBindingPreviewFirst.setImageResource(android.R.color.transparent)
             binding.imageBindingPreviewSecond.setImageResource(android.R.color.transparent)
 
-            binding.imageBindingPreviewFirst.setImageBitmap(adapter.items[0].bitmap)
-            binding.imageBindingPreviewSecond.setImageBitmap(adapter.items[1].bitmap)
+            firstImage = adapter.items[0].bitmap
+            secondImage = adapter.items[1].bitmap
         }
         else {
             val pair = adapter.bindingPairs.minBy { adapter.getIndexOf(it.first) + adapter.getIndexOf(it.second) }
-            binding.imageBindingPreviewFirst.setImageBitmap(pair.first.bitmap)
-            binding.imageBindingPreviewSecond.setImageBitmap(pair.second.bitmap)
+            firstImage = pair.first.bitmap
+            secondImage = pair.second.bitmap
         }
 
+        setPreviewWith(firstImage, secondImage)
     }
 
 

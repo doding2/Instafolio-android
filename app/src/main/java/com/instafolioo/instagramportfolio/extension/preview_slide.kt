@@ -18,9 +18,7 @@ import java.lang.Integer.max
 
 // 슬라이드 이미지를 오리지널로 리턴
 fun PreviewSlide.getAsOriginal(): Bitmap {
-    return bitmap.run {
-        return bitmap
-    }
+    return bitmap
 }
 
 // 슬라이드 이미지를 인스타 사이즈로 리턴

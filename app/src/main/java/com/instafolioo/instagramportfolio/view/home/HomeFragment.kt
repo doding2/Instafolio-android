@@ -266,7 +266,6 @@ class HomeFragment : Fragment(), MainActivity.OnBackPressedListener {
         }
 
         if(Build.VERSION.SDK_INT < 24) {
-            binding.layoutRoot.setPadding(0, getStatusBarHeight(), 0, getNaviBarHeight())
             binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
             return
         }

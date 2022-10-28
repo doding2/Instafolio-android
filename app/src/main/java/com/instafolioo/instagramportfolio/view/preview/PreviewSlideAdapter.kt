@@ -1,8 +1,10 @@
 package com.instafolioo.instagramportfolio.view.preview
 
 import android.content.res.Configuration
+import android.graphics.Bitmap
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -145,6 +147,7 @@ class PreviewSlideAdapter(
             // 프리뷰에 보여지는 예시와 실제 결과가 같게 하기 위해
             // 그냥 미리 합쳐버림
             binding.imagePreview.setImageBitmap(item.bitmap)
+//            setPreviewWith(item.bitmap, item.bitmapSecond)
 
             // 밑의 코드는 item_preview_slide_original_binding2.xml에 대응함
 //            // 이미지 넣기
@@ -179,6 +182,62 @@ class PreviewSlideAdapter(
 //                binding.imagePreviewSecond.scaleType = ImageView.ScaleType.FIT_CENTER
 //            }
         }
+
+////         프리뷰 화면을 바인딩된 이미지로 세팅
+//        private fun setPreviewWith(firstImage: Bitmap, secondImage: Bitmap?) {
+//            binding.run {
+//                val firstParams = (imagePreviewFirst.layoutParams as FrameLayout.LayoutParams).apply {
+//                    width = FrameLayout.LayoutParams.MATCH_PARENT
+//                    height = FrameLayout.LayoutParams.MATCH_PARENT
+//                }
+//                firstParams.height = FrameLayout.LayoutParams.WRAP_CONTENT
+//                imagePreviewFirst.layoutParams = firstParams
+//                val secondParams = (imagePreviewSecond.layoutParams as FrameLayout.LayoutParams).apply {
+//                    width = FrameLayout.LayoutParams.MATCH_PARENT
+//                    height = FrameLayout.LayoutParams.MATCH_PARENT
+//                }
+//                imagePreviewSecond.layoutParams = secondParams
+//
+//                imagePreviewFirst.setImageBitmap(firstImage)
+//                imagePreviewSecond.setImageBitmap(secondImage)
+//
+//                if (secondImage == null) return
+//
+//                // 이미지 크기 비율이 2:1일때 UI 조정
+//                val firstRatio = firstImage.width.toDouble() / firstImage.height.toDouble()
+//                val secondRatio = secondImage.width.toDouble() / secondImage.height.toDouble()
+//                if (firstRatio < 2.0 && secondRatio < 2.0) {
+//                    return
+//                }
+//                imagePreviewFirst.alpha = 0F
+//                imagePreviewSecond.alpha = 0F
+//
+//                firstParams.apply {
+//                    width = FrameLayout.LayoutParams.WRAP_CONTENT
+//                    height = FrameLayout.LayoutParams.WRAP_CONTENT
+//                }
+//                secondParams.apply {
+//                    width = FrameLayout.LayoutParams.WRAP_CONTENT
+//                    height = FrameLayout.LayoutParams.WRAP_CONTENT
+//                }
+//                imagePreviewFirst.layoutParams = firstParams
+//                imagePreviewSecond.layoutParams = secondParams
+//
+//                imagePreviewFirst.post {
+//                    val height = minOf(imagePreviewFirst.height, imagePreviewSecond.height)
+//                    val firstParams = imagePreviewFirst.layoutParams as FrameLayout.LayoutParams
+//                    firstParams.height = height
+//                    imagePreviewFirst.layoutParams = firstParams
+//
+//                    val secondParams = imagePreviewSecond.layoutParams as FrameLayout.LayoutParams
+//                    secondParams.height = height
+//                    imagePreviewSecond.layoutParams = secondParams
+//
+//                    binding.imagePreviewFirst.alpha = 255F
+//                    binding.imagePreviewSecond.alpha = 255F
+//                }
+//            }
+//        }
     }
 
     // 인스타 사이즈 바인딩 뷰홀더
@@ -187,8 +246,7 @@ class PreviewSlideAdapter(
     ): RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: PreviewSlide) {
-            binding.imagePreviewFirst.setImageBitmap(item.bitmap)
-            binding.imagePreviewSecond.setImageBitmap(item.bitmapSecond)
+            setPreviewWith(item.bitmap, item.bitmapSecond)
 
             val constraintParams = binding.layoutConstraint.layoutParams
             val previewParams = binding.layoutPreview.layoutParams
@@ -225,6 +283,62 @@ class PreviewSlideAdapter(
 
                 binding.layoutConstraint.layoutParams = constraintParams
                 binding.layoutPreview.layoutParams = previewParams
+            }
+        }
+
+        // 프리뷰 화면을 바인딩된 이미지로 세팅
+        private fun setPreviewWith(firstImage: Bitmap, secondImage: Bitmap?) {
+            binding.run {
+                val firstParams = (imagePreviewFirst.layoutParams as FrameLayout.LayoutParams).apply {
+                    width = FrameLayout.LayoutParams.MATCH_PARENT
+                    height = FrameLayout.LayoutParams.MATCH_PARENT
+                }
+                firstParams.height = FrameLayout.LayoutParams.WRAP_CONTENT
+                imagePreviewFirst.layoutParams = firstParams
+                val secondParams = (imagePreviewSecond.layoutParams as FrameLayout.LayoutParams).apply {
+                    width = FrameLayout.LayoutParams.MATCH_PARENT
+                    height = FrameLayout.LayoutParams.MATCH_PARENT
+                }
+                imagePreviewSecond.layoutParams = secondParams
+
+                imagePreviewFirst.setImageBitmap(firstImage)
+                imagePreviewSecond.setImageBitmap(secondImage)
+
+                if (secondImage == null) return
+
+                // 이미지 크기 비율이 2:1일때 UI 조정
+                val firstRatio = firstImage.width.toDouble() / firstImage.height.toDouble()
+                val secondRatio = secondImage.width.toDouble() / secondImage.height.toDouble()
+                if (firstRatio < 2.0 && secondRatio < 2.0) {
+                    return
+                }
+                imagePreviewFirst.alpha = 0F
+                imagePreviewSecond.alpha = 0F
+
+                firstParams.apply {
+                    width = FrameLayout.LayoutParams.WRAP_CONTENT
+                    height = FrameLayout.LayoutParams.WRAP_CONTENT
+                }
+                secondParams.apply {
+                    width = FrameLayout.LayoutParams.WRAP_CONTENT
+                    height = FrameLayout.LayoutParams.WRAP_CONTENT
+                }
+                imagePreviewFirst.layoutParams = firstParams
+                imagePreviewSecond.layoutParams = secondParams
+
+                imagePreviewFirst.post {
+                    val height = minOf(imagePreviewFirst.height, imagePreviewSecond.height)
+                    val firstParams = imagePreviewFirst.layoutParams as FrameLayout.LayoutParams
+                    firstParams.height = height
+                    imagePreviewFirst.layoutParams = firstParams
+
+                    val secondParams = imagePreviewSecond.layoutParams as FrameLayout.LayoutParams
+                    secondParams.height = height
+                    imagePreviewSecond.layoutParams = secondParams
+
+                    binding.imagePreviewFirst.alpha = 255F
+                    binding.imagePreviewSecond.alpha = 255F
+                }
             }
         }
     }

@@ -12,7 +12,6 @@ import android.os.ParcelFileDescriptor
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.text.TextUtils
-import android.util.Log
 import androidx.fragment.app.Fragment
 import org.apache.commons.io.IOUtils
 import java.io.*
@@ -22,26 +21,6 @@ import java.io.*
  * navigation bar를
  * 투명하게 만든 후
  * 높이 조정을 위해 필요 */
-// status bar의 높이 구하는 확장함수
-fun Fragment.getStatusBarHeight(): Int {
-    val resourceId = this.resources.getIdentifier("status_bar_height", "dimen", "android")
-
-    return if (resourceId > 0) {
-        this.resources.getDimensionPixelSize(resourceId)
-    } else {
-        0
-    }
-}
-
-// navigation bar의 높이 구하는 확장함수
-fun Fragment.getNaviBarHeight(): Int {
-    val resourceId: Int = this.resources.getIdentifier("navigation_bar_height", "dimen", "android")
-    return if (resourceId > 0) {
-        this.resources.getDimensionPixelSize(resourceId)
-    } else {
-        0
-    }
-}
 
 // dp와 px간의 변환
 fun Context.dpToPx(dp: Int): Int {
@@ -186,7 +165,6 @@ fun Fragment.pdfToBitmaps(pdfFile: File): ArrayList<Bitmap> {
 //            }
             width = page.width
             height = page.height
-            Log.d("extension", "pdf image $i  width: $width, height: $height")
 
             bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
             page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)

@@ -1,24 +1,23 @@
 package com.instafolioo.instagramportfolio.view.common
 
-import android.os.Build
 import android.os.Bundle
 import android.view.ViewTreeObserver
-import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.gms.ads.MobileAds
 import com.instafolioo.instagramportfolio.R
 import com.instafolioo.instagramportfolio.databinding.ActivityMainBinding
-import com.instafolioo.instagramportfolio.extension.getNaviBarHeight
-import com.instafolioo.instagramportfolio.extension.getStatusBarHeight
+import com.instafolioo.instagramportfolio.view.common.delegates.ActivityLayoutSpecifier
+import com.instafolioo.instagramportfolio.view.common.delegates.ActivityLayoutSpecifierDelegate
 import com.instafolioo.instagramportfolio.view.home.HomeViewModel
 import com.instafolioo.instagramportfolio.view.home.HomeViewModelFactory
 import com.instafolioo.instagramportfolio.view.preview.PreviewViewModel
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(),
+    ActivityLayoutSpecifier by ActivityLayoutSpecifierDelegate()
+{
 
     private var _binding: ActivityMainBinding? = null
     private val binding get() = _binding!!
@@ -36,12 +35,7 @@ class MainActivity : AppCompatActivity() {
         val analyticsFactory = FirebaseAnalyticsViewModelFactory(this)
         analyticsViewModel = ViewModelProvider(this, analyticsFactory)[FirebaseAnalyticsViewModel::class.java]
 
-        if(Build.VERSION.SDK_INT >= 25) {
-            window.setFlags(
-                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-            )
-        }
+        extendRootViewLayout(window)
 
         MobileAds.initialize(this)
         previewViewModel.loadAd()

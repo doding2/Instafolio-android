@@ -1,14 +1,12 @@
 package com.instafolioo.instagramportfolio.view.tooltip
 
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RelativeLayout
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -18,13 +16,16 @@ import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.instafolioo.instagramportfolio.R
 import com.instafolioo.instagramportfolio.databinding.FragmentTooltipBinding
-import com.instafolioo.instagramportfolio.extension.getNaviBarHeight
-import com.instafolioo.instagramportfolio.extension.getStatusBarHeight
 import com.instafolioo.instagramportfolio.view.common.FirebaseAnalyticsViewModel
 import com.instafolioo.instagramportfolio.view.common.FirebaseAnalyticsViewModelFactory
 import com.instafolioo.instagramportfolio.view.common.MainActivity
+import com.instafolioo.instagramportfolio.view.common.delegates.ActivityLayoutSpecifier
+import com.instafolioo.instagramportfolio.view.common.delegates.ActivityLayoutSpecifierDelegate
 
-class TooltipFragment : Fragment(), MainActivity.OnBackPressedListener {
+class TooltipFragment : Fragment(),
+    MainActivity.OnBackPressedListener,
+    ActivityLayoutSpecifier by ActivityLayoutSpecifierDelegate()
+{
 
     private var _binding: FragmentTooltipBinding? = null
     private val binding get() = _binding!!
@@ -57,41 +58,32 @@ class TooltipFragment : Fragment(), MainActivity.OnBackPressedListener {
     }
 
     private fun setRootPadding() {
-        activity?.window?.apply {
-            statusBarColor = Color.WHITE
-            navigationBarColor = Color.WHITE
-            WindowInsetsControllerCompat(this, binding.root).apply {
-                isAppearanceLightStatusBars = true
-                isAppearanceLightNavigationBars = true
-            }
-        }
-
-        if(Build.VERSION.SDK_INT < 24) {
-            binding.textTooltip.layoutParams = (binding.textTooltip.layoutParams as RelativeLayout.LayoutParams).apply {
+        binding.apply {
+            val layoutParams = textTooltip.layoutParams as RelativeLayout.LayoutParams
+            textTooltip.layoutParams = layoutParams.apply {
                 topMargin = dpToPx(29)
             }
-            return
-        }
 
-        when (requireActivity().display?.rotation) {
-            Surface.ROTATION_90 -> {
-                binding.layoutRoot.setPadding(0, getStatusBarHeight(), getNaviBarHeight(), 0)
-                binding.textTooltip.layoutParams = (binding.textTooltip.layoutParams as RelativeLayout.LayoutParams).apply {
-                    topMargin = 0
+            setStatusBarColor(activity, root, Color.WHITE, true)
+            setNavigationBarColor(activity, root, Color.WHITE, true)
+            setOrientationActions(
+                activity = activity,
+                onPortrait = {
+                    layoutRoot.setPadding(0, getStatusBarHeight(), 0, getNavigationBarHeight())
+                },
+                onLeftLandscape = {
+                    layoutRoot.setPadding(0, getStatusBarHeight(), getNavigationBarHeight(), 0)
+                    textTooltip.layoutParams = layoutParams.apply {
+                        topMargin = 0
+                    }
+                },
+                onRightLandscape = {
+                    layoutRoot.setPadding(getNavigationBarHeight(), getStatusBarHeight(), 0, 0)
+                    textTooltip.layoutParams = layoutParams.apply {
+                        topMargin = 0
+                    }
                 }
-            }
-            Surface.ROTATION_270 -> {
-                binding.layoutRoot.setPadding(getNaviBarHeight(), getStatusBarHeight(), 0, 0)
-                binding.textTooltip.layoutParams = (binding.textTooltip.layoutParams as RelativeLayout.LayoutParams).apply {
-                    topMargin = 0
-                }
-            }
-            else -> {
-                binding.layoutRoot.setPadding(0, getStatusBarHeight(), 0, getNaviBarHeight())
-                binding.textTooltip.layoutParams = (binding.textTooltip.layoutParams as RelativeLayout.LayoutParams).apply {
-                    topMargin = dpToPx(29)
-                }
-            }
+            )
         }
     }
 

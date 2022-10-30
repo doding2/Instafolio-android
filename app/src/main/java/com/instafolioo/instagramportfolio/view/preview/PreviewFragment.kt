@@ -12,12 +12,11 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RelativeLayout
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -44,6 +43,8 @@ import com.instafolioo.instagramportfolio.model.Slide
 import com.instafolioo.instagramportfolio.view.common.FirebaseAnalyticsViewModel
 import com.instafolioo.instagramportfolio.view.common.FirebaseAnalyticsViewModelFactory
 import com.instafolioo.instagramportfolio.view.common.MainActivity
+import com.instafolioo.instagramportfolio.view.common.delegates.ActivityLayoutSpecifier
+import com.instafolioo.instagramportfolio.view.common.delegates.ActivityLayoutSpecifierDelegate
 import com.instafolioo.instagramportfolio.view.home.HomeViewModel
 import com.instafolioo.instagramportfolio.view.home.HomeViewModelFactory
 import com.instafolioo.instagramportfolio.view.slide.SlideViewModel
@@ -54,8 +55,10 @@ import java.util.*
 import kotlin.coroutines.suspendCoroutine
 import kotlin.math.round
 
-
-class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
+class PreviewFragment : Fragment(),
+    MainActivity.OnBackPressedListener,
+    ActivityLayoutSpecifier by ActivityLayoutSpecifierDelegate()
+{
 
     companion object {
         const val TAG = "PreviewFragment"
@@ -206,32 +209,34 @@ class PreviewFragment : Fragment(), MainActivity.OnBackPressedListener {
     }
 
     private fun setRootPadding() {
-        activity?.window?.apply {
-            statusBarColor = Color.BLACK
-            navigationBarColor = Color.BLACK
-            WindowInsetsControllerCompat(this, binding.root).apply {
-                isAppearanceLightStatusBars = false
-                isAppearanceLightNavigationBars = false
+        binding.apply {
+            val portraitMargin = context?.dpToPx(100) ?: return
+            val landscapeMargin = context!!.dpToPx(20)
+            val layoutParams = layoutCut.layoutParams as RelativeLayout.LayoutParams
+            layoutCut.layoutParams = layoutParams.apply {
+                bottomMargin = portraitMargin
             }
-        }
 
-        if(Build.VERSION.SDK_INT < 24) {
-            return
-        }
-
-        when (requireActivity().display?.rotation) {
-            // 폰이 왼쪽으로 누움
-            Surface.ROTATION_90 -> {
-                binding.layoutRoot.setPadding(0, getStatusBarHeight(), getNaviBarHeight(), 0)
-            }
-            // 폰이 오른쪽으로 누움
-            Surface.ROTATION_270 -> {
-                binding.layoutRoot.setPadding(getNaviBarHeight(), getStatusBarHeight(), 0, 0)
-            }
-            // 그 외는 그냥 정방향으으로 처리함
-            else -> {
-                binding.layoutRoot.setPadding(0, getStatusBarHeight(), 0, getNaviBarHeight())
-            }
+            setStatusBarColor(activity, root, Color.BLACK, false)
+            setNavigationBarColor(activity, root, Color.BLACK, false)
+            setOrientationActions(
+                activity = activity,
+                onPortrait = {
+                    layoutRoot.setPadding(0, getStatusBarHeight(), 0, getNavigationBarHeight())
+                },
+                onLeftLandscape = {
+                    layoutRoot.setPadding(0, getStatusBarHeight(), getNavigationBarHeight(), 0)
+                    layoutCut.layoutParams = layoutParams.apply {
+                        bottomMargin = landscapeMargin
+                    }
+                },
+                onRightLandscape = {
+                    layoutRoot.setPadding(getNavigationBarHeight(), getStatusBarHeight(), 0, 0)
+                    layoutCut.layoutParams = layoutParams.apply {
+                        bottomMargin = landscapeMargin
+                    }
+                }
+            )
         }
     }
 

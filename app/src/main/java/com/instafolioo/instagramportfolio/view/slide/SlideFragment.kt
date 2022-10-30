@@ -6,7 +6,6 @@ import android.animation.AnimatorListenerAdapter
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Surface
@@ -16,7 +15,6 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -31,13 +29,18 @@ import com.instafolioo.instagramportfolio.model.Slide
 import com.instafolioo.instagramportfolio.view.common.FirebaseAnalyticsViewModel
 import com.instafolioo.instagramportfolio.view.common.FirebaseAnalyticsViewModelFactory
 import com.instafolioo.instagramportfolio.view.common.MainActivity
+import com.instafolioo.instagramportfolio.view.common.delegates.ActivityLayoutSpecifier
+import com.instafolioo.instagramportfolio.view.common.delegates.ActivityLayoutSpecifierDelegate
 import com.instafolioo.instagramportfolio.view.home.HomeViewModel
 import com.instafolioo.instagramportfolio.view.home.HomeViewModelFactory
 import com.instafolioo.instagramportfolio.view.preview.PreviewViewModel
 import kotlinx.coroutines.*
 import java.io.File
 
-class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
+class SlideFragment : Fragment(),
+    MainActivity.OnBackPressedListener,
+    ActivityLayoutSpecifier by ActivityLayoutSpecifierDelegate()
+{
 
     companion object {
         const val TAG = "SlideFragment"
@@ -212,53 +215,33 @@ class SlideFragment : Fragment(), MainActivity.OnBackPressedListener {
     }
 
     private fun setRootPadding() {
-        requireActivity().window.apply {
-            statusBarColor = Color.BLACK
-            navigationBarColor = Color.BLACK
-            WindowInsetsControllerCompat(this, binding.root).apply {
-                isAppearanceLightStatusBars = false
-                isAppearanceLightNavigationBars = false
+        binding.apply {
+            val params = layoutPreviewBackground.layoutParams
+            layoutPreviewBackground.layoutParams = params.apply {
+                width = ViewGroup.LayoutParams.MATCH_PARENT
             }
-        }
 
-        if(Build.VERSION.SDK_INT < 24) {
-            val params = binding.layoutPreviewBackground.layoutParams
-            params.width = ViewGroup.LayoutParams.MATCH_PARENT
-            binding.layoutPreviewBackground.layoutParams = params
-            return
-        }
-
-        when (requireActivity().display?.rotation) {
-            // 폰이 왼쪽으로 누움
-            Surface.ROTATION_90 -> {
-                binding.layoutRoot.setPadding(0, getStatusBarHeight(), getNaviBarHeight(), 0)
-
-                // 뷰가 화면에 너무 크게 차지하지 않게 조절
-                binding.layoutRoot.post {
-                    val params = binding.layoutPreviewBackground.layoutParams
-                    params.width = (binding.layoutRoot.height / 3.0).toInt()
-                    binding.layoutPreviewBackground.layoutParams = params
-                }
-            }
-            // 폰이 오른쪽으로 누움
-            Surface.ROTATION_270 -> {
-                binding.layoutRoot.setPadding(getNaviBarHeight(), getStatusBarHeight(), 0, 0)
-
-                // 뷰가 화면에 너무 크게 차지하지 않게 조절
-                binding.layoutRoot.post {
-                    val params = binding.layoutPreviewBackground.layoutParams
-                    params.width = (binding.layoutRoot.height / 3.0).toInt()
-                    binding.layoutPreviewBackground.layoutParams = params
-                }
-            }
-            // 그 외는 그냥 정방향으으로 처리함
-            else -> {
-                binding.layoutRoot.setPadding(0, getStatusBarHeight(), 0, getNaviBarHeight())
-
-                // 정상 상태
-                val params = binding.layoutPreviewBackground.layoutParams
-                params.width = ViewGroup.LayoutParams.MATCH_PARENT
-                binding.layoutPreviewBackground.layoutParams = params
+            setStatusBarColor(activity, root, Color.BLACK, false)
+            setNavigationBarColor(activity, root, Color.BLACK, false)
+            layoutRoot.post {
+                setOrientationActions(
+                    activity = activity,
+                    onPortrait = {
+                        layoutRoot.setPadding(0, getStatusBarHeight(), 0, getNavigationBarHeight())
+                    },
+                    onLeftLandscape = {
+                        layoutRoot.setPadding(0, getStatusBarHeight(), getNavigationBarHeight(), 0)
+                        layoutPreviewBackground.layoutParams = params.apply {
+                            width = (layoutRoot.height / 3.0).toInt()
+                        }
+                    },
+                    onRightLandscape = {
+                        layoutRoot.setPadding(getNavigationBarHeight(), getStatusBarHeight(), 0, 0)
+                        layoutPreviewBackground.layoutParams = params.apply {
+                            width = (layoutRoot.height / 3.0).toInt()
+                        }
+                    }
+                )
             }
         }
     }

@@ -79,7 +79,7 @@ class PreviewViewModel(application: Application): AndroidViewModel(application) 
                 }
             }
 
-            RewardedAd.load(context, context.resources.getString(R.string.admob_id_rewarded_ad), adRequest, callback)
+            RewardedAd.load(context, context.resources.getString(R.string.test_admob_id_rewarded_ad), adRequest, callback)
         }
     }
 

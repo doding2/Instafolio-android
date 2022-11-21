@@ -30,7 +30,7 @@ class ActivityLayoutSpecifierDelegate : ActivityLayoutSpecifier {
         }
     }
 
-    // activity의 view가 status와 navigation의 영역을 침범하도록 확장
+    /* activity의 view가 status와 navigation의 영역을 침범하도록 확장 */
     override fun extendRootViewLayout(window: Window?) {
         if (Build.VERSION.SDK_INT < 25) return
 

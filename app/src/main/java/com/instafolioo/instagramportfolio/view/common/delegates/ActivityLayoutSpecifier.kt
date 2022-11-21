@@ -15,6 +15,7 @@ interface ActivityLayoutSpecifier {
 
     fun getNavigationBarHeight(): Int
 
+    /* activity의 view가 status와 navigation의 영역을 침범하도록 확장 */
     fun extendRootViewLayout(window: Window?)
 
     fun setOrientationActions(

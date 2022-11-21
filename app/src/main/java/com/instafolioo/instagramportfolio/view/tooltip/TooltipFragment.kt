@@ -1,6 +1,7 @@
 package com.instafolioo.instagramportfolio.view.tooltip
 
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Surface
@@ -31,8 +32,6 @@ class TooltipFragment : Fragment(),
     private val binding get() = _binding!!
 
     private lateinit var tooltipTexts: ArrayList<String>
-
-
     private lateinit var analyticsViewModel: FirebaseAnalyticsViewModel
 
     override fun onCreateView(
@@ -133,6 +132,8 @@ class TooltipFragment : Fragment(),
     }
 
     private fun adjustScreen() {
+        if (Build.VERSION.SDK_INT < 24) return
+
         binding.recyclerView.apply {
             post {
                 val position = (layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
@@ -146,8 +147,9 @@ class TooltipFragment : Fragment(),
                         scrollIndicator.height + it.height
                     }
 
+                    val orientation = activity?.display?.rotation ?: return@post
                     var margin = height - upperHeight - lowerHeight
-                    margin = when (requireActivity().display?.rotation) {
+                    margin = when (orientation) {
                         Surface.ROTATION_90, Surface.ROTATION_270 ->
                             if (margin <= 10) dpToPx(10) else margin
                         else -> margin

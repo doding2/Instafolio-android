@@ -15,13 +15,13 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.instafolio.instagramportfolio.R
+import com.instafolio.instagramportfolio.databinding.FragmentTooltipBinding
 import com.instafolio.instagramportfolio.view.common.FirebaseAnalyticsViewModel
 import com.instafolio.instagramportfolio.view.common.FirebaseAnalyticsViewModelFactory
 import com.instafolio.instagramportfolio.view.common.MainActivity
 import com.instafolio.instagramportfolio.view.common.delegates.ActivityLayoutSpecifier
 import com.instafolio.instagramportfolio.view.common.delegates.ActivityLayoutSpecifierDelegate
-import com.instafolio.instagramportfolio.R
-import com.instafolio.instagramportfolio.databinding.FragmentTooltipBinding
 
 class TooltipFragment : Fragment(),
     MainActivity.OnBackPressedListener,
@@ -147,7 +147,11 @@ class TooltipFragment : Fragment(),
                         scrollIndicator.height + it.height
                     }
 
-                    val orientation = activity?.display?.rotation ?: return@post
+                    val orientation = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        activity?.display?.rotation
+                    } else {
+                        return@post
+                    }
                     var margin = height - upperHeight - lowerHeight
                     margin = when (orientation) {
                         Surface.ROTATION_90, Surface.ROTATION_270 ->

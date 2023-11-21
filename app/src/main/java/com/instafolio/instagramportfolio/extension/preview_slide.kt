@@ -13,7 +13,11 @@ import com.instafolio.instagramportfolio.model.ResultSlide
 import com.itextpdf.text.Document
 import com.itextpdf.text.Image
 import com.itextpdf.text.pdf.PdfWriter
-import java.io.*
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
+import java.io.ObjectOutputStream
 import java.lang.Integer.max
 
 // 슬라이드 이미지를 오리지널로 리턴

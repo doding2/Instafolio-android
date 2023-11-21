@@ -336,8 +336,8 @@ class PreviewSlideAdapter(
                     secondParams.height = height
                     imagePreviewSecond.layoutParams = secondParams
 
-                    binding.imagePreviewFirst.alpha = 255F
-                    binding.imagePreviewSecond.alpha = 255F
+                    binding.imagePreviewFirst.alpha = 1F
+                    binding.imagePreviewSecond.alpha = 1F
                 }
             }
         }

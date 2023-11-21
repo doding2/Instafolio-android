@@ -32,7 +32,20 @@ import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import com.instafolioo.instagramportfolio.R
 import com.instafolioo.instagramportfolio.databinding.FragmentPreviewBinding
-import com.instafolioo.instagramportfolio.extension.*
+import com.instafolioo.instagramportfolio.extension.bindSlide
+import com.instafolioo.instagramportfolio.extension.deleteCache
+import com.instafolioo.instagramportfolio.extension.dpToPx
+import com.instafolioo.instagramportfolio.extension.getAsInstarSize
+import com.instafolioo.instagramportfolio.extension.getAsInstarSizeBinding
+import com.instafolioo.instagramportfolio.extension.getAsOriginal
+import com.instafolioo.instagramportfolio.extension.getAsOriginalBinding
+import com.instafolioo.instagramportfolio.extension.getResized
+import com.instafolioo.instagramportfolio.extension.saveBitmapsAsImageInExternalStorage
+import com.instafolioo.instagramportfolio.extension.saveBitmapsAsPdfInExternalStorage
+import com.instafolioo.instagramportfolio.extension.saveOriginalSlidesWithState
+import com.instafolioo.instagramportfolio.extension.showConfirmDialog
+import com.instafolioo.instagramportfolio.extension.showMessageDialog
+import com.instafolioo.instagramportfolio.extension.showSelectFormatDialog
 import com.instafolioo.instagramportfolio.model.PreviewSlide
 import com.instafolioo.instagramportfolio.model.PreviewSlide.Companion.INSTAR_SIZE
 import com.instafolioo.instagramportfolio.model.PreviewSlide.Companion.INSTAR_SIZE_BINDING
@@ -48,10 +61,15 @@ import com.instafolioo.instagramportfolio.view.common.delegates.ActivityLayoutSp
 import com.instafolioo.instagramportfolio.view.home.HomeViewModel
 import com.instafolioo.instagramportfolio.view.home.HomeViewModelFactory
 import com.instafolioo.instagramportfolio.view.slide.SlideViewModel
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Locale
 import kotlin.coroutines.suspendCoroutine
 import kotlin.math.round
 
@@ -270,7 +288,7 @@ class PreviewFragment : Fragment(),
                 .alpha(alpha)
                 .setDuration(duration1)
                 .setListener(object: AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator?) {
+                    override fun onAnimationEnd(animation: Animator) {
                         _binding?.layoutLoading?.root?.setVisibility(visibility)
                     }
                 })
@@ -283,7 +301,7 @@ class PreviewFragment : Fragment(),
                 .alpha(alphaR)
                 .setDuration(duration1)
                 .setListener(object: AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator?) {
+                    override fun onAnimationEnd(animation: Animator) {
                         _binding?.recyclerView?.setVisibility(visibilityR)
                     }
                 })
@@ -294,7 +312,7 @@ class PreviewFragment : Fragment(),
             .alpha(alphaR)
             .setDuration(duration1)
             .setListener(object: AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator?) {
+                override fun onAnimationEnd(animation: Animator) {
                     _binding?.recyclerViewCut?.setAlpha(alphaR)
                 }
             })
@@ -304,7 +322,7 @@ class PreviewFragment : Fragment(),
             .alpha(alphaR)
             .setDuration(duration1)
             .setListener(object: AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator?) {
+                override fun onAnimationEnd(animation: Animator) {
                     _binding?.textIndicator?.setAlpha(alphaR)
                 }
             })
@@ -314,7 +332,7 @@ class PreviewFragment : Fragment(),
             .alpha(alphaR)
             .setDuration(duration1)
             .setListener(object: AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator?) {
+                override fun onAnimationEnd(animation: Animator) {
                     _binding?.imageCurrentPageIndicator?.setAlpha(alphaR)
                 }
             })

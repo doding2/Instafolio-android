@@ -182,7 +182,7 @@ class HomeFragment : Fragment(),
                             .y(collapsed)
                             .setDuration(0)
                             .setListener(object: AnimatorListenerAdapter() {
-                                override fun onAnimationEnd(animation: Animator?) {
+                                override fun onAnimationEnd(animation: Animator) {
                                     binding.layoutEditMode.root.visibility = View.GONE
                                 }
                             })
@@ -195,7 +195,7 @@ class HomeFragment : Fragment(),
                             .y(expanded)
                             .setDuration(200)
                             .setListener(object: AnimatorListenerAdapter() {
-                                override fun onAnimationStart(animation: Animator?) {
+                                override fun onAnimationStart(animation: Animator) {
                                     binding.layoutEditMode.root.visibility = View.VISIBLE
                                 }
                             })
@@ -205,7 +205,7 @@ class HomeFragment : Fragment(),
                             .y(collapsed)
                             .setDuration(200)
                             .setListener(object: AnimatorListenerAdapter() {
-                                override fun onAnimationEnd(animation: Animator?) {
+                                override fun onAnimationEnd(animation: Animator) {
                                     binding.layoutEditMode.root.visibility = View.GONE
                                 }
                             })
@@ -251,6 +251,10 @@ class HomeFragment : Fragment(),
                     }
                 )
             }
+        }
+
+        binding.ivMenu.setOnClickListener {
+            findNavController().navigate(R.id.action_homeFragment_to_settingFragment)
         }
 
         return binding.root
@@ -300,8 +304,6 @@ class HomeFragment : Fragment(),
     private fun checkInternetPermission() {
         val pi = requireActivity().packageManager.getPackageInfo(requireActivity().packageName, 0)
         val versionCode = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) pi.longVersionCode else pi.versionCode.toLong()
-
-        pi.versionCode
 
         if (versionCode < 4) {
             val isGranted = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.INTERNET)
@@ -431,7 +433,7 @@ class HomeFragment : Fragment(),
                     .alpha(1f)
                     .setDuration(150)
                     .setListener(object: AnimatorListenerAdapter() {
-                        override fun onAnimationStart(animation: Animator?) {
+                        override fun onAnimationStart(animation: Animator) {
                             visibility = View.VISIBLE
                         }
                     })
@@ -443,7 +445,7 @@ class HomeFragment : Fragment(),
                     .alpha(0f)
                     .setDuration(150)
                     .setListener(object: AnimatorListenerAdapter() {
-                        override fun onAnimationEnd(animation: Animator?) {
+                        override fun onAnimationEnd(animation: Animator) {
                             this@apply.visibility = View.GONE
                         }
                     })

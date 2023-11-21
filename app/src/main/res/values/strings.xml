@@ -13,5 +13,8 @@
     <string name="tooltip_text_4">이미지를 길게 터치하여 순서 변경</string>
     <string name="tooltip_text_5">다양한 형식의 파일로 추출하여 저장</string>
 
+    <string name="setting_privacy_policy">개인정보처리방침</string>
+    <string name="setting_version_info">버전 정보</string>
+
     <string name="pref_settings">pref_settings</string>
 </resources>

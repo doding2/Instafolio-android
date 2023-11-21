@@ -364,7 +364,7 @@ class SlideFragment : Fragment(),
                 .alpha(alpha)
                 .setDuration(duration1)
                 .setListener(object: AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator?) {
+                    override fun onAnimationEnd(animation: Animator) {
                         _binding?.layoutLoading?.root?.setVisibility(visibility)
                     }
                 })

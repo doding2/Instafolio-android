@@ -24,6 +24,13 @@
             app:exitAnim="@anim/do_nothing"
             app:popEnterAnim="@anim/do_nothing"
             app:popExitAnim="@anim/translate_down_exit" />
+        <action
+            android:id="@+id/action_homeFragment_to_settingFragment"
+            app:destination="@id/settingFragment"
+            app:enterAnim="@anim/translate_up_enter"
+            app:exitAnim="@anim/do_nothing"
+            app:popEnterAnim="@anim/do_nothing"
+            app:popExitAnim="@anim/translate_down_exit" />
     </fragment>
     <fragment
         android:id="@+id/slideFragment"
@@ -65,4 +72,9 @@
         android:name="com.instafolioo.instagramportfolio.view.tooltip.TooltipFragment"
         android:label="TooltipFragment"
         tools:layout="@layout/fragment_tooltip" />
+    <fragment
+        android:id="@+id/settingFragment"
+        android:name="com.instafolioo.instagramportfolio.view.setting.SettingFragment"
+        android:label="fragment_setting"
+        tools:layout="@layout/fragment_setting" />
 </navigation>

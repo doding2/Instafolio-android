@@ -34,7 +34,7 @@
                  android:resource="@xml/provider_paths"/>
          </provider>
         <activity
-            android:name="com.instafolioo.instagramportfolio.view.common.MainActivity"
+            android:name="com.instafolio.instagramportfolio.view.common.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

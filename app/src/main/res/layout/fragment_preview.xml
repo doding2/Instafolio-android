@@ -6,7 +6,7 @@
     <data>
         <variable
             name="viewModel"
-            type="com.instafolioo.instagramportfolio.view.preview.PreviewViewModel" />
+            type="com.instafolio.instagramportfolio.view.preview.PreviewViewModel" />
     </data>
 
     <FrameLayout

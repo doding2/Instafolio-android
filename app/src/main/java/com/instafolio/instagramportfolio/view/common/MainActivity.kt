@@ -1,0 +1,82 @@
+package com.instafolio.instagramportfolio.view.common
+
+import android.os.Bundle
+import android.view.ViewTreeObserver
+import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProvider
+import com.google.android.gms.ads.MobileAds
+import com.instafolio.instagramportfolio.R
+import com.instafolio.instagramportfolio.view.common.delegates.ActivityLayoutSpecifier
+import com.instafolio.instagramportfolio.view.common.delegates.ActivityLayoutSpecifierDelegate
+import com.instafolio.instagramportfolio.view.home.HomeViewModel
+import com.instafolio.instagramportfolio.view.home.HomeViewModelFactory
+import com.instafolio.instagramportfolio.view.preview.PreviewViewModel
+import com.instafolio.instagramportfolio.databinding.ActivityMainBinding
+
+
+class MainActivity : AppCompatActivity(),
+    ActivityLayoutSpecifier by ActivityLayoutSpecifierDelegate()
+{
+
+    private var _binding: ActivityMainBinding? = null
+    private val binding get() = _binding!!
+
+    private lateinit var homeViewModel: HomeViewModel
+    private lateinit var previewViewModel: PreviewViewModel
+    private lateinit var analyticsViewModel: FirebaseAnalyticsViewModel
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        _binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        val factory = HomeViewModelFactory(this)
+        homeViewModel = ViewModelProvider(this, factory)[HomeViewModel::class.java]
+        previewViewModel = ViewModelProvider(this)[PreviewViewModel::class.java]
+        val analyticsFactory = FirebaseAnalyticsViewModelFactory(this)
+        analyticsViewModel = ViewModelProvider(this, analyticsFactory)[FirebaseAnalyticsViewModel::class.java]
+
+        extendRootViewLayout(window)
+
+        MobileAds.initialize(this)
+        previewViewModel.loadAd()
+
+        // splash screen 동안 result slides 로딩
+        binding.layoutRoot.viewTreeObserver.addOnPreDrawListener(
+            object: ViewTreeObserver.OnPreDrawListener {
+                override fun onPreDraw(): Boolean {
+                    return if (homeViewModel.isReady) {
+                        binding.layoutRoot.viewTreeObserver.removeOnPreDrawListener(this)
+                        true
+                    } else {
+                        false
+                    }
+                }
+
+            }
+        )
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
+    }
+
+    // 프래그먼트들에서 onBackPressed()를 지원하기 위한 인터페이스
+    interface OnBackPressedListener {
+        fun onBackPressed()
+    }
+
+    override fun onBackPressed() {
+        val fragmentList = supportFragmentManager.fragments.toMutableList()
+        fragmentList += fragmentList[0].childFragmentManager.fragments
+
+        for (fragment in fragmentList) {
+            if (fragment is OnBackPressedListener) {
+                fragment.onBackPressed()
+                return
+            }
+        }
+
+        super.onBackPressed()
+    }
+}

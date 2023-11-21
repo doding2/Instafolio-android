@@ -1,0 +1,462 @@
+package com.instafolio.instagramportfolio.extension
+
+import android.content.Context
+import android.content.ContextWrapper
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.os.Build
+import android.os.Environment
+import androidx.lifecycle.MutableLiveData
+import com.instafolio.instagramportfolio.model.PreviewSlide
+import com.instafolio.instagramportfolio.model.ResultSlide
+import com.itextpdf.text.Document
+import com.itextpdf.text.Image
+import com.itextpdf.text.pdf.PdfWriter
+import java.io.*
+import java.lang.Integer.max
+
+// 슬라이드 이미지를 오리지널로 리턴
+fun PreviewSlide.getAsOriginal(): Bitmap {
+    return bitmap
+}
+
+// 슬라이드 이미지를 인스타 사이즈로 리턴
+fun PreviewSlide.getAsInstarSize(): Bitmap {
+    return setSlideInstarSize(bitmap)
+}
+
+// 서로 바인딩된 슬라이드 이미지 둘을 오리지널로 리턴
+fun PreviewSlide.getAsOriginalBinding(): Bitmap {
+    return getAsOriginal()
+}
+
+// 서로 바인딩된 슬라이드 이미지 둘을 인스타 사이즈로 리턴
+fun PreviewSlide.getAsInstarSizeBinding(): Bitmap {
+    val bindedBitmap = bindSlide(bitmap, bitmapSecond!!)
+    return setSlideInstarSize(bindedBitmap)
+}
+
+// 유저가 수정한 상태를 원본 이미지와 함께 저장
+fun saveOriginalSlidesWithState(
+    context: Context,
+    bitmaps: List<Bitmap>,
+    isInstarSize: Boolean,
+    bindingIndices: List<Pair<Int, Int>>,
+    directory: String,
+    innerDirectory: String,
+    extension: String,
+    isSavingSlide: MutableLiveData<MutableList<ResultSlide>>
+) {
+    // state 저장
+    saveState(context, isInstarSize, bindingIndices, directory, innerDirectory)
+    
+    // 비트맵 저장
+    bitmaps.forEachIndexed { index, bitmap ->
+        // 유저가 저장 도중에 나갈때
+        if (isSavingSlide.value.isNullOrEmpty()) return@forEachIndexed
+
+        saveBitmap(context, bitmap, directory, innerDirectory, "$index", extension)
+    }
+}
+
+// 프리뷰 이미지를 그대로 저장
+fun savePreviewSlides(
+    context: Context,
+    bitmaps: List<Bitmap>,
+    directory: String,
+    innerDirectory: String,
+    extension: String,
+    isSavingSlide: MutableLiveData<ResultSlide>
+): List<File> {
+    // 파일 리스트
+    val files = arrayListOf<File>()
+
+    // 비트맵 저장
+    bitmaps.forEachIndexed { index, bitmap ->
+        // 유저가 저장 도중에 나갈때
+        isSavingSlide.value ?: return@forEachIndexed
+
+        val file = saveBitmap(context, bitmap, directory, innerDirectory, "$index", extension, true)
+        files.add(file)
+    }
+
+    return files
+}
+
+// 인자로 받은 비트맵을 이미지로 저장
+fun saveBitmap(
+    context: Context,
+    bitmap: Bitmap,
+    directory: String,
+    innerDirectory: String,
+    name: String,
+    extension: String,
+    isCache: Boolean = false
+): File {
+    val dir = if (isCache) {
+        val cw = ContextWrapper(context)
+        var cacheDir = File(cw.cacheDir, directory)
+        cacheDir = File(cacheDir, innerDirectory)
+        cacheDir.mkdirs()
+        cacheDir
+    }
+    else {
+        val cw = ContextWrapper(context)
+        var fileDir = cw.getDir(directory, Context.MODE_PRIVATE)
+        fileDir = File(fileDir, innerDirectory)
+        fileDir.mkdirs()
+        fileDir
+    }
+
+    val imagePath = File(dir, "${name}.${extension}")
+
+    val out = FileOutputStream(imagePath)
+    if (extension == "jpg") {
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
+    } else {
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+    }
+    out.close()
+
+    return imagePath
+}
+
+// state 저장
+fun saveState(
+    context: Context,
+    isInstarSize: Boolean,
+    bindingPairs: List<Pair<Int, Int>>,
+    directory: String,
+    innerDirectory: String
+) {
+    val cw = ContextWrapper(context)
+    var cacheDir = cw.getDir(directory, Context.MODE_PRIVATE)
+    cacheDir = File(cacheDir, innerDirectory)
+    cacheDir.mkdirs()
+
+    val instarSizeState = File(cacheDir, "instar_size_state.dat")
+    val bindingState = File(cacheDir, "binding_state.dat")
+
+    // instar size 정보 저장
+    val instarSizeWriter = ObjectOutputStream(FileOutputStream(instarSizeState))
+    instarSizeWriter.writeBoolean(isInstarSize)
+    instarSizeWriter.close()
+
+    // binding 정보 저장
+    val bindingWriter = ObjectOutputStream(FileOutputStream(bindingState))
+    bindingWriter.writeObject(bindingPairs)
+    bindingWriter.close()
+}
+
+// 비트맵들을 pdf로 저장
+fun saveBitmapsAsPdf(
+    context: Context,
+    bitmaps: List<Bitmap>,
+    directory: String,
+    innerDirectory: String,
+    name: String
+) {
+    val cw = ContextWrapper(context)
+    var cacheDir = cw.getDir(directory, Context.MODE_PRIVATE)
+    cacheDir = File(cacheDir, innerDirectory)
+    cacheDir.mkdirs()
+
+    val pdfPath = File(cacheDir, "${name}.pdf")
+
+    val document = Document()
+    PdfWriter.getInstance(document, FileOutputStream(pdfPath))
+    document.open()
+
+    for (bitmap in bitmaps) {
+        val stream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+
+        val image = Image.getInstance(stream.toByteArray())
+
+        document.pageSize = image
+        document.newPage()
+
+        image.setAbsolutePosition(0f, 0f)
+        document.add(image)
+        stream.close()
+    }
+
+    document.close()
+}
+
+// 비트맵들을 pdf로 외부저장소에 저장
+fun saveBitmapsAsPdfInExternalStorage(
+    bitmaps: List<Bitmap>,
+    innerDirectory: String? = null,
+    name: String,
+    isSavingSlide: MutableLiveData<MutableList<ResultSlide>>
+): File {
+    val externalStorage = if (innerDirectory == null) {
+        getExternalStorageDirWithoutInner("인스타폴리오")
+    } else {
+        getExternalStorageDir("인스타폴리오", innerDirectory)
+    }
+
+    val document = Document()
+    var fileName = name
+    var count = 1
+
+    do {
+        try {
+            val pdfPath = File(externalStorage, "${fileName}.pdf")
+            PdfWriter.getInstance(document, FileOutputStream(pdfPath))
+            break
+        } catch (e: FileNotFoundException) {
+            fileName = "$name ($count)"
+            count++
+        }
+    } while(true)
+
+    document.open()
+
+    for (bitmap in bitmaps) {
+        // 유저가 저장 중간에 나갈때
+        if (isSavingSlide.value.isNullOrEmpty()) {
+            document.close()
+            return externalStorage
+        }
+
+        val stream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
+
+        val image = Image.getInstance(stream.toByteArray())
+
+        document.pageSize = image
+        document.newPage()
+
+        image.setAbsolutePosition(0f, 0f)
+        document.add(image)
+        stream.close()
+    }
+
+    document.close()
+
+    return externalStorage
+}
+
+// 비트맵들을 이미지로 외부저장소에 저장
+fun saveBitmapsAsImageInExternalStorage(
+    bitmaps: List<Bitmap>,
+    innerDirectory: String,
+    extension: String,
+    isSavingSlide: MutableLiveData<MutableList<ResultSlide>>
+): File {
+
+    bitmaps.forEachIndexed { index, bitmap ->
+        // 유저가 중간에 나갈때
+        if (isSavingSlide.value.isNullOrEmpty()) return@forEachIndexed
+        
+        saveBitmapInExternalStorage(bitmap, innerDirectory, "image $index", extension)
+    }
+
+    return getExternalStorageDir("인스타폴리오", innerDirectory)
+}
+
+// 비트맵들을 이미지로 외부저장소에 저장
+fun saveBitmapInExternalStorage(
+    bitmap: Bitmap,
+    innerDirectory: String,
+    name: String,
+    extension: String
+): File {
+    val externalStorage = getExternalStorageDir("인스타폴리오", innerDirectory)
+
+    var out: FileOutputStream
+    var fileName = name
+    var count = 1
+    val imagePath = File(externalStorage, "${fileName}.${extension}")
+
+    do {
+        try {
+            out = FileOutputStream(imagePath)
+            break
+        } catch (e: FileNotFoundException) {
+            fileName = "$name ($count)"
+            count++
+        }
+    } while(true)
+
+    if (extension == "jpg") {
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
+    } else {
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+    }
+    out.close()
+
+    return imagePath
+}
+
+// 외부 저장소 주소를 리턴하는 함수
+fun getExternalStorageDir(directory: String, innerDirectory: String): File {
+
+    val dir: File = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        File(
+            "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)}" +
+                    "/$directory/$innerDirectory"
+        )
+    } else {
+        File("${Environment.getExternalStorageDirectory()}/$directory/$innerDirectory")
+    }
+
+    if (!dir.exists()) {
+        dir.mkdirs()
+    }
+
+    return dir
+}
+
+// inner directory 없는 버전
+fun getExternalStorageDirWithoutInner(directory: String): File {
+    val dir: File = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        File(
+            "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)}" +
+                    "/$directory"
+        )
+    } else {
+        File("${Environment.getExternalStorageDirectory()}/$directory")
+    }
+
+    if (!dir.exists()) {
+        dir.mkdirs()
+    }
+
+    return dir
+}
+
+
+// 이미지를 인스타 사이즈로 변환하여 리턴
+fun setSlideInstarSize(
+    bitmap: Bitmap
+): Bitmap {
+    // 비트맵 크기 1080으로 변환
+    val resizedBitmap = if (bitmap.width != 1080 || bitmap.height != 1080) {
+        getResized(bitmap)
+    } else {
+        bitmap
+    }
+    // 비트맵 타입을 hardware type에서 내가 수정할 수 있도록 변경
+    val bitmapCopied = resizedBitmap.copy(Bitmap.Config.ARGB_8888, false)
+
+    val backgroundBitmap = Bitmap.createBitmap(1080, 1080, Bitmap.Config.ARGB_8888)
+
+    val canvas = Canvas(backgroundBitmap)
+    canvas.drawColor(Color.WHITE)
+    canvas.drawBitmap(
+        bitmapCopied,
+        (backgroundBitmap.width - bitmapCopied.width) / 2f,
+        (backgroundBitmap.height - bitmapCopied.height) / 2f,
+        null
+    )
+
+    return backgroundBitmap
+}
+
+// 바인딩된 비트맵을 생성하여 리턴
+fun bindSlide(
+    firstBitmap: Bitmap,
+    secondBitmap: Bitmap
+): Bitmap {
+    // 합치기 전 사이즈 조절(두 이미지의 높이가 같도록)
+    val resizedFirst = if (firstBitmap.height != 1080) {
+        getResizedForHeight(firstBitmap)
+    } else {
+        firstBitmap
+    }
+    val resizedSecond = if (secondBitmap.height != 1080) {
+        getResizedForHeight(secondBitmap)
+    } else {
+        secondBitmap
+    }
+
+    // 비트맵 타입을 hardware type에서 내가 수정할 수 있도록 변경
+    val firstBitmapCopied: Bitmap = resizedFirst.copy(Bitmap.Config.ARGB_8888, false)
+    val secondBitmapCopied: Bitmap = resizedSecond.copy(Bitmap.Config.ARGB_8888, false)
+
+    val width: Int = max(firstBitmapCopied.width, secondBitmapCopied.width)
+    val height: Int = firstBitmapCopied.height + secondBitmapCopied.height
+
+    val backgroundBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+
+    val canvas = Canvas(backgroundBitmap)
+    canvas.drawBitmap(firstBitmapCopied, (width - firstBitmapCopied.width) / 2f, 0f, null)
+    canvas.drawBitmap(secondBitmapCopied, (width - secondBitmapCopied.width) / 2f, firstBitmapCopied.height.toFloat(), null)
+
+    return backgroundBitmap
+}
+
+// 인스타그램에 업로드 하려면 1대1 비율이어야 됨
+fun Bitmap.setInstagramRatio(): Bitmap {
+    // 비트맵 크기 1080으로 변환
+    val resizedBitmap = if (this.width != 1080 || this.height != 1080) {
+        getResized(this)
+    } else {
+        this
+    }
+    // 비트맵 타입을 hardware type에서 내가 수정할 수 있도록 변경
+    val bitmapCopied = resizedBitmap.copy(Bitmap.Config.ARGB_8888, false)
+
+    val backgroundBitmap = Bitmap.createBitmap(1080, 1080, Bitmap.Config.ARGB_8888)
+
+    val canvas = Canvas(backgroundBitmap)
+    canvas.drawColor(Color.TRANSPARENT)
+    canvas.drawBitmap(
+        bitmapCopied,
+        (backgroundBitmap.width - bitmapCopied.width) / 2f,
+        (backgroundBitmap.height - bitmapCopied.height) / 2f,
+        null
+    )
+
+    return backgroundBitmap
+}
+
+// 이미지의 높이를 무조건 1080으로 맞추고
+// 너비는 그에 비례하여 키움
+fun getResizedForHeight(
+    bitmap: Bitmap,
+    maxHeight: Int = 1080,
+): Bitmap {
+    var image = bitmap
+    if (maxHeight > 0) {
+        val width = image.width
+        val height = image.height
+        val ratioBitmap = width.toFloat() / height.toFloat()
+
+        val finalWidth = (maxHeight.toFloat() * ratioBitmap).toInt()
+        val finalHeight = maxHeight
+        image = Bitmap.createScaledBitmap(image, finalWidth, finalHeight, true)
+    }
+
+    return image
+}
+
+// 인자로 전달된 비트맵을 리사이징해서 반환하는 함수
+fun getResized(
+    bitmap: Bitmap,
+    maxWidth: Int = 1080,
+    maxHeight: Int = 1080
+): Bitmap {
+    var image = bitmap
+    if (maxHeight > 0 && maxWidth > 0) {
+        val width = image.width
+        val height = image.height
+        val ratioBitmap = width.toFloat() / height.toFloat()
+        val ratioMax = maxWidth.toFloat() / maxHeight.toFloat()
+
+        var finalWidth = maxWidth
+        var finalHeight = maxHeight
+        if (ratioMax > ratioBitmap) {
+            finalWidth = (maxHeight.toFloat() * ratioBitmap).toInt()
+        } else {
+            finalHeight = (maxWidth.toFloat() / ratioBitmap).toInt()
+        }
+        image = Bitmap.createScaledBitmap(image, finalWidth, finalHeight, true)
+    }
+
+    return image
+}

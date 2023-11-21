@@ -9,7 +9,7 @@ android {
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.instafolioo.instagramportfolio"
+        applicationId "com.instafolio.instagramportfolio"
         minSdk 21
         targetSdk 34
         versionCode 5
@@ -35,7 +35,7 @@ android {
         viewBinding true
         dataBinding true
     }
-    namespace 'com.instafolioo.instagramportfolio'
+    namespace 'com.instafolio.instagramportfolio'
 
     // view model factory 오류 해결 코드
     kotlinOptions{

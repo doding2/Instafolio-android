@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.instafolioo.instagramportfolio.view.home.HomeFragment"
+        android:name="com.instafolio.instagramportfolio.view.home.HomeFragment"
         android:label="HomeFragment"
         tools:layout="@layout/fragment_home">
         <action
@@ -34,7 +34,7 @@
     </fragment>
     <fragment
         android:id="@+id/slideFragment"
-        android:name="com.instafolioo.instagramportfolio.view.slide.SlideFragment"
+        android:name="com.instafolio.instagramportfolio.view.slide.SlideFragment"
         android:label="SlideFragment"
         tools:layout="@layout/fragment_slide" >
         <action
@@ -54,7 +54,7 @@
     </fragment>
     <fragment
         android:id="@+id/previewFragment"
-        android:name="com.instafolioo.instagramportfolio.view.preview.PreviewFragment"
+        android:name="com.instafolio.instagramportfolio.view.preview.PreviewFragment"
         android:label="PreviewFragment"
         tools:layout="@layout/fragment_preview" >
         <action
@@ -69,12 +69,12 @@
     </fragment>
     <fragment
         android:id="@+id/tooltipFragment"
-        android:name="com.instafolioo.instagramportfolio.view.tooltip.TooltipFragment"
+        android:name="com.instafolio.instagramportfolio.view.tooltip.TooltipFragment"
         android:label="TooltipFragment"
         tools:layout="@layout/fragment_tooltip" />
     <fragment
         android:id="@+id/settingFragment"
-        android:name="com.instafolioo.instagramportfolio.view.setting.SettingFragment"
+        android:name="com.instafolio.instagramportfolio.view.setting.SettingFragment"
         android:label="fragment_setting"
         tools:layout="@layout/fragment_setting" />
 </navigation>

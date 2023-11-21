@@ -1,0 +1,56 @@
+package com.instafolio.instagramportfolio.view.slide
+
+import android.net.Uri
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import com.instafolio.instagramportfolio.model.ResultSlide
+import com.instafolio.instagramportfolio.model.Slide
+
+class SlideViewModel: ViewModel() {
+    // 기존 파일을 편집할 경우
+    val resultSlideWithExtension = MutableLiveData<MutableList<Pair<ResultSlide, String>>>().apply {
+        value = mutableListOf()
+    }
+
+    // 새로운 파일을 열었을 경우
+    val uriWithExtension = MutableLiveData<MutableList<Pair<Uri, String>>>().apply {
+        value = mutableListOf()
+    }
+
+    val slides = MutableLiveData<MutableList<Slide>>().apply {
+        value = mutableListOf()
+    }
+
+    // 이거랑 아래거는 백업 용도로만 사용해야 됨
+    // 실제로 사용해야 하는 것은 adapter에서 관리
+    val bindingPairs = MutableLiveData<MutableList<Pair<Slide, Slide>>>().apply {
+        value = mutableListOf()
+    }
+    val bindingFlattenSlides = MutableLiveData<List<Slide>>().apply {
+        value = listOf()
+    }
+
+    val isInstarSize = MutableLiveData<Boolean>().apply {
+        value = false
+    }
+
+    val enableBinding = MutableLiveData<Boolean>().apply {
+        value = false
+    }
+
+    // 기존 파일 열었을때 아무런 수정 안해으면 뒤로가기 다이얼로그 안뜨게 하기 위해
+    val isSlideChanged = MutableLiveData<Boolean>().apply {
+        value = false
+    }
+
+    fun clear() {
+        resultSlideWithExtension.value = mutableListOf()
+        uriWithExtension.value = mutableListOf()
+        slides.value = mutableListOf()
+        bindingPairs.value = mutableListOf()
+        bindingFlattenSlides.value = listOf()
+        isInstarSize.value = false
+        enableBinding.value = false
+        isSlideChanged.value = false
+    }
+}

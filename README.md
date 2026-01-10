@@ -19,31 +19,6 @@ PDF 기반 포트폴리오 작업물을 인스타그램에 업로드하는 과�
 
 ---
 
-## 🛠️ Tech Stack
-
-| **Category** | **Tech Stack** |
-| --- | --- |
-| **Language** | ![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white) |
-| **Platform** | ![Android](https://img.shields.io/badge/Native%20Android-3DDC84?style=for-the-badge&logo=android&logoColor=white) |
-| **Architecture** | ![MVVM](https://img.shields.io/badge/MVVM-4CAF50?style=for-the-badge) |
-| **Async & State** | ![Coroutines](https://img.shields.io/badge/Coroutines-0095D5?style=for-the-badge), ![LiveData](https://img.shields.io/badge/LiveData-00C853?style=for-the-badge) |
-| **Local Data** | ![Room](https://img.shields.io/badge/Room-4285F4?style=for-the-badge) |
-| **Jetpack** | ![ViewModel](https://img.shields.io/badge/ViewModel-795548?style=for-the-badge), ![Navigation](https://img.shields.io/badge/Navigation-673AB7?style=for-the-badge), ![ViewBinding](https://img.shields.io/badge/ViewBinding-009688?style=for-the-badge) |
-
----
-
-## 🧱 Architecture & Design
-
-![Architecture Diagram](image/architecture_diagram.png)
-
-화면 로직(UI)과 비즈니스 로직(데이터 처리)을 명확하게 분리하기 위해 MVVM 패턴을 적용했습니다. 각 계층은 다음과 같은 명확한 책임을 가집니다.
-
-- View (UI): 사용자에게 보여지는 UI를 담당하며, 모든 사용자 이벤트(버튼 클릭, 목록 선택 등)를 ViewModel로 전달하는 역할만 수행합니다. 데이터가 어떻게 변경되고 저장되는지에 대해서는 관여하지 않습니다.
-- ViewModel: 화면에 필요한 데이터를 LiveData 형태로 소유하고, UI 상태(예: 편집 모드 여부, 선택된 아이템 목록)를 관리합니다. View로부터 이벤트를 전달받으면, 필요한 비즈니스 로직을 수행한 후 Model 계층에 데이터 처리를 요청합니다.
-- Model (Repository, Room Database): 애플리케이션의 데이터를 책임지는 계층입니다. Repository는 데이터 입출력을 총괄하고, Room Database는 데이터를 기기 내에 영구적으로 저장합니다.
-
----
-
 ## ✨ Key Features
 
 - PDF / PNG / JPG 형식의 파일 불러오기 및 저장 지원
@@ -105,6 +80,31 @@ PDF 기반 포트폴리오 작업물을 인스타그램에 업로드하는 과�
 **배운 점**
 - ViewModel은 UI 상태 관리에 집중해야 함
 - 대용량 데이터는 별도 저장소를 활용하는 것이 바람직함
+
+---
+
+## 🧱 Architecture & Design
+
+![Architecture Diagram](image/architecture_diagram.png)
+
+화면 로직(UI)과 비즈니스 로직(데이터 처리)을 명확하게 분리하기 위해 MVVM 패턴을 적용했습니다. 각 계층은 다음과 같은 명확한 책임을 가집니다.
+
+- View (UI): 사용자에게 보여지는 UI를 담당하며, 모든 사용자 이벤트(버튼 클릭, 목록 선택 등)를 ViewModel로 전달하는 역할만 수행합니다. 데이터가 어떻게 변경되고 저장되는지에 대해서는 관여하지 않습니다.
+- ViewModel: 화면에 필요한 데이터를 LiveData 형태로 소유하고, UI 상태(예: 편집 모드 여부, 선택된 아이템 목록)를 관리합니다. View로부터 이벤트를 전달받으면, 필요한 비즈니스 로직을 수행한 후 Model 계층에 데이터 처리를 요청합니다.
+- Model (Repository, Room Database): 애플리케이션의 데이터를 책임지는 계층입니다. Repository는 데이터 입출력을 총괄하고, Room Database는 데이터를 기기 내에 영구적으로 저장합니다.
+- 
+---
+
+## 🛠️ Tech Stack
+
+| **Category** | **Tech Stack** |
+| --- | --- |
+| **Language** | ![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white) |
+| **Platform** | ![Android](https://img.shields.io/badge/Native%20Android-3DDC84?style=for-the-badge&logo=android&logoColor=white) |
+| **Architecture** | ![MVVM](https://img.shields.io/badge/MVVM-4CAF50?style=for-the-badge) |
+| **Async & State** | ![Coroutines](https://img.shields.io/badge/Coroutines-0095D5?style=for-the-badge), ![LiveData](https://img.shields.io/badge/LiveData-00C853?style=for-the-badge) |
+| **Local Data** | ![Room](https://img.shields.io/badge/Room-4285F4?style=for-the-badge) |
+| **Jetpack** | ![ViewModel](https://img.shields.io/badge/ViewModel-795548?style=for-the-badge), ![Navigation](https://img.shields.io/badge/Navigation-673AB7?style=for-the-badge), ![ViewBinding](https://img.shields.io/badge/ViewBinding-009688?style=for-the-badge) |
 
 ---
 

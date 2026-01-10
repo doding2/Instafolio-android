@@ -19,26 +19,16 @@ PDF 기반 포트폴리오 작업물을 인스타그램에 업로드하는 과�
 
 ---
 
-## 🛠 Tech Stack
+## 🛠️ Tech Stack
 
-### Language & Platform
-- Kotlin
-- Native Android
-
-### Architecture
-- MVVM
-
-### Async & State
-- Kotlin Coroutines
-- LiveData
-
-### Local Data
-- Room Database
-
-### Android Jetpack
-- ViewModel
-- Navigation Component
-- ViewBinding
+| **Category** | **Tech Stack** |
+| --- | --- |
+| **Language** | ![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white) |
+| **Platform** | ![Android](https://img.shields.io/badge/Native%20Android-3DDC84?style=for-the-badge&logo=android&logoColor=white) |
+| **Architecture** | ![MVVM](https://img.shields.io/badge/MVVM-4CAF50?style=for-the-badge) |
+| **Async & State** | ![Coroutines](https://img.shields.io/badge/Coroutines-0095D5?style=for-the-badge), ![LiveData](https://img.shields.io/badge/LiveData-00C853?style=for-the-badge) |
+| **Local Data** | ![Room](https://img.shields.io/badge/Room-4285F4?style=for-the-badge) |
+| **Jetpack** | ![ViewModel](https://img.shields.io/badge/ViewModel-795548?style=for-the-badge), ![Navigation](https://img.shields.io/badge/Navigation-673AB7?style=for-the-badge), ![ViewBinding](https://img.shields.io/badge/ViewBinding-009688?style=for-the-badge) |
 
 ---
 

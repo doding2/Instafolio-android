@@ -17,5 +17,5 @@ interface ResultSlideDAO {
     suspend fun getResultSlide(id: Long): ResultSlide
 
     @Query("SELECT * FROM ResultSlideTable")
-    fun getAllResultSlides(): LiveData<MutableList<ResultSlide>>
+    fun getAllResultSlides(): List<ResultSlide>
 }

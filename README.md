@@ -85,7 +85,7 @@ PDF 기반 포트폴리오 작업물을 인스타그램에 업로드하는 과�
 
 ## 🧱 Architecture & Design
 
-![Architecture Diagram](image/architecture_diagram.png)
+![Architecture Diagram](image/Instafolio_Architecture_Diagram.png)
 
 화면 로직(UI)과 비즈니스 로직(데이터 처리)을 명확하게 분리하기 위해 MVVM 패턴을 적용했습니다. 각 계층은 다음과 같은 명확한 책임을 가집니다.
 

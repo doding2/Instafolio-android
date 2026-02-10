@@ -17,7 +17,9 @@ class HomeViewModel(context: Context): ViewModel() {
 
     private val repository = ResultSlideRepository(ResultSlideDatabase(context).resultSlideDAO)
 
-    val resultSlides: LiveData<MutableList<ResultSlide>> = repository.resultSlides
+    val resultSlides = MutableLiveData<MutableList<ResultSlide>>().apply {
+        value = repository.getAll().toMutableList()
+    }
 
     // 편집모드인지 아닌지 저장
     val isEditMode = MutableLiveData<Boolean>().apply {

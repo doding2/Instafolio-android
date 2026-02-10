@@ -5,7 +5,9 @@ import com.instafolio.instagramportfolio.model.ResultSlide
 
 class ResultSlideRepository(private val dao: ResultSlideDAO) {
 
-    val resultSlides = dao.getAllResultSlides()
+    suspend fun getAll(): List<ResultSlide> {
+        return dao.getAllResultSlides()
+    }
 
     suspend fun add(resultSlide: ResultSlide): Long {
         return dao.insertResultSlide(resultSlide)

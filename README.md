@@ -1,7 +1,5 @@
 ## 📌 소개
 
----
-
 ![Instafolio_Introduce](image/instafolio_introduce.png)
 
 많은 광고 업계 학생 및 취업 준비생들이
@@ -10,9 +8,9 @@ PDF 기반 포트폴리오 작업물을 인스타그램에 업로드하는 과�
 
 인스타폴리오는 **가장 쉽고 빠르게 인스타그램 포트폴리오를 만드는 앱** 입니다.
 
-## ✨ 핵심 기능
+<br>
 
----
+## ✨ 핵심 기능
 
 <p style="text-align: center;">
   <img src="image/instafolio_tooltip_1.png" width="30%"/>
@@ -31,15 +29,15 @@ PDF 기반 포트폴리오 작업물을 인스타그램에 업로드하는 과�
 - Drag & Drop으로 페이지 순서 편집
 - 최근 저장한 작업 재편집
 
-## 👤 담당 역할
+<br>
 
----
+## 👤 담당 역할
 
 - Android 개발자로서 앱 아키텍쳐 설계 및 기능 구현 담당
 
-## **🔧 주요 개발 내용**
+<br>
 
----
+## **🔧 주요 개발 내용**
 
 ### **MVVM Architecture**
 
@@ -64,9 +62,9 @@ PDF 기반 포트폴리오 작업물을 인스타그램에 업로드하는 과�
   아이템 이동(onMove) 및 상태 변경(onItemSelected) 시의 동작을 직접 제어
 - 두 아이템이 하나로 묶인 상태에서도 함께 이동하는 기능을 구현
 
-## 🏗️ 아키텍쳐
+<br>
 
----
+## 🏗️ 아키텍쳐
 
 ![Architecture Diagram](image/instafolio_architecture_diagram.png)
 
@@ -84,9 +82,9 @@ UI 로직과 비즈니스 로직을 명확하게 분리하기 위해 MVVM 패턴
     - 애플리케이션의 비즈니스 로직을 책임지는 계층.
     - Repository는 데이터 입출력을 총괄하고 Room Database는 데이터를 기기 내에 영구적으로 저장함
 
-## 🛠️ 기술 스택
+<br>
 
----
+## 🛠️ 기술 스택
 
 | **Category** | **Tech Stack** |
 | --- | --- |
@@ -97,9 +95,9 @@ UI 로직과 비즈니스 로직을 명확하게 분리하기 위해 MVVM 패턴
 | **Local Data** | ![Room](https://img.shields.io/badge/Room-4285F4?style=for-the-badge) |
 | **Jetpack** | ![ViewModel](https://img.shields.io/badge/ViewModel-795548?style=for-the-badge), ![Navigation](https://img.shields.io/badge/Navigation-673AB7?style=for-the-badge), ![ViewBinding](https://img.shields.io/badge/ViewBinding-009688?style=for-the-badge) |
 
-## 🔗 링크
+<br>
 
----
+## 🔗 링크
 
 - **Notion**  
   https://www.notion.so/INSTAFOLIO-284f7c60382844b287a998bd3c2f6620?pvs=24

@@ -2,10 +2,8 @@
 
 ![Instafolio_Introduce](image/instafolio_introduce.png)
 
-많은 광고 업계 학생 및 취업 준비생들이
-
+📷 많은 광고 업계 학생 및 취업 준비생들이
 PDF 기반 포트폴리오 작업물을 인스타그램에 업로드하는 과정에서 불편함을 겪습니다.
-
 인스타폴리오는 **가장 쉽고 빠르게 인스타그램 포트폴리오를 만드는 앱** 입니다.
 
 <br>
@@ -13,14 +11,14 @@ PDF 기반 포트폴리오 작업물을 인스타그램에 업로드하는 과�
 ## ✨ 핵심 기능
 
 <p style="text-align: center;">
-  <img src="image/instafolio_tooltip_1.png" width="30%"/>
   <img src="image/instafolio_tooltip_2.png" width="30%"/>
   <img src="image/instafolio_tooltip_3.png" width="30%"/>
+  <img src="image/instafolio_tooltip_4.png" width="30%"/>
 </p>
 
 <p style="text-align: center;">
-  <img src="image/instafolio_tooltip_4.png" width="30%"/>
   <img src="image/instafolio_tooltip_5.png" width="30%"/>
+  <img src="image/instafolio_tooltip_1.png" width="30%"/>
 </p>
 
 - PDF / PNG / JPG 형식의 파일 저장 및 불러오기 지원

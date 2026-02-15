@@ -1,10 +1,8 @@
 # 인스타폴리오(instafolio)
 ![Instafolio_Introduce](image/instafolio_introduce.png)
 
-📷 많은 광고 업계 학생 및 취업 준비생들이
-
-PDF 기반 포트폴리오 작업물을 인스타그램에 업로드하는 과정에서 불편함을 겪습니다. 
-
+📷 많은 광고 업계 학생 및 취업 준비생들이   
+PDF 기반 포트폴리오 작업물을 인스타그램에 업로드하는 과정에서 불편함을 겪습니다.   
 인스타폴리오는 **가장 쉽고 빠르게 인스타그램 포트폴리오를 만드는 앱**입니다.
 
 <br>
@@ -24,7 +22,7 @@ PDF 기반 포트폴리오 작업물을 인스타그램에 업로드하는 과�
 
 - PDF / PNG / JPG 형식의 파일 저장 및 불러오기 지원
 - 다수의 이미지를 인스타그램 규격(1:1)에 맞게 비율 간편 맞춤
-- 한 페이지의 정보 밀도를 높일 수 있도록 두 장의 페이지를 한 장의 페이지로 묶어 병합
+- 한 페이지의 정보 밀도를 높일 수 있도록 두 장의 페이지를 한 장의 페이지로 묶어 병합
 - Drag & Drop으로 페이지 순서 편집
 - 최근 저장한 작업 재편집
 
@@ -69,14 +67,13 @@ PDF 기반 포트폴리오 작업물을 인스타그램에 업로드하는 과�
 
 ![Architecture Diagram](image/instafolio_architecture_diagram.png)
 
-UI 로직과 비즈니스 로직을 명확하게 분리하기 위해 MVVM 패턴을 적용함.
-각 계층은 다음과 같은 명확한 책임을 가짐.
+UI 로직과 비즈니스 로직을 명확하게 분리하기 위해 MVVM 패턴을 적용함. 각 계층은 다음과 같은 명확한 책임을 가짐.
 
 - **View**
-    - 사용자에게 보여지는 UI를 담당하며 모든 사용자 이벤트를 ViewModel로 전달하는 역할을 수행
+    - 사용자에게 보여지는 UI를 담당하며 모든 사용자 이벤트를 ViewModel로 전달하는 역할을 수행함
 - **ViewModel**
     - 화면에 필요한 데이터를 LiveData 형태로 보유하고 UI 상태(편집 모드 여부, 선택된 아이템 목록 등)을 관리
-    - View로부터 이벤트를 전달받으면 Model 계층에 비즈니스 로직 수행을 요청
+    - View로부터 이벤트를 전달받으면 Model 계층에 비즈니스 로직 수행을 요청함
 - **Model**
     - 애플리케이션의 비즈니스 로직을 책임지는 계층
     - Repository는 데이터 입출력을 총괄하고 Room Database는 데이터를 기기 내에 영구적으로 저장함
@@ -85,14 +82,14 @@ UI 로직과 비즈니스 로직을 명확하게 분리하기 위해 MVVM 패턴
 
 ## 🛠️ 기술 스택
 
-| **Category** | **Tech Stack** |
-| --- | --- |
-| **Language** | ![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white) |
-| **Platform** | ![Android](https://img.shields.io/badge/Native%20Android-3DDC84?style=for-the-badge&logo=android&logoColor=white) |
-| **Architecture** | ![MVVM](https://img.shields.io/badge/MVVM-4CAF50?style=for-the-badge) |
-| **Async & State** | ![Coroutines](https://img.shields.io/badge/Coroutines-0095D5?style=for-the-badge), ![LiveData](https://img.shields.io/badge/LiveData-00C853?style=for-the-badge) |
-| **Local Data** | ![Room](https://img.shields.io/badge/Room-4285F4?style=for-the-badge) |
-| **Jetpack** | ![ViewModel](https://img.shields.io/badge/ViewModel-795548?style=for-the-badge), ![Navigation](https://img.shields.io/badge/Navigation-673AB7?style=for-the-badge), ![ViewBinding](https://img.shields.io/badge/ViewBinding-009688?style=for-the-badge) |
+| **Category** | **Tech Stack**                                                                                                                                                                                                                                                                                                                         |
+| --- |----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Language** | ![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)                                                                                                                                                                                                                                  |
+| **Platform** | ![Android](https://img.shields.io/badge/Native%20Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)                                                                                                                                                                                                                      |
+| **Architecture** | ![MVVM](https://img.shields.io/badge/MVVM-4CAF50?style=for-the-badge)                                                                                                                                                                                                                                                                  |
+| **Async** | ![Coroutine](https://img.shields.io/badge/Coroutine-0095D5?style=for-the-badge)                                                                                                                                                                                                                                                        |
+| **Local Data** | ![Room](https://img.shields.io/badge/Room-4285F4?style=for-the-badge)                                                                                                                                                                                                                                                                  |
+| **Jetpack** | ![LiveData](https://img.shields.io/badge/LiveData-00C853?style=for-the-badge), ![ViewModel](https://img.shields.io/badge/ViewModel-795548?style=for-the-badge), ![Navigation](https://img.shields.io/badge/Navigation-673AB7?style=for-the-badge), ![ViewBinding](https://img.shields.io/badge/ViewBinding-009688?style=for-the-badge) |
 
 <br>
 

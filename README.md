@@ -49,7 +49,7 @@
 - PDF 파일인 경우 안드로이드 내장 PdfRenderer를 사용하여 각 페이지를 순회하며 이미지 Bitmap으로 변환
 - 이미지를 PDF로 변환하려는 경우 itextpdf 라이브러리를 이용해 이미지 Bitmap을 PDF로 변환
 
-### Offline-first 설계
+### Offline 앱 설계
 
 - 네트워크 연결 없이도 유저의 작업 내용을 안정적으로 보존하기 위해 Room 데이터베이스를 도입하고 Repository 패턴을 적용하여 데이터 계층을 설계
 - 작업 결과물을 @Entity로 정의하고, 데이터의 삽입, 삭제, 조회를 위한 DAO 인터페이스를 설계
